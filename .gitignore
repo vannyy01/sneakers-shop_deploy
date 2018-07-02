@@ -4,5 +4,4 @@
 out
 gen
 /node_modules
-keys.js
 /config/dev.js
