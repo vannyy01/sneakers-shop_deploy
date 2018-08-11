@@ -1,0 +1,71 @@
+.section_padding_100 {
+    padding-bottom: 50px;
+}
+
+.section-heading {
+    padding-top: 20px;
+    margin-bottom: 60px;
+}
+
+.line-shape {
+    margin-left: calc(50% - 40px);
+}
+
+.line-shape-white, .line-shape {
+    width: 80px;
+    height: 2px;
+    background-color: #03A9F4;
+    margin-top: 15px;
+}
+
+.single-special {
+    border: 1px solid #eff2f6;
+    padding: 40px;
+    border-radius: 40px 40px 40px 40px;
+    -webkit-transition-duration: 800ms;
+    -o-transition-duration: 800ms;
+    transition-duration: 800ms;
+    margin-bottom: 30px;
+}
+
+.single-special:hover {
+    -webkit-box-shadow: 0 10px 90px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 90px rgba(0, 0, 0, 0.08);
+}
+
+.single-icon {
+    margin-bottom: 25px;
+}
+
+.single-special > h4 {
+    font-size: 22px;
+    color: #5b32b4;
+    margin-bottom: 15px;
+}
+
+.icon_style {
+    font-size: 60px;
+    color: rebeccapurple;
+}
+
+.message-enter {
+    opacity: 0;
+    -webkit-transform: translateY(20px);
+    -ms-transform: translateY(20px);
+    transform: translateY(20px);
+}
+.message-enter-active {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+}
+.message-exit {
+    opacity: 1;
+    transform: scale(1) translateY(0%);
+}
+.message-exit-active {
+    opacity: 0.01;
+    transform: scale(0.9) translateY(50%);
+    transition: all 300ms ease-out;
+}
