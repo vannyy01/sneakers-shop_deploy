@@ -12,7 +12,7 @@
     "server": "nodemon index.js",
     "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "heroku config:set NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "author": "vannyy01",
   "license": "ISC",
@@ -29,6 +29,7 @@
     "passport-google-oauth20": "^1.0.0"
   },
   "devDependencies": {
-    "@types/express": "^4.16.0"
+    "@types/express": "^4.16.0",
+    "typescript": "2.9.2"
   }
 }
