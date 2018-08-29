@@ -1,6 +1,7 @@
 import * as  React from 'react';
 import {connect} from "react-redux";
-import {BrowserRouter, Route} from 'react-router-dom';
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import AdminModule from './admin/Admin';
 import NavBar from './NavBar';
 
 import Landing from './Landing';
@@ -9,15 +10,11 @@ import {fetchUser} from '../actions';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import 'animate.css/animate.min.css';
-
-const CashBag = () => <h2>Cash Bag</h2>;
-
-interface AppI {
+interface AppPropsI {
     fetchUser: any
 }
 
-class App extends React.Component<AppI> {
+class App extends React.Component<AppPropsI, any> {
     public componentDidMount() {
         this.props.fetchUser();
     }
@@ -28,8 +25,10 @@ class App extends React.Component<AppI> {
                 <div>
                     <NavBar/>
                     <div>
-                        <Route exact={true} path="/" component={Landing}/>
-                        <Route path="/bag" component={CashBag}/>
+                        <Switch>
+                            <Route exact={true} path="/" component={Landing}/>
+                            <Route path="/admin" component={AdminModule}/>
+                        </Switch>
                     </div>
                 </div>
             </BrowserRouter>
@@ -37,4 +36,4 @@ class App extends React.Component<AppI> {
     }
 }
 
-export default connect<{}, AppI>(null, {fetchUser})(App);
+export default connect<any, AppPropsI>(null, {fetchUser})(App);

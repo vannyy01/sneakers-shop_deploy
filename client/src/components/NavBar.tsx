@@ -32,25 +32,24 @@ const styles = {
     },
 };
 
-interface HeaderI {
+interface HeaderPropsI {
     classes: {
         aStyle: string,
         root: string,
         flex: string,
         menuButton: string,
     },
-    auth: any
+    auth?: any
 }
 
-class NavBar extends React.Component<HeaderI> {
+class NavBar extends React.Component<HeaderPropsI, any> {
     public render() {
-        console.log(this.props.auth);
         const {classes} = this.props;
         return (
             <AppBar position="fixed" className={classes.root}>
                 <Toolbar>
                     <Typography variant="title" color="inherit" className={classes.flex}>
-                        <Link to='/bag' className={classes.aStyle}>
+                        <Link to='/' className={classes.aStyle}>
                             Sneakers-shop
                         </Link>
                     </Typography>
@@ -60,7 +59,7 @@ class NavBar extends React.Component<HeaderI> {
         );
     }
 
-    private renderContent() {
+    protected renderContent() {
         switch (this.props.auth) {
             case null:
                 return 'Still logging';

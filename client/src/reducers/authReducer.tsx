@@ -1,4 +1,6 @@
-import {FETCH_USER, FetchUserAction} from "../actions/types";
+import {
+    FETCH_USER, FetchUserAction
+} from "../actions/types";
 
 type AuthAction = FetchUserAction;
 

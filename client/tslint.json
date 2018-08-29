@@ -4,18 +4,27 @@
     "tslint-react",
     "tslint-config-prettier"
   ],
+  "react/jsx-no-bind": {
+    "ignoreDOMComponents": true
+  },
   "linterOptions": {
     "exclude": [
       "config/**/*.js",
       "node_modules/**/*.ts"
     ]
   },
-  "ordered-imports": [true, {
-    "import-sources-order": "any",
-    "named-imports-order": "any"
-  }],
+  "ordered-imports": [
+    true,
+    {
+      "import-sources-order": "any",
+      "named-imports-order": "any"
+    }
+  ],
   "rules": {
     "no-console": false,
-    "interface-name" : [true, "never-prefix"]
+    "interface-name": [
+      true,
+      "never-prefix"
+    ]
   }
 }

@@ -1,11 +1,19 @@
 import * as React from 'react';
+
+import * as _ from 'lodash';
+import {connect} from "react-redux";
+
 import Header from "./Header";
 import ParagraphHeader from "./landing/ParagraphHeader";
+
+import {fetchGoods} from '../actions';
 
 import Shopping from '@material-ui/icons/ShoppingBasket';
 
 import Card from "./landing/Card";
 import './landing/landing.css';
+
+import CommodityCard from './landing/CommodityCard';
 
 const shoppingStyle = {
     color: 'hotpink',
@@ -24,14 +32,26 @@ const styles = {
     minHeight: 750,
 };
 
-export default class Landing extends React.Component<{}, { showCard: boolean }> {
-    constructor(props: {}) {
+interface LandingStateI {
+    showCard: boolean
+}
+
+interface LandingPropsI {
+    goods?: [any],
+    fetchGoods: any
+}
+
+class Landing extends React.Component<LandingPropsI, LandingStateI> {
+    constructor(props: LandingPropsI) {
         super(props);
         this.state = {
             showCard: false
         };
-        this.onClick = this.onClick.bind(this);
         this.Scroll = this.Scroll.bind(this);
+    }
+
+    public componentDidMount() {
+        this.props.fetchGoods();
     }
 
     public render() {
@@ -39,7 +59,6 @@ export default class Landing extends React.Component<{}, { showCard: boolean }> 
             enter: 1200,
             exit: 1400
         };
-
         return (
             <div>
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
@@ -53,35 +72,55 @@ export default class Landing extends React.Component<{}, { showCard: boolean }> 
                                   styles={{headerStyle, iconStyle: shoppingStyle}}
                                   headerText="Easy to use"
                                   text="We build pretty complex tools and this allows us
-                                 to take designs and turn them"/>
+                        to take designs and turn them"/>
                             <Card animationProperties={animationProperties} Icon={Shopping}
                                   showCard={this.state.showCard}
                                   styles={{headerStyle, iconStyle: shoppingStyle}}
                                   headerText="Easy to use"
                                   text="We build pretty complex tools and this allows us
-                                 to take designs and turn them
-                                        into functional quickly."/>
+                        to take designs and turn them
+                        into functional quickly."/>
                             <Card animationProperties={animationProperties} Icon={Shopping}
                                   showCard={this.state.showCard}
                                   styles={{headerStyle, iconStyle: shoppingStyle}}
                                   headerText="Customizable"
                                   text="We build pretty complex tools and this allows us to take designs and turn them
-                                        into functional quickly."/>
+                        into functional quickly."/>
                         </div>
                     </div>
                 </section>
-                <div style={{height: 500, width: '100%'}}/>
+                {this.state.showCard ?
+                    <section className="special-area section_padding_100">
+                        <ParagraphHeader title="Оберіть взуття"/>
+                        <div className="container">
+                            <div className="row">
+                                {!this.props.goods ?
+                                    <div>Loading...</div> :
+                                    _.map(this.props.goods, (good, index) =>
+                                        <CommodityCard key={index} good={good}/>
+                                    )
+                                }
+                            </div>
+                        </div>
+                    </section>
+                    : null}
             </div>
         )
     }
 
     protected Scroll = () => {
-        this.setState({showCard: true});
-    };
-
-    protected onClick = () => {
-        this.setState((prevState) => {
-            return {showCard: !prevState.showCard}
+        this.setState(() => {
+            return {showCard: true}
         });
     };
 }
+
+/**
+ * @param {any} goods
+ * @returns {{goods}}
+ */
+const mapStateToProps = ({goods}: any) => ({
+    goods
+});
+
+export default connect(mapStateToProps, {fetchGoods})(Landing);
