@@ -38,10 +38,10 @@ class Goods extends React.Component<PropsInterface, any> {
 
     public render() {
         if (this.props.goods) {
-            for (let i = 0; i < this.props.goods.length; i++) {
-                delete this.props.goods[i].images;
-                delete this.props.goods[i].mainImage;
-                delete this.props.goods[i].size;
+            for (const item of this.props.goods) {
+                delete item.images;
+                delete item.mainImage;
+                delete item.size;
             }
             return <GridView idField="_id" data={this.props.goods} title="Товари"/>
         }
