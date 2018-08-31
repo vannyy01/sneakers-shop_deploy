@@ -7,7 +7,7 @@ const {Schema} = mongoose;
  * @returns {module:mongoose.Schema}
  */
 const commoditySchema = new Schema({
-    title: String,
+    title: {type: String, unique: true},
     brand: String,
     description: String,
     price: Number,

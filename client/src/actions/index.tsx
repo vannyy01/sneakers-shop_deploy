@@ -21,7 +21,7 @@ export const fetchUsers = () => async (dispatch: any) => {
 /**
  * @returns {(dispatch: any) => Promise<void>}
  */
-export const fetchGoods = () => async (dispatch: any) => {
-    const res = await axios.get('/api/commodity');
+export const fetchGoods = (to: number) => async (dispatch: any) => {
+    const res = await axios.get(`/api/commodity/${to}`);
     dispatch({type: FETCH_GOODS, payload: res.data})
 };

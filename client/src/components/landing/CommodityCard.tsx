@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import {withStyles} from '@material-ui/core/styles';
+import {Theme, withStyles} from '@material-ui/core/styles';
 import classnames from 'classnames';
 
 import Card from '@material-ui/core/Card';
@@ -13,6 +13,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Chip from '@material-ui/core/Chip';
 import Collapse from '@material-ui/core/Collapse';
+import createStyles from "@material-ui/core/styles/createStyles";
+
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 
@@ -21,7 +23,7 @@ import Star from '@material-ui/icons/Star';
 import StarBorder from '@material-ui/icons/StarBorder';
 import {checkStorage, getStorage, removeStorage, setStorage} from "../../actions/validation";
 
-const styles = (theme: any) => ({
+const styles = (theme: Theme) => createStyles({
     actions: {
         display: 'flex',
     },
@@ -29,7 +31,8 @@ const styles = (theme: any) => ({
         color: 'blueviolet'
     },
     card: {
-        maxWidth: 400,
+        margin: '0 5px 10px 0',
+        maxWidth: 350,
     },
     expand: {
         marginLeft: 'auto',
@@ -122,7 +125,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                 <CardMedia
                     className={classes.media}
                     image={mainImage}
-                    title="Contemplative Reptile"
+                    title={brand + " " + title}
                 />
                 <CardContent>
                     <Typography className="d-flex justify-content-between" variant="headline" component="h2">

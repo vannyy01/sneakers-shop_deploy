@@ -21,5 +21,25 @@ export const FETCH_GOODS: FETCH_GOODS = 'FETCH_GOODS';
 
 export interface FetchGoodsAction {
     type: FETCH_GOODS,
-    payload: AxiosPromise<any>
+    payload: AxiosPromise<ShoeInterface[]>
+}
+
+export interface SizeInterface {
+    sizeValue: number,
+    count: number,
+}
+
+export interface ShoeInterface {
+    description: string,
+    brand: string,
+    price: number,
+    _id: string,
+    mainImage: string,
+    images: [string],
+    size: [
+        SizeInterface
+        ],
+    type: string,
+    title: string,
+    sex: string
 }

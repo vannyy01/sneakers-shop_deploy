@@ -4,36 +4,17 @@ import {connect} from "react-redux";
 import GridView from '../GridView';
 
 import {fetchGoods} from "../../actions";
-
-interface SizeInterface {
-    sizeValue: number,
-    count: number,
-}
-
-interface ShoeInterface {
-    description: string,
-    brand: string,
-    price: number,
-    _id: string,
-    mainImage: string,
-    images: [string],
-    size: [
-        SizeInterface
-        ],
-    type: string,
-    title: string,
-    sex: string
-}
+import {ShoeInterface} from "../../actions/types";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
-    fetchGoods: () => (dispatch: any) => Promise<void>
+    fetchGoods: (to: number) => (dispatch: any) => Promise<void>
 }
 
 class Goods extends React.Component<PropsInterface, any> {
 
     public componentDidMount() {
-        this.props.fetchGoods();
+        this.props.fetchGoods(6);
     }
 
     public render() {
