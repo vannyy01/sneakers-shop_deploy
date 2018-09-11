@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {connect} from "react-redux";
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
@@ -21,6 +22,8 @@ import Typography from '@material-ui/core/Typography';
 import AddShoppingCart from '@material-ui/icons/AddShoppingCart';
 import Star from '@material-ui/icons/Star';
 import StarBorder from '@material-ui/icons/StarBorder';
+import {getCartItems, setCartItem} from "../../actions";
+import {ShoeInterface, SizeInterface} from "../../actions/types";
 import {checkStorage, getStorage, removeStorage, setStorage} from "../../actions/validation";
 
 const styles = (theme: Theme) => createStyles({
@@ -62,26 +65,6 @@ const styles = (theme: Theme) => createStyles({
 
 });
 
-interface SizeInterface {
-    sizeValue: number,
-    count: number,
-}
-
-interface ShoeInterface {
-    description: string,
-    brand: string,
-    price: number,
-    _id: string,
-    mainImage: string,
-    images: [string],
-    size: [
-        SizeInterface
-        ],
-    type: string,
-    title: string,
-    sex: string
-}
-
 interface CommodityCardStateI {
     expanded: boolean,
     likes: [string] | []
@@ -99,10 +82,13 @@ interface CommodityCardPropsI {
         par?: string,
         pos?: string,
     },
+    getCartItems: () => void,
     good: ShoeInterface,
+    setCartItem: (item: { [id: number]: ShoeInterface }) => void
 }
 
 class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCardStateI> {
+    private static count: number = 0;
     constructor(props: any) {
         super(props);
         this.state = {
@@ -148,7 +134,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                             <StarBorder/>
                         </IconButton>
                     }
-                    <IconButton aria-label="Додати в корзину">
+                    <IconButton aria-label="Додати в корзину" onClick={this.handleAddGood}>
                         <AddShoppingCart/>
                     </IconButton>
                     <IconButton
@@ -192,6 +178,12 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
         );
     }
 
+    protected handleAddGood = (): void => {
+        this.props.setCartItem({[CommodityCard.count]: this.props.good});
+        CommodityCard.count++;
+        this.props.getCartItems();
+    };
+
     protected handleExpandClick = (): void => {
         this.setState((prevState: CommodityCardStateI) =>
             ({expanded: !prevState.expanded}))
@@ -212,4 +204,5 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
     };
 }
 
-export default withStyles(styles)(CommodityCard);
+export default connect(null, {setCartItem, getCartItems})
+(withStyles(styles)(CommodityCard));

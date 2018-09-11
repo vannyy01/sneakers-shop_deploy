@@ -3,12 +3,16 @@ import {connect} from "react-redux";
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
+import IconButton from "@material-ui/core/IconButton/IconButton";
+import Cart from './ShoppingCart';
 
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import ShoppingCart from '@material-ui/icons/ShoppingCart';
 
 import {withStyles} from '@material-ui/core/styles';
 import {Link} from "react-router-dom";
+
 
 const styles = {
     aStyle: {
@@ -42,7 +46,14 @@ interface HeaderPropsI {
     auth?: any
 }
 
-class NavBar extends React.Component<HeaderPropsI, any> {
+class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean }> {
+    constructor(props: HeaderPropsI) {
+        super(props);
+        this.state = {
+            showCart: false
+        }
+    }
+
     public render() {
         const {classes} = this.props;
         return (
@@ -53,6 +64,13 @@ class NavBar extends React.Component<HeaderPropsI, any> {
                             Sneakers-shop
                         </Link>
                     </Typography>
+                    <IconButton
+                        onClick={this.openCart}
+                        color="inherit"
+                    >
+                        <ShoppingCart/>
+                    </IconButton>
+                    <Cart showCart={this.state.showCart}/>
                     {this.renderContent()}
                 </Toolbar>
             </AppBar>
@@ -69,6 +87,10 @@ class NavBar extends React.Component<HeaderPropsI, any> {
             default:
                 return <Button className={this.props.classes.aStyle} href="/api/logout">Вийти</Button>
         }
+    }
+
+    protected openCart = (): void => {
+        this.setState(state => ({showCart: !state.showCart}))
     }
 }
 
