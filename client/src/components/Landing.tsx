@@ -54,7 +54,7 @@ class Landing extends React.PureComponent<LandingPropsI, LandingStateI> {
         this.state = {
             expanded: false,
             goodsCount: 0,
-            justifyCards: "justify-content-between",
+            justifyCards: innerWidth < 767 ? "justify-content-around" : "justify-content-between",
             showCard: false
         };
         this.ScrollRef = React.createRef();
@@ -63,9 +63,6 @@ class Landing extends React.PureComponent<LandingPropsI, LandingStateI> {
     public componentDidMount() {
         this.props.fetchGoods(this.state.goodsCount);
         window.addEventListener('scroll', this.handleScroll);
-        if (innerWidth < 767) {
-            this.setState(() => ({justifyCards: "justify-content-around"}))
-        }
     }
 
     public componentWillUnmount() {

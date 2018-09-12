@@ -29,7 +29,6 @@ interface CartPropsI {
         active: string,
         button: string,
         cartItems: string,
-        cartPreview: string,
         count: string,
         paragraph: string
         rightIcon: string,
@@ -59,9 +58,7 @@ const styles = (theme: Theme) => createStyles({
         display: 'block',
         height: '464px',
         position: 'absolute',
-        right: 124,
         top: '48px',
-        width: '368px',
         zIndex: 2
     },
     button: {
@@ -70,10 +67,6 @@ const styles = (theme: Theme) => createStyles({
     cartItems: {
         height: '320px',
         width: '360px'
-    },
-    cartPreview: {
-        background: '#fff',
-        border: '1px solid #ccc',
     },
     count: {
         backgroundColor: "lavender",
@@ -137,7 +130,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
         if (this.props.showCart) {
             return (
                 <div
-                    className={classes.cartPreview + " " + classes.active + " cart-preview"}
+                    className={"cart-preview " + classes.active}
                     ref={this.cartPreview}
                 >
                     <Scrollbars style={{width: 360, height: 320}}>
@@ -161,7 +154,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
                                 <span style={{margin: '0 2px 0 5px'}}>{this.state.totalItems} шт.</span>
                             </div>
                         </div>
-                        <Button size="large" disabled={!this.state.cart}
+                        <Button size="large" disabled={_.isEmpty(this.state.cart)}
                                 variant="contained" color="primary" className={classes.button}>
                             Купити
                             <Done className={classes.rightIcon}/>
@@ -189,7 +182,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
         }));
     };
 
-    protected handleRemoveProduct = (id: string) => (event: React.MouseEvent<HTMLAnchorElement>): void => {
+    protected handleRemoveProduct = (id: string) => (event: React.MouseEvent<HTMLDivElement>): void => {
         this.props.deleteCartItem(id);
     };
 

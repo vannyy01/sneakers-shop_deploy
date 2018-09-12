@@ -7,7 +7,6 @@ import {ShoeInterface} from "../../actions/types";
 interface CartItemI {
     classes: {
         amount: string,
-        cartItem: string,
         productImage: string,
         productInfo: string,
         productName: string,
@@ -16,18 +15,13 @@ interface CartItemI {
     }
     product: ShoeInterface,
     productID: string,
-    removeProduct: (id: string) => (event: React.MouseEvent<HTMLAnchorElement>) => void
+    removeProduct: (id: string) => (event: React.MouseEvent<HTMLDivElement>) => void
 }
 
 const styles = () => createStyles({
         amount: {
             color: '#333',
             fontWeight: 700
-        },
-        cartItem: {
-            alignItems: 'center',
-            display: 'flex',
-            padding: '8px',
         },
         productImage: {
             height: '48px',
@@ -44,6 +38,7 @@ const styles = () => createStyles({
 
         productRemove: {
             color: '#ccc',
+            cursor: 'pointer',
             fontSize: '22px',
             height: '24px',
             lineHeight: '24px',
@@ -57,7 +52,7 @@ const styles = () => createStyles({
     });
 
 const CartItem = ({classes, product, productID, removeProduct}: CartItemI) => (
-    <li className={classes.cartItem}>
+    <li className="cart-item">
         <img className={classes.productImage} src={product.mainImage}/>
         <div className={classes.productInfo}>
             <p className={classes.productName}>{product.brand + " " + product.title}</p>
@@ -65,13 +60,12 @@ const CartItem = ({classes, product, productID, removeProduct}: CartItemI) => (
         <div className={classes.productTotal}>
             <p className={classes.amount}>{product.price}</p>
         </div>
-        <a
+        <div
             className={classes.productRemove}
-            href="#"
             onClick={removeProduct(productID)}
         >
             ×
-        </a>
+        </div>
     </li>
 );
 export default withStyles(styles)(CartItem);
