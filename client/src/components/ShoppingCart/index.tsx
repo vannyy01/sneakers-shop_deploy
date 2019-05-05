@@ -33,13 +33,13 @@ interface CartPropsI {
         paragraph: string
         rightIcon: string,
     },
+    handleCart: () => void,
     getCartItems: () => void,
-    showCart: boolean
+    showCart: boolean,
 }
 
 interface CartStateI {
     cart: { [id: string]: ShoeInterface },
-    showCart: boolean,
     totalAmount: number,
     totalItems: number,
 }
@@ -94,7 +94,6 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
         super(props);
         this.state = {
             cart: props.cartItems,
-            showCart: props.showCart,
             totalAmount: 0,
             totalItems: 0
         };
@@ -186,13 +185,11 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
         this.props.deleteCartItem(id);
     };
 
-    protected handleClickOutside = (event: any) => {
+    protected handleClickOutside = (event: any): void => {
         const cartNode = findDOMNode(this.cartPreview.current);
-        if (this.state.showCart) {
+        if (this.props.showCart) {
             if (!cartNode || !cartNode.contains(event.target)) {
-                this.setState({
-                    showCart: false
-                });
+                this.props.handleCart();
                 event.stopPropagation();
             }
         }

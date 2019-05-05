@@ -89,6 +89,7 @@ interface CommodityCardPropsI {
 
 class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCardStateI> {
     private static count: number = 0;
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -103,7 +104,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
         );
     }
 
-    public render() {
+       public render() {
         const {classes} = this.props;
         const {mainImage, description, title, price, brand, size, sex, _id} = this.props.good;
         return (

@@ -79,7 +79,7 @@ interface EnhancedTableStateI {
     rowsPerPage: number,
 }
 
-class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI> {
+class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI>{
     constructor(props: EnhancedTablePropsI) {
         super(props);
         this.state = {

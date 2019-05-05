@@ -1,19 +1,16 @@
 import * as React from 'react';
 import {RefObject} from "react";
 
-import * as _ from 'lodash';
 import {connect} from "react-redux";
-import Header from "./Header";
-import CommodityCard from './landing/CommodityCard';
-import LoadCommodities from './landing/LoadCommodities';
-import ParagraphHeader from "./landing/ParagraphHeader";
+
+import Header from './Header';
+import {Card, Goods, LoadCommodities, ParagraphHeader} from './landing';
 
 import {fetchGoods} from '../actions';
 import {ShoeInterface} from "../actions/types";
 
 import Shopping from '@material-ui/icons/ShoppingBasket';
 
-import Card from "./landing/Card";
 import './landing/landing.css';
 
 
@@ -27,7 +24,7 @@ const headerStyle = {
 };
 
 const styles = {
-    backgroundImage: "url(http://static1.uk.businessinsider.com/image/59b820f4ba785e45c50fbd69-1422/lede.jpg)",
+    backgroundImage: "url(https://cdn.shopify.com/s/files/1/0214/7974/products/Nike_Air_Force_1_07_QS_GameRoyal_Sail_Football_Grey_AH8462-401_sneaker_politics_-15.jpg?v=1556810730)",
     height: innerHeight,
     marginBottom: 0,
     marginTop: "2em",
@@ -42,11 +39,11 @@ interface LandingStateI {
 }
 
 interface LandingPropsI {
-    goods?: [ShoeInterface],
+    goods?: ShoeInterface[],
     fetchGoods: (to: number) => (dispatch: any) => Promise<void>
 }
 
-class Landing extends React.PureComponent<LandingPropsI, LandingStateI> {
+class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     private readonly ScrollRef: RefObject<any>;
 
     constructor(props: LandingPropsI) {
@@ -107,16 +104,7 @@ class Landing extends React.PureComponent<LandingPropsI, LandingStateI> {
                 </section>
                 <section className="special-area section_padding_100">
                     <ParagraphHeader title="Оберіть взуття"/>
-                    <div className="container">
-                        <div className={`row ${this.state.justifyCards}`}>
-                            {!this.props.goods ?
-                                <div>Loading...</div> :
-                                _.map(this.props.goods, (good, index) =>
-                                    <CommodityCard key={index} good={good}/>
-                                )
-                            }
-                        </div>
-                    </div>
+                    <Goods justifyCards={this.state.justifyCards} goods={this.props.goods}/>
                     <LoadCommodities onTransitionEnd={this.onSpin} expanded={this.state.expanded}
                                      handleLoadClick={this.handleLoadClick}/>
                 </section>
@@ -146,4 +134,4 @@ class Landing extends React.PureComponent<LandingPropsI, LandingStateI> {
  */
 const mapStateToProps = ({goods}: any) => ({goods});
 
-export default connect(mapStateToProps, {fetchGoods})(Landing);
+export default connect(mapStateToProps, {fetchGoods})(Main);

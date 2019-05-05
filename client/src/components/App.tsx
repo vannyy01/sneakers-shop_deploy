@@ -4,7 +4,7 @@ import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import AdminModule from './admin/Admin';
 import NavBar from './NavBar';
 
-import Landing from './Landing';
+import Landing from './Main';
 
 import {fetchUser} from '../actions';
 

@@ -3,15 +3,15 @@ import {connect} from "react-redux";
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
-import IconButton from "@material-ui/core/IconButton/IconButton";
 import Cart from './ShoppingCart';
+import PollButton from './poll/PollButton';
 
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import ShoppingCart from '@material-ui/icons/ShoppingCart';
 
 import {withStyles} from '@material-ui/core/styles';
 import {Link} from "react-router-dom";
+import CartButton from "./ShoppingCart/CartButton";
 
 
 const styles = {
@@ -64,13 +64,9 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean }> {
                             Sneakers-shop
                         </Link>
                     </Typography>
-                    <IconButton
-                        onClick={this.openCart}
-                        color="inherit"
-                    >
-                        <ShoppingCart/>
-                    </IconButton>
-                    <Cart showCart={this.state.showCart}/>
+                    <CartButton openCart={this.handleCart}/>
+                    <PollButton/>
+                    <Cart handleCart={this.handleCart} showCart={this.state.showCart}/>
                     {this.renderContent()}
                 </Toolbar>
             </AppBar>
@@ -89,7 +85,7 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean }> {
         }
     }
 
-    protected openCart = (): void => {
+    protected handleCart = (): void => {
         this.setState(state => ({showCart: !state.showCart}))
     }
 }
