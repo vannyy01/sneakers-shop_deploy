@@ -15,7 +15,7 @@ interface UserInterface {
 
 interface PropsInterface {
     users: UserInterface[] | [],
-    fetchUsers: () => (dispatch: any) => Promise<void>
+    fetchUsers: () => void
 }
 
 class Users extends React.Component<PropsInterface, any> {

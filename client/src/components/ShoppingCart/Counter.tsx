@@ -52,18 +52,18 @@ class Counter extends React.PureComponent<CounterPropsI, CounterStateI> {
         event.preventDefault();
     };
 
-    protected decrement = (event: any) => {
+
+    protected decrement = (event: any) : number | void=> {
         event.preventDefault();
         if (this.state.value <= 1) {
             return this.state.value;
         }
-        this.setState(
+        return this.setState(
             prevState => ({
                 value: Number(prevState.value) - 1
             }),
             () => this.props.updateQuantity(this.state.value)
         );
-        return;
     };
 
     protected feed = (event: React.ChangeEvent): void => {

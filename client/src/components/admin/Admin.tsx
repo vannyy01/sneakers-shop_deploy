@@ -21,7 +21,7 @@ const styles = (theme: Theme) => createStyles({
         backgroundColor: theme.palette.background.default,
         flexGrow: 1,
         minWidth: 0, // So the Typography noWrap works
-        padding: theme.spacing.unit * 3,
+        padding: theme.spacing(3),
     },
     drawerPaper: {
         position: 'relative',

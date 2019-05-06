@@ -11,7 +11,7 @@ export const fetchUser = () => async (dispatch: any) => {
 };
 
 /**
- * @returns {(dispatch: any) => Promise<void>}
+ *
  */
 export const fetchUsers = () => async (dispatch: any) => {
     const res = await axios.get('/api/users');
@@ -19,7 +19,8 @@ export const fetchUsers = () => async (dispatch: any) => {
 };
 
 /**
- * @returns {(dispatch: any) => Promise<void>}
+ *
+ * @param to
  */
 export const fetchGoods = (to: number) => async (dispatch: any) => {
     const res = await axios.get(`/api/commodity/${to}`);
@@ -29,7 +30,7 @@ export const fetchGoods = (to: number) => async (dispatch: any) => {
 /**
  * @param item
  */
-export const setCartItem = (item: ShoeInterface) => (dispatch: any) => {
+export const setCartItem = (item: { [id: number]: ShoeInterface; }) => (dispatch: any) => {
     dispatch({type: SET_CART_ITEM, payload: item})
 };
 

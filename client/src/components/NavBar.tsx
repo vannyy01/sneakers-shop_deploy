@@ -4,14 +4,15 @@ import {connect} from "react-redux";
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import Cart from './ShoppingCart';
-import PollButton from './poll/PollButton';
 
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import {withStyles} from '@material-ui/core/styles';
 import {Link} from "react-router-dom";
-import CartButton from "./ShoppingCart/CartButton";
+import PollButton from './poll/PollButton';
+import PollModal from './poll/PollModal';
+import CartButton from './ShoppingCart/CartButton';
 
 
 const styles = {
@@ -46,26 +47,30 @@ interface HeaderPropsI {
     auth?: any
 }
 
-class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean }> {
+class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, showModal: boolean }> {
     constructor(props: HeaderPropsI) {
         super(props);
         this.state = {
-            showCart: false
+            showCart: false,
+            showModal: false
         }
     }
 
     public render() {
+        const modal = this.state.showModal ?
+            (<PollModal onClick={this.handleShowModal}/>) : null;
         const {classes} = this.props;
         return (
             <AppBar position="fixed" className={classes.root}>
                 <Toolbar>
-                    <Typography variant="title" color="inherit" className={classes.flex}>
+                    <Typography variant="inherit" color="inherit" className={classes.flex}>
                         <Link to='/' className={classes.aStyle}>
                             Sneakers-shop
                         </Link>
                     </Typography>
+                    <PollButton onClick={this.handleShowModal}/>
+                    {modal}
                     <CartButton openCart={this.handleCart}/>
-                    <PollButton/>
                     <Cart handleCart={this.handleCart} showCart={this.state.showCart}/>
                     {this.renderContent()}
                 </Toolbar>
@@ -87,7 +92,11 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean }> {
 
     protected handleCart = (): void => {
         this.setState(state => ({showCart: !state.showCart}))
-    }
+    };
+    protected handleShowModal = (): void => {
+        if (this.state.showModal) {document.title = 'Sneakers-shop';}
+        this.setState(state => ({showModal: !state.showModal}))
+    };
 }
 
 const mapStateToProps = ({auth}: any) => {

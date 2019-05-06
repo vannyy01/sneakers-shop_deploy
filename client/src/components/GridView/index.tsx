@@ -48,7 +48,7 @@ function getSorting(order: string, orderBy: string) {
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
         width: '100%',
     },
     table: {
@@ -136,7 +136,6 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                     i++;
                                                     return <TableCell key={i} component={i === 0 ? "th" : "td"}
                                                                       scope="row"
-                                                                      numeric={typeof item === 'number'}
                                                                       padding={i === 0 ? "none" : "default"}>
                                                         {item}
                                                     </TableCell>

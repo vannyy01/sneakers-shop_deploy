@@ -2,15 +2,15 @@ import IconButton from "@material-ui/core/IconButton/IconButton";
 import Poll from "@material-ui/icons/Poll";
 import * as React from "react";
 
-interface CartButtonI {
-    openCart?: () => void,
+interface PollButtonI {
+    onClick?: () => void,
 }
 
-const CartButton = (props: CartButtonI) => <IconButton
-    onClick={props.openCart}
+const PollButton = (props: PollButtonI) => <IconButton
+    onClick={props.onClick}
     color="inherit"
 >
     <Poll/>
 </IconButton>;
 
-export default CartButton;
+export default PollButton;

@@ -40,7 +40,7 @@ interface LandingStateI {
 
 interface LandingPropsI {
     goods?: ShoeInterface[],
-    fetchGoods: (to: number) => (dispatch: any) => Promise<void>
+    fetchGoods: (to: number) => void
 }
 
 class Main extends React.PureComponent<LandingPropsI, LandingStateI> {

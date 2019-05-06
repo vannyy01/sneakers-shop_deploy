@@ -8,7 +8,7 @@ import {ShoeInterface} from "../../actions/types";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
-    fetchGoods: (to: number) => (dispatch: any) => Promise<void>
+    fetchGoods: (to: number) => void
 }
 
 class Goods extends React.Component<PropsInterface, any> {

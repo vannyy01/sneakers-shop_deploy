@@ -16,6 +16,7 @@ interface AppPropsI {
 
 class App extends React.Component<AppPropsI, any> {
     public componentDidMount() {
+        document.title = 'Sneakers-shop';
         this.props.fetchUser();
     }
 

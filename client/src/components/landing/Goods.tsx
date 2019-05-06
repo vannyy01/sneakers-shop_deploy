@@ -34,7 +34,7 @@ interface GoodsStateI {
 const styles = (theme: Theme) => createStyles(
     {
         formControl: {
-            margin: theme.spacing.unit,
+            margin: theme.spacing(1),
             minWidth: 120,
         }
     });

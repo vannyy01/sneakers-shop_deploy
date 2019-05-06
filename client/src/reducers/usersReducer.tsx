@@ -10,7 +10,7 @@ type AuthAction = FetchUsersAction;
  * @returns {any}
  */
 
-export const usersReducer = (state = null, action: AuthAction) => {
+export const usersReducer = (state:any = null, action: AuthAction) => {
     switch (action.type) {
         case FETCH_USERS:
             return action.payload || [];

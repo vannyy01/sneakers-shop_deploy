@@ -62,7 +62,7 @@ const styles = (theme: Theme) => createStyles({
         zIndex: 2
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     cartItems: {
         height: '320px',
@@ -81,7 +81,7 @@ const styles = (theme: Theme) => createStyles({
         fontSize: 14
     },
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     }
 });
 
@@ -153,7 +153,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
                                 <span style={{margin: '0 2px 0 5px'}}>{this.state.totalItems} шт.</span>
                             </div>
                         </div>
-                        <Button size="large" disabled={_.isEmpty(this.state.cart)}
+                        <Button type='button' size="large" disabled={_.isEmpty(this.state.cart)}
                                 variant="contained" color="primary" className={classes.button}>
                             Купити
                             <Done className={classes.rightIcon}/>

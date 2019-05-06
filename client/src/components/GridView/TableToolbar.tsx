@@ -28,7 +28,7 @@ const toolbarStyles = (theme: Theme) => createStyles({
                 color: theme.palette.text.primary,
             },
     root: {
-        paddingRight: theme.spacing.unit,
+        paddingRight: theme.spacing(1),
     },
     spacer: {
         flex: '1 1 100%',
@@ -60,11 +60,11 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
         >
             <div className={classes.title}>
                 {numSelected > 0 ? (
-                    <Typography color="inherit" variant="subheading">
+                    <Typography color="inherit" variant="subtitle2">
                         {numSelected} selected
                     </Typography>
                 ) : (
-                    <Typography variant="title" id="tableTitle">
+                    <Typography variant="subtitle1" id="tableTitle">
                         {title}
                     </Typography>
                 )}

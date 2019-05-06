@@ -115,7 +115,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                     title={brand + " " + title}
                 />
                 <CardContent>
-                    <Typography className="d-flex justify-content-between" variant="headline" component="h2">
+                    <Typography className="d-flex justify-content-between" variant="h5" component="h5">
                         <a>{title}</a>
                         <span className={classes.bdHighlight}>{price} грн.</span>
                     </Typography>
@@ -126,7 +126,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                         {description}
                     </Typography>
                 </CardContent>
-                <CardActions className={classes.actions} disableActionSpacing={true}>
+                <CardActions className={classes.actions} disableSpacing={true}>
                     {!checkStorage("FavouritesGoods", _id) ?
                         <IconButton aria-label="Додати в улюблені" onClick={this.dislikeGood}>
                             <Star style={{color: '#FFDF00'}}/>
@@ -151,7 +151,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                 </CardActions>
                 <Collapse in={this.state.expanded} timeout="auto" unmountOnExit={true}>
                     <CardContent>
-                        <Typography className="d-flex justify-content-between" variant="headline" component="h2">
+                        <Typography className="d-flex justify-content-between" variant="inherit" component="h2">
                             <p className={classes.par}>Розміри:</p>
                             <div>
                                 {size ? size.map((data: SizeInterface, index: number) =>
@@ -169,7 +169,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                                 }
                             </div>
                         </Typography>
-                        <Typography className="d-flex justify-content-between" variant="headline" component="h2">
+                        <Typography className="d-flex justify-content-between" variant="h2" component="h2">
                             <p className={classes.par}>Стать:</p>
                             <p className={classes.par}><b>{sex}</b></p>
                         </Typography>
