@@ -71,7 +71,7 @@ interface CommodityCardStateI {
 }
 
 interface CommodityCardPropsI {
-    classes: {
+    classes?: {
         actions?: string,
         bdHighlight: string,
         card?: string,

@@ -66,3 +66,32 @@ export interface DeleteCartItemsAction {
     type: DELETE_CART_ITEM,
     payload: string
 }
+
+type ANSWER_POLL = 'ANSWER_POLL';
+export const ANSWER_POLL: ANSWER_POLL = 'ANSWER_POLL';
+
+export interface AnswerI {
+    count: number
+    description: string,
+    image: string,
+    item?: string,
+    title: string
+}
+
+export interface PollReducerI {
+    answerA: AnswerI,
+    answerB: AnswerI,
+    answerC: AnswerI
+}
+
+export interface AnswerPollAction {
+    type: ANSWER_POLL,
+    payload: { id: number, answerKey: string }
+}
+
+type CALC_POLL = 'CALC_POLL';
+export const CALC_POLL: CALC_POLL = 'CALC_POLL';
+
+export interface CalcPollAction {
+    type: CALC_POLL,
+}

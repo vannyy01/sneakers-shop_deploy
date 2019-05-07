@@ -1,5 +1,14 @@
 import axios from 'axios';
-import {DELETE_CART_ITEM, FETCH_GOODS, FETCH_USER, FETCH_USERS, GET_CART_ITEMS, SET_CART_ITEM, ShoeInterface}
+import {
+    ANSWER_POLL, CALC_POLL,
+    DELETE_CART_ITEM,
+    FETCH_GOODS,
+    FETCH_USER,
+    FETCH_USERS,
+    GET_CART_ITEMS,
+    SET_CART_ITEM,
+    ShoeInterface
+}
     from './types';
 
 /**
@@ -40,4 +49,12 @@ export const getCartItems = () => async (dispatch: any) => {
 
 export const deleteCartItem = (id: string) => (dispatch: any) => {
     dispatch({type: DELETE_CART_ITEM, payload: id})
+};
+
+export const answerOnPoll = (id: number, answerKey: string) => async (dispatch: any) => {
+    dispatch({type: ANSWER_POLL, payload: {id, answerKey}});
+};
+
+export const getAnswersResult = () => async (dispatch: any) => {
+    dispatch({type: CALC_POLL});
 };

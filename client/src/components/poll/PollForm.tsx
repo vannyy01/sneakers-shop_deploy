@@ -6,7 +6,6 @@ import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabe
 import FormLabel from "@material-ui/core/FormLabel/FormLabel";
 import Radio from "@material-ui/core/Radio/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup/RadioGroup";
-import {QuestionI} from "./PollSteper";
 
 const useStyles = makeStyles((theme: Theme) => ({
     formControl: {
@@ -17,14 +16,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     }
 }));
 
-function PollForm(props: QuestionI) {
+function PollForm(props: any) {
     const classes = useStyles();
-    const [value, setValue] = React.useState(props.answerA);
     const {answerA, answerB, answerC} = props;
-
-    function handleChange(event: React.ChangeEvent<unknown>) {
-        setValue((event.target as HTMLInputElement).value);
-    }
 
     return (
         <FormControl component="fieldset" className={classes.formControl}>
@@ -33,27 +27,22 @@ function PollForm(props: QuestionI) {
                 aria-label="answer"
                 name="answer"
                 className='d-flex'
-                value={value}
-                onChange={handleChange}
+                onChange={props.handleChange}
             >
                 <FormControlLabel
-                    value={answerA}
-                    name={answerA}
+                    value='answerA'
                     control={<Radio color="primary"/>}
-                    label="A"
-                    labelPlacement="start"
+                    label={answerA}
                 />
                 <FormControlLabel
-                    value={answerB}
+                    value='answerB'
                     control={<Radio color="primary"/>}
-                    label="B"
-                    labelPlacement="start"
+                    label={answerB}
                 />
                 <FormControlLabel
-                    value={answerC}
+                    value='answerC'
                     control={<Radio color="primary"/>}
-                    label="C"
-                    labelPlacement="start"
+                    label={answerC}
                 />
             </RadioGroup>
         </FormControl>

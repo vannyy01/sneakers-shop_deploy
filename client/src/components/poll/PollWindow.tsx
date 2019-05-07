@@ -1,44 +1,70 @@
 import * as React from 'react';
-// import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import {connect} from "react-redux";
 
 import Button from '@material-ui/core/Button';
+import CardMedia from "@material-ui/core/CardMedia/CardMedia";
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import {createStyles, makeStyles} from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import {answerOnPoll, getAnswersResult} from "../../actions";
+import {AnswerI} from "../../actions/types";
 import PollStepper from './PollSteper';
 
-// const useStyles = makeStyles((theme: Theme) =>
-//     createStyles({
-//         form: {
-//             display: 'flex',
-//             flexDirection: 'column',
-//             margin: 'auto',
-//             width: 'fit-content',
-//         },
-//         formControl: {
-//             marginTop: theme.spacing(2),
-//             minWidth: 120,
-//         },
-//         formControlLabel: {
-//             marginTop: theme.spacing(1),
-//         },
-//     }),
-// );
+interface DialogBoxI {
+    answerOnPoll: (id: number, answerKey: string) => void,
+    getAnswersResult: () => void,
+    onClick: () => void,
+    poll: AnswerI
+}
 
-function MaxWidthDialog(props: { onClick: () => void }) {
+const useStyles = makeStyles(() =>
+    createStyles({
+        dialog: {
+            minHeight: '700px',
+            zIndex: 1112
+        },
+        media: {
+            height: '300px',
+            marginBottom: '0.5em',
+            minWidth: '50%!important',
+            width: '550px'
+        },
+    }),
+);
+
+function DialogBox(props: DialogBoxI) {
+    const classes = useStyles();
+
     return (
         <React.Fragment>
             <Dialog
                 fullWidth={true}
                 maxWidth="md"
                 open={true}
+                className={classes.dialog}
                 aria-labelledby="max-width-dialog-title"
-                style={{zIndex: 1112}}
             >
                 <DialogTitle id="max-width-dialog-title">Ваші кросівки</DialogTitle>
                 <DialogContent>
-                    <PollStepper/>
+                    {!props.poll.item ?
+                        <PollStepper onNext={props.answerOnPoll} onFinish={props.getAnswersResult}/>
+                        :
+                        <React.Fragment>
+                            <CardMedia
+                                image={props.poll.image}
+                                className={`${classes.media} rounded`}
+                            />
+                            <div>
+                                <Typography gutterBottom={true} variant="h5" component="h2">
+                                    {props.poll.title}
+                                </Typography>
+                                <p style={{fontSize: 18}}>{props.poll.description}</p>
+                            </div>
+                        </React.Fragment>
+                    }
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={props.onClick} color="primary">
@@ -50,4 +76,8 @@ function MaxWidthDialog(props: { onClick: () => void }) {
     );
 }
 
-export default MaxWidthDialog;
+const mapStateToProps = ({poll}: any) => {
+    return {poll};
+};
+
+export default connect(mapStateToProps, {answerOnPoll, getAnswersResult})(DialogBox);

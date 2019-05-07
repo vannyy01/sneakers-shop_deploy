@@ -55,12 +55,12 @@ const questions: QuestionI[] = [
         image: "https://t.resfu.com/media/img_news/screenshot-of-liverpool-counter-attacking-against-west-ham--sporttv.jpg?size=776x&q=60",
         question: "Ваша команда перейшла в контратаку,  3 проти 3. Що б Ви зробили",
     }, {
-        answerA: "Якщо оборона занадто тверда, і ви, здається, не дуже близько до мети, ви повинні починати пробувати свою удачу потужними дальніми ударами.",
-        answerB: "Не варто пропускати м'яч у середині поля; бігти вперед до оборони і атакувати в повну силу через фланги.",
-        answerC: "Ви повинні бути терплячими. Зберігайте володіння, поки не знайдете розрив в обороні, і переконайтеся в тому, що вбивчий пас пройде до нападника, який закінчить атаку.",
+        answerA: "CS:GO.",
+        answerB: "Fortnite.",
+        answerC: "FIFA.",
         id: 3,
-        image: "https://amp.businessinsider.com/images/578fb25f4321f172088b9882-750-562.jpg",
-        question: "Який з них найбільше схожий на вас",
+        image: "https://s3.dexerto.com/thumbnails/_thumbnailLarge/zlatan-ibrahimovic-twitch-fortnite-stream-live-donation-highlight-hilarious-funny-clip-donate.jpg",
+        question: "В яку онлайн гру ви граєте",
     },
     {
         answerA: "Ваш товариш по команді відриває вас м'яким пасом, готовим щоб Ви вдарили м’яч у верхній кут.",
@@ -68,7 +68,7 @@ const questions: QuestionI[] = [
         answerC: "Зробити гарну стіночку з вашим товаришем по команді, ви даєте йому досконалий м'яч. Він біжить і пробиває, але воротар рятує, і м'яч прилітає до вас і торкаєтесь його в 2-3 метрах від лінії воріт.",
         id: 4,
         image: "https://s.ill.in.ua/i/news/630x373/330/330409.jpg",
-        question: "Яка найкраща сцена для вас 2 проти 1",
+        question: "Яка краща ситуація 2 проти 1 для вас",
     },
     {
         answerA: "Ромелу Лукаку# 9 Манчестер Юнайтед + Бельгія",
@@ -116,18 +116,20 @@ const questions: QuestionI[] = [
         answerC: "Пас на партнера перед пустими воротами.",
         id: 10,
         image: "https://static.standard.co.uk/s3fs-public/thumbnails/image/2018/02/21/20/ucl210218m.jpg?width=1000&height=614&fit=bounds&format=pjpg&auto=webp&quality=70&crop=16:9,offset-y0.5",
-        question: "Ви перехопили м’яч у захисника команди суперника і вийшли один на один з воротарем. Як Ви вчинете",
+        question: "Ви перехопили м’яч у захисника команди суперника і вийшли один на один з воротарем. Як Ви вчините",
     },
 ];
 
-function HorizontalLabelPositionBelowStepper() {
+function HorizontalLabelPositionBelowStepper(props: { onNext: (id: number, answerKey: string) => void, onFinish: () => void }) {
     const classes = useStyles();
     const [activeStep, setActiveStep] = React.useState(0);
+    const [value, setValue] = React.useState();
     document.title = `Пит. ${activeStep}`;
     const {answerA, answerB, answerC, id, image, question} = questions[activeStep];
 
     function handleNext() {
         setActiveStep(prevActiveStep => prevActiveStep + 1);
+        props.onNext(questions[activeStep].id, value);
     }
 
     function handleBack() {
@@ -136,6 +138,11 @@ function HorizontalLabelPositionBelowStepper() {
 
     function handleReset() {
         setActiveStep(0);
+    }
+
+    function handleChange(event: React.ChangeEvent<unknown>) {
+        console.log('value: ' + (event.target as HTMLInputElement).value);
+        setValue((event.target as HTMLInputElement).value);
     }
 
     return (
@@ -156,25 +163,31 @@ function HorizontalLabelPositionBelowStepper() {
                 ) : (
                     <React.Fragment>
                         <Typography className={classes.instructions}>{questions[activeStep].question + '?'}</Typography>
-                        <React.Fragment>
+                        <div className="d-flex justify-content-start">
                             <CardMedia
                                 image={questions[activeStep].image}
                                 className={`${classes.media} rounded`}
                             />
-                            <PollForm answerA={answerA} answerB={answerB} answerC={answerC} id={id} image={image}
+                            <PollForm value={value} handleChange={handleChange} answerA={answerA} answerB={answerB}
+                                      answerC={answerC} id={id} image={image}
                                       question={question}/>
-                        </React.Fragment>
+                        </div>
                         <React.Fragment>
                             <Button
-                                disabled={activeStep === 0}
+                                disabled={true}
                                 onClick={handleBack}
                                 className={classes.backButton}
                             >
                                 Back
                             </Button>
-                            <Button variant="contained" color="primary" onClick={handleNext}>
-                                {activeStep === questions.length - 1 ? 'Finish' : 'Next'}
-                            </Button>
+                            {activeStep === questions.length - 1 ?
+                                <Button variant="contained" color="primary" onClick={props.onFinish}>
+                                    Finish
+                                </Button> :
+                                <Button variant="contained" color="primary" disabled={!value} onClick={handleNext}>
+                                    Next
+                                </Button>
+                            }
                         </React.Fragment>
                     </React.Fragment>
                 )}
