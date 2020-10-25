@@ -41,7 +41,7 @@ const AdminMenu = ({classes, rows, props}: AdminMenuPropsI) =>
                         </ListItemIcon>
                         {typeof row.title === 'undefined' ?
                             null :
-                            <ListItemText inset={true} primary={row.title}/>
+                            <ListItemText style={{paddingLeft: "unset"}} inset={true} primary={row.title}/>
                         }
                     </ListItem>
                 </Link>

@@ -8,10 +8,11 @@ import AdminMenu from './AdminMenu';
 import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {Route, Switch} from "react-router";
+import Default from "./Default";
 import Goods from "./Goods";
 import Users from "./Users";
 
-const drawerWidth = 200;
+const drawerWidth = 250;
 
 const styles = (theme: Theme) => createStyles({
     appBar: {
@@ -20,8 +21,10 @@ const styles = (theme: Theme) => createStyles({
     content: {
         backgroundColor: theme.palette.background.default,
         flexGrow: 1,
+        minHeight: '100vh',
         minWidth: 0, // So the Typography noWrap works
-        padding: theme.spacing(3),
+        padding: '3vh',
+        paddingTop: '8vh',
     },
     drawerPaper: {
         position: 'relative',
@@ -57,17 +60,27 @@ const AdminModule = (props: AdminModulePropsI) => {
                 {
                     icon: <AddShoppingCart/>,
                     route: '/admin/goods',
-                    title: 'Товари',
+                    title: 'Склад',
                 },
                 {
                     icon: <PeopleIcon/>,
                     route: `/admin/users`,
                     title: 'Користувачі'
+                },
+                {
+                    icon: <PeopleIcon/>,
+                    route: `/`,
+                    title: 'Замовлення'
+                },
+                {
+                    icon: <PeopleIcon/>,
+                    route: `/`,
+                    title: 'Оплата'
                 }
             ]}/>
             <main className={classes.content}>
-                <div className={classes.toolbar}/>
                 <Switch>
+                    <Route path="/" exact={true} component={Default}/>
                     <Route path="/admin/goods" component={Goods}/>
                     <Route path="/admin/users" component={Users}/>
                 </Switch>

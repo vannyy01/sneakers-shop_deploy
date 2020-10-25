@@ -24,7 +24,7 @@ const headerStyle = {
 };
 
 const styles = {
-    backgroundImage: "url(https://cdn.shopify.com/s/files/1/0214/7974/products/Nike_Air_Force_1_07_QS_GameRoyal_Sail_Football_Grey_AH8462-401_sneaker_politics_-15.jpg?v=1556810730)",
+    backgroundImage: "url(https://static.highsnobiety.com/thumbor/AtgJm2sPhxXbYXvsZcCtaK2YcQc=/1200x720/static.highsnobiety.com/wp-content/uploads/2019/09/04164635/custom-sneakers-good-bad-ugly-feature.jpg)",
     height: innerHeight,
     marginBottom: 0,
     marginTop: "2em",

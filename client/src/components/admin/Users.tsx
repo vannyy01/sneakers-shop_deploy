@@ -17,6 +17,19 @@ interface PropsInterface {
     users: UserInterface[] | [],
     fetchUsers: () => void
 }
+interface HeadCell {
+    disablePadding: boolean;
+    id: keyof UserInterface;
+    label: string;
+    numeric: boolean;
+}
+
+const headCells: HeadCell[] = [
+    { id: 'role', numeric: true, disablePadding: false, label: 'Роль' },
+    { id: 'googleID', numeric: false, disablePadding: true, label: 'GoogleID' },
+    { id: 'email', numeric: false, disablePadding: true, label: 'Ел.Пошта' },
+];
+
 
 class Users extends React.Component<PropsInterface, any> {
     public componentDidMount() {
@@ -26,7 +39,7 @@ class Users extends React.Component<PropsInterface, any> {
     public render() {
         console.log(this.props.users);
         if (this.props.users) {
-            return <GridView idField="_id" data={this.props.users} title="Користувачі"/>
+            return <GridView idField="_id" data={this.props.users} headCells={headCells} title="Користувачі"/>
         }
         return <div>Loading...</div>
     }

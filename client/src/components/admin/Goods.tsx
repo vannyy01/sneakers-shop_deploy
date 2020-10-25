@@ -11,6 +11,22 @@ interface PropsInterface {
     fetchGoods: (to: number) => void
 }
 
+interface HeadCell {
+    disablePadding: boolean;
+    id: keyof ShoeInterface;
+    label: string;
+    numeric: boolean;
+}
+
+const headCells: HeadCell[] = [
+    { id: 'title', numeric: false, disablePadding: true, label: 'Модель' },
+    { id: 'brand', numeric: false, disablePadding: true, label: 'Бренд' },
+    { id: 'description', numeric: false, disablePadding: true, label: 'Опис' },
+    { id: 'price', numeric: true, disablePadding: false, label: 'Ціна' },
+    { id: 'type', numeric: false, disablePadding: true, label: 'Тип' },
+    { id: 'sex', numeric: false, disablePadding: true, label: 'Стать' },
+];
+
 class Goods extends React.Component<PropsInterface, any> {
 
     public componentDidMount() {
@@ -24,7 +40,7 @@ class Goods extends React.Component<PropsInterface, any> {
                 delete item.mainImage;
                 delete item.size;
             }
-            return <GridView idField="_id" data={this.props.goods} title="Товари"/>
+            return <GridView idField="_id" data={this.props.goods} headCells={headCells} title="Товари"/>
         }
         return <div>Loading...</div>
     }

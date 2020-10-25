@@ -59,6 +59,7 @@ const styles = (theme: Theme) => createStyles({
     },
 });
 
+// For @data and @headCells used any type due to delegation typechecking to a client class
 interface EnhancedTablePropsI {
     classes: {
         root: string,
@@ -66,6 +67,7 @@ interface EnhancedTablePropsI {
         tableWrapper: string
     },
     data: any,
+    headCells: any,
     idField: string,
     title: string
 }
@@ -90,6 +92,7 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
             rowsPerPage: 5,
             selected: [],
         };
+        console.log(typeof props.data);
     }
 
     public render() {
@@ -107,7 +110,7 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                             orderBy={orderBy}
                             onSelectAllClick={this.handleSelectAllClick}
                             onRequestSort={this.handleRequestSort}
-                            rows={this.getRows()}
+                            rows={this.props.headCells}
                             rowCount={data.length}
                         />
                         <TableBody>
@@ -171,25 +174,6 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         );
     }
 
-    protected getRows = (): any[] => {
-        const {data} = this.state;
-        const items = _.keys(data[0]);
-        const result: any[] = [];
-        items.map((row) => {
-                if (row !== this.props.idField) {
-                    result.push(
-                        {
-                            disablePadding: typeof data[0][row] === 'string',
-                            id: row,
-                            label: _.capitalize(row),
-                            numeric: typeof data[0][row] === 'number',
-                        },
-                    )
-                }
-            }
-        );
-        return result;
-    };
     protected handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
         const orderBy = property;
         let order: 'asc' | 'desc' = 'desc';
