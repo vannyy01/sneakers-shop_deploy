@@ -81,7 +81,7 @@ interface EnhancedTableStateI {
     rowsPerPage: number,
 }
 
-class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI>{
+class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI> {
     constructor(props: EnhancedTablePropsI) {
         super(props);
         this.state = {
@@ -92,7 +92,6 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
             rowsPerPage: 5,
             selected: [],
         };
-        console.log(typeof props.data);
     }
 
     public render() {
@@ -223,7 +222,10 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         });
     };
 
-    protected isSelected = (id: number) => this.state.selected.indexOf(id) !== -1;
+    protected isSelected = (id: number) => {
+        console.log(this.state.selected);
+        return this.state.selected.indexOf(id) !== -1;
+    }
 }
 
 export default withStyles(styles)(EnhancedTable);
