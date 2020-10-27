@@ -32,7 +32,7 @@ function createData(name: string, calories: number, fat: number, carbs: number, 
 }
 */
 
-function desc(a: any, b: any, orderBy: string): number {
+function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
     }
@@ -42,8 +42,24 @@ function desc(a: any, b: any, orderBy: string): number {
     return 0;
 }
 
-function getSorting(order: string, orderBy: string) {
-    return order === 'desc' ? (a: any, b: any) => desc(a, b, orderBy) : (a: any, b: any) => -desc(a, b, orderBy);
+type Order = 'asc' | 'desc';
+
+function getComparator<Key extends keyof any>(
+    order: Order,
+    orderBy: Key,
+): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+    return order === 'desc'
+        ? (a, b) => descendingComparator(a, b, orderBy)
+        : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
+    const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
+    stabilizedThis.sort((a, b) => {
+        const order = comparator(a[0], b[0]);
+        return order !== 0 ? order : a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -67,16 +83,16 @@ interface EnhancedTablePropsI {
         tableWrapper: string
     },
     data: any,
-    headCells: any,
+    headCells: any[],
     idField: string,
     title: string
 }
 
 interface EnhancedTableStateI {
     data: any[],
-    order: 'asc' | 'desc',
+    order: Order,
     orderBy: string,
-    selected: number[],
+    selected: string[],
     page: number,
     rowsPerPage: number,
 }
@@ -113,35 +129,40 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                             rowCount={data.length}
                         />
                         <TableBody>
-                            {data
-                                .sort(getSorting(order, orderBy))
+                            {stableSort(this.state.data, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map(n => {
-                                    const isSelected = this.isSelected(n.id);
-                                    const obj = Object.assign({}, n);
-                                    delete obj[this.props.idField];
-                                    let i = -1;
+                                .map((tableRow, index) => {
+                                    const row = Object.assign({}, tableRow);
+                                    const rowId: string = row._id;
+                                    const isItemSelected = this.isSelected(rowId);
+                                    const labelId = `enhanced-table-checkbox-${index}`;
+                                    let cellCounter = -1;
+                                    delete row._id;
                                     return (
                                         <TableRow
                                             hover={true}
-                                            onClick={this.handleClick(n.id)}
+                                            onClick={(event) => this.handleClick(event, rowId)}
                                             role="checkbox"
-                                            aria-checked={isSelected}
+                                            aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={n[this.props.idField]}
-                                            selected={isSelected}
+                                            key={rowId}
+                                            selected={isItemSelected}
                                         >
                                             <TableCell padding="checkbox">
-                                                <Checkbox checked={isSelected}/>
+                                                <Checkbox checked={isItemSelected}
+                                                          inputProps={{'aria-labelledby': labelId}}
+                                                />
                                             </TableCell>
-                                            {_.map(obj, item => {
-                                                    i++;
-                                                    return <TableCell key={i} component={i === 0 ? "th" : "td"}
-                                                                      scope="row"
-                                                                      padding={i === 0 ? "none" : "default"}>
-                                                        {item}
-                                                    </TableCell>
-
+                                            {_.map(row, item => {
+                                                    cellCounter++;
+                                                    return cellCounter === 0 ?
+                                                        <TableCell key={cellCounter} id={labelId} component="th"
+                                                                   scope="row" padding="none">
+                                                            {item}
+                                                        </TableCell> :
+                                                        <TableCell key={cellCounter}>
+                                                            {item}
+                                                        </TableCell>
                                                 }
                                             )}
                                         </TableRow>
@@ -184,15 +205,16 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         this.setState(() => ({order, orderBy}));
     };
 
-    protected handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean): void => {
-        if (checked) {
-            this.setState(state => ({selected: state.data.map(n => n.id)}));
+    protected handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        if (event.target.checked) {
+            this.setState(state => ({selected: state.data.map(n => n._id)}));
             return;
         }
         this.setState({selected: []});
     };
 
-    protected handleClick = (id: number) => (event: React.MouseEvent<HTMLTableRowElement>): void => {
+
+    protected handleClick = (event: React.MouseEvent<HTMLTableRowElement>, id: string): void => {
         const {selected} = this.state;
         const selectedIndex = this.state.selected.indexOf(id);
         let newSelected: any = [];
@@ -222,8 +244,7 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         });
     };
 
-    protected isSelected = (id: number) => {
-        console.log(this.state.selected);
+    protected isSelected = (id: string): boolean => {
         return this.state.selected.indexOf(id) !== -1;
     }
 }

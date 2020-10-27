@@ -37,7 +37,8 @@ class Users extends React.Component<PropsInterface, any> {
     }
 
     public render() {
-        if (this.props.users) {
+        if (this.props.users.length > 0) {
+            console.log(this.props.users);
             return <GridView idField="_id" data={this.props.users} headCells={headCells} title="Користувачі"/>
         }
         return <div>Loading...</div>

@@ -6,8 +6,11 @@ type StateType = ShoeInterface[] | [];
 export const goodsReducer = (state: StateType = [], action: AuthAction) => {
     switch (action.type) {
         case FETCH_GOODS:
-            const array : any = action.payload;
-            return [...state, ...array];
+            if (action.payload.length > 0 && state.length > 0) {
+                return state[0]._id === action.payload[0]._id ? state : [...state, ...action.payload];
+            }
+
+            return action.payload;
         default:
             return state;
     }

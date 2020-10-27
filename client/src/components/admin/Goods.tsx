@@ -34,7 +34,8 @@ class Goods extends React.Component<PropsInterface, any> {
     }
 
     public render() {
-        if (this.props.goods) {
+        if (this.props.goods.length > 0) {
+            console.log(this.props.goods);
             for (const item of this.props.goods) {
                 delete item.images;
                 delete item.mainImage;

@@ -8,7 +8,7 @@ module.exports = app => {
                 res.status(404).send('Cannot get the goods list!');
             else
                 res.send(comms);
-        }).limit(3).skip(Number.parseInt(req.params.to));
+        }).limit(3);
     });
     /**
     app.get('/api/commodity/:id', async (req, res) => {

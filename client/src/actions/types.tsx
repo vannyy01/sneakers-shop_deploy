@@ -13,7 +13,7 @@ export const FETCH_USERS: FETCH_USERS = 'FETCH_USERS';
 
 export interface FetchUsersAction {
     type: FETCH_USERS,
-    payload: AxiosPromise<any>
+    payload: any[]
 }
 
 type FETCH_GOODS = 'FETCH_GOODS';
@@ -21,7 +21,7 @@ export const FETCH_GOODS: FETCH_GOODS = 'FETCH_GOODS';
 
 export interface FetchGoodsAction {
     type: FETCH_GOODS,
-    payload: AxiosPromise<ShoeInterface[]>
+    payload: ShoeInterface[]
 }
 
 export interface SizeInterface {
