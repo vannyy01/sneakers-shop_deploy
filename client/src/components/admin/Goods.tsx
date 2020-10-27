@@ -6,6 +6,7 @@ import GridView from '../GridView';
 import {fetchGoods} from "../../actions";
 import {ShoeInterface} from "../../actions/types";
 
+
 interface PropsInterface {
     goods: ShoeInterface[] | [],
     fetchGoods: (to: number) => void
@@ -19,12 +20,12 @@ interface HeadCell {
 }
 
 const headCells: HeadCell[] = [
-    { id: 'title', numeric: false, disablePadding: true, label: 'Модель' },
-    { id: 'brand', numeric: false, disablePadding: true, label: 'Бренд' },
-    { id: 'description', numeric: false, disablePadding: true, label: 'Опис' },
-    { id: 'price', numeric: true, disablePadding: false, label: 'Ціна' },
-    { id: 'type', numeric: false, disablePadding: true, label: 'Тип' },
-    { id: 'sex', numeric: false, disablePadding: true, label: 'Стать' },
+    {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
+    {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
+    {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
+    {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
+    {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
+    {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
 ];
 
 class Goods extends React.Component<PropsInterface, any> {
@@ -41,7 +42,12 @@ class Goods extends React.Component<PropsInterface, any> {
                 delete item.mainImage;
                 delete item.size;
             }
-            return <GridView idField="_id" data={this.props.goods} headCells={headCells} title="Товари"/>
+            return (
+                <React.Fragment>
+                    <GridView idField="_id" route='/admin/goods' data={this.props.goods} headCells={headCells}
+                              title="Товари"/>
+                </React.Fragment>
+            )
         }
         return <div>Loading...</div>
     }

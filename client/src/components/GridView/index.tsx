@@ -14,6 +14,8 @@ import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import * as _ from 'lodash';
 
+import {Link} from "react-router-dom";
+
 /*
 interface DataInterface {
     calories: number,
@@ -85,6 +87,7 @@ interface EnhancedTablePropsI {
     data: any,
     headCells: any[],
     idField: string,
+    route?: string,
     title: string
 }
 
@@ -158,10 +161,12 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                     return cellCounter === 0 ?
                                                         <TableCell key={cellCounter} id={labelId} component="th"
                                                                    scope="row" padding="none">
-                                                            {item}
+                                                            <Link color='black'
+                                                                  to={`${this.props.route}\\${rowId}`}> {item}</Link>
                                                         </TableCell> :
                                                         <TableCell key={cellCounter}>
-                                                            {item}
+                                                            <Link color='black'
+                                                                  to={`${this.props.route}\\${rowId}`}> {item}</Link>
                                                         </TableCell>
                                                 }
                                             )}
