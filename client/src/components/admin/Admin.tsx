@@ -20,8 +20,11 @@ const styles = (theme: Theme) => createStyles({
         zIndex: theme.zIndex.drawer + 1,
     },
     content: {
+        alignItems: 'center',
         backgroundColor: theme.palette.background.default,
+        display: 'flex',
         flexGrow: 1,
+        justifyContent: 'center',
         minHeight: '100vh',
         minWidth: 0, // So the Typography noWrap works
         padding: '3vh',
@@ -82,7 +85,7 @@ const AdminModule = (props: AdminModulePropsI) => {
             <main className={classes.content}>
                 <Switch>
                     <Route path="/" exact={true} component={Default}/>
-                    <Route path="/admin/goods/:commID"  render={Edit}/>
+                    <Route path="/admin/goods/:commID"  component={Edit}/>
                     <Route path="/admin/goods" component={Goods}/>
                     <Route path="/admin/users" component={Users}/>
                 </Switch>

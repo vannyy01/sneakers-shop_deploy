@@ -1,15 +1,15 @@
 import * as React from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import TextField from '@material-ui/core/TextField';
 
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
-import {Theme} from "@material-ui/core";
+import {createStyles, Theme} from "@material-ui/core";
+import withStyles from "@material-ui/core/styles/withStyles";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
     paper: {
         marginBottom: theme.spacing(3),
         marginTop: theme.spacing(3),
@@ -19,13 +19,13 @@ const useStyles = makeStyles((theme: Theme) => ({
             marginTop: theme.spacing(6),
             padding: theme.spacing(3),
         },
+        width: "60em"
     }
-}));
+});
 
-export default function AddressForm() {
-    const classes = useStyles();
+function AddressForm(props: { classes: {paper: string} }) {
     return (
-        <Paper className={classes.paper}>
+        <Paper className={props.classes.paper}>
             <Typography component="h1" variant="h4" align="center">
                 Checkout
             </Typography>
@@ -111,3 +111,5 @@ export default function AddressForm() {
         </Paper>
     );
 }
+
+export default withStyles(styles)(AddressForm);
