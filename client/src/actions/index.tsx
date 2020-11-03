@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
     ANSWER_POLL, CALC_POLL,
     DELETE_CART_ITEM,
+    FETCH_GOOD,
     FETCH_GOODS,
     FETCH_USER,
     FETCH_USERS,
@@ -34,6 +35,12 @@ export const fetchUsers = () => async (dispatch: any) => {
 export const fetchGoods = (to: number) => async (dispatch: any) => {
     const res = await axios.get(`/api/commodity/${to}`);
     dispatch({type: FETCH_GOODS, payload: res.data})
+};
+
+
+export const fetchGoodByID = (id: string) => async (dispatch: any) => {
+    const res = await axios.get(`/api/commodity/get/${id}`);
+    dispatch({type: FETCH_GOOD, payload: res.data})
 };
 
 /**

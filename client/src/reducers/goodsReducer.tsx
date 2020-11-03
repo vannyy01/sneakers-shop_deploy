@@ -1,6 +1,6 @@
-import {FETCH_GOODS, FetchGoodsAction, ShoeInterface} from "../actions/types";
+import {FETCH_GOOD, FETCH_GOODS, FetchGoodAction, FetchGoodsAction, ShoeInterface} from "../actions/types";
 
-type AuthAction = FetchGoodsAction;
+type AuthAction =  FetchGoodAction | FetchGoodsAction;
 type StateType = ShoeInterface[] | [];
 
 export const goodsReducer = (state: StateType = [], action: AuthAction) => {
@@ -10,6 +10,8 @@ export const goodsReducer = (state: StateType = [], action: AuthAction) => {
                 return state[0]._id === action.payload[0]._id ? state : [...state, ...action.payload];
             }
 
+            return action.payload;
+        case FETCH_GOOD:
             return action.payload;
         default:
             return state;

@@ -1,10 +1,12 @@
 import * as React from 'react';
 
 import {connect} from "react-redux";
-import GridView from '../GridView';
 
 import {fetchGoods} from "../../actions";
+import GridView from '../GridView';
+
 import {ShoeInterface} from "../../actions/types";
+
 
 
 interface PropsInterface {
@@ -44,8 +46,8 @@ class Goods extends React.Component<PropsInterface, any> {
             }
             return (
                 <React.Fragment>
-                    <GridView idField="_id" route='/admin/goods' data={this.props.goods} headCells={headCells}
-                              title="Товари"/>
+                        <GridView idField="_id" route='/admin/goods/edit' data={this.props.goods} headCells={headCells}
+                                  title="Товари"/>
                 </React.Fragment>
             )
         }

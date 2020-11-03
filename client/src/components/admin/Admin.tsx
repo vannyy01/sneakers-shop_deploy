@@ -7,7 +7,7 @@ import AdminMenu from './AdminMenu';
 
 import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
-import {Route, Switch} from "react-router";
+import {Route, Switch} from "react-router-dom";
 import Default from "./Default";
 import Edit from "./Edit";
 import Goods from "./Goods";
@@ -85,8 +85,8 @@ const AdminModule = (props: AdminModulePropsI) => {
             <main className={classes.content}>
                 <Switch>
                     <Route path="/" exact={true} component={Default}/>
-                    <Route path="/admin/goods/:commID"  component={Edit}/>
-                    <Route path="/admin/goods" component={Goods}/>
+                    <Route path="/admin/goods" exact={true} component={Goods}/>
+                    <Route path="/admin/goods/edit/:commID" component={Edit} />
                     <Route path="/admin/users" component={Users}/>
                 </Switch>
             </main>

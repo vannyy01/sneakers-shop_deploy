@@ -24,18 +24,27 @@ export interface FetchGoodsAction {
     payload: ShoeInterface[]
 }
 
+type FETCH_GOOD = 'FETCH_GOOD';
+export const FETCH_GOOD: FETCH_GOOD = 'FETCH_GOOD';
+
+export interface FetchGoodAction {
+    type: FETCH_GOOD,
+    payload: ShoeInterface
+}
+
 export interface SizeInterface {
     sizeValue: number,
     count: number,
 }
 
 export interface ShoeInterface {
+
     description?: string,
     brand: string,
     price: number,
     _id: string,
     mainImage: string,
-    images?: [string],
+    images?: string[],
     size?: [
         SizeInterface
         ],

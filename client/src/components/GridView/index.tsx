@@ -162,11 +162,11 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                         <TableCell key={cellCounter} id={labelId} component="th"
                                                                    scope="row" padding="none">
                                                             <Link color='black'
-                                                                  to={`${this.props.route}\\${rowId}`}> {item}</Link>
+                                                                  to={`${this.props.route}\\${rowId}`}>{item}</Link>
                                                         </TableCell> :
                                                         <TableCell key={cellCounter}>
                                                             <Link color='black'
-                                                                  to={`${this.props.route}\\${rowId}`}> {item}</Link>
+                                                                  to={`${this.props.route}\\${rowId}`}>{item}</Link>
                                                         </TableCell>
                                                 }
                                             )}

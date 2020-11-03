@@ -21,7 +21,9 @@
     }
   ],
   "rules": {
+    "ordered-imports": false,
     "jsx-no-lambda": false,
+    "object-literal-sort-keys": false,
     "no-console": false,
     "interface-name": [
       true,

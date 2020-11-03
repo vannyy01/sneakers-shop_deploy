@@ -10,6 +10,14 @@ module.exports = app => {
                 res.send(comms);
         }).limit(3);
     });
+    app.get('/api/commodity/get/:id', async (req, res) => {
+        await Commodity.findById(req.params.id, function (err, comm) {
+            if (err)
+                res.status(404).send('Cannot get the goods list!');
+            else
+                res.send(comm);
+        });
+    });
     /**
     app.get('/api/commodity/:id', async (req, res) => {
         const Comm = await Commodity.findById(req.params.id);
