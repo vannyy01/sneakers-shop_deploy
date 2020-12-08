@@ -7,8 +7,6 @@ import GridView from '../GridView';
 
 import {ShoeInterface} from "../../actions/types";
 
-
-
 interface PropsInterface {
     goods: ShoeInterface[] | [],
     fetchGoods: (to: number) => void
@@ -37,16 +35,15 @@ class Goods extends React.Component<PropsInterface, any> {
     }
 
     public render() {
-        if (this.props.goods.length > 0) {
-            console.log(this.props.goods);
+        if (this.props.goods.length > 0 && Array.isArray(this.props.goods)) {
             for (const item of this.props.goods) {
                 delete item.images;
                 delete item.mainImage;
-                delete item.size;
+                delete item.sizes;
             }
             return (
                 <React.Fragment>
-                        <GridView idField="_id" route='/admin/goods/edit' data={this.props.goods} headCells={headCells}
+                        <GridView idField="_id" createLocationPath='/admin/goods/create' editRoute='/admin/goods/edit' data={this.props.goods} headCells={headCells}
                                   title="Товари"/>
                 </React.Fragment>
             )

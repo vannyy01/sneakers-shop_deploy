@@ -22,8 +22,12 @@ export function checkStorage(name: string, item: string): boolean {
     return !matches.includes(item);
 }
 
-export function removeStorage(name: string, item: string):void {
+export function removeStorage(name: string, item: string): void {
     const matches = getStorage(name);
     const newStorage = matches.filter((thing: string) => thing !== item);
     localStorage.setItem(name, JSON.stringify(newStorage));
+}
+
+export function validateEmail(mail: string): boolean {
+    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(mail);
 }

@@ -31,6 +31,11 @@ const styles = {
     minHeight: 750,
 };
 
+const animationProperties = {
+    enter: 1200,
+    exit: 1400
+};
+
 interface LandingStateI {
     expanded: boolean,
     goodsCount: number,
@@ -50,7 +55,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
         super(props);
         this.state = {
             expanded: false,
-            goodsCount: 0,
+            goodsCount: 3,
             justifyCards: innerWidth < 767 ? "justify-content-around" : "justify-content-between",
             showCard: false
         };
@@ -66,12 +71,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
         window.removeEventListener('scroll', this.handleScroll);
     };
 
-
     public render() {
-        const animationProperties = {
-            enter: 1200,
-            exit: 1400
-        };
         return (
             <div ref={this.ScrollRef} onScroll={this.handleScroll}>
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>

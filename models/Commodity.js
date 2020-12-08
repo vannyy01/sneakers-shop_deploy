@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
+const Size = require('./Size');
 
 /**
  * Base schema for other instances
@@ -7,12 +8,15 @@ const {Schema} = mongoose;
  * @returns {module:mongoose.Schema}
  */
 const commoditySchema = new Schema({
-    title: {type: String, unique: true},
+    title: String,
     brand: String,
     description: String,
     price: Number,
     mainImage: String,
     images: [String],
+    sizes: [Size],
+    type: String,
+    sex: String,
 });
 
 mongoose.model('commodities', commoditySchema);

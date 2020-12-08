@@ -23,7 +23,7 @@
     "cookie-session": "^2.0.0-beta.3",
     "express": "^4.16.4",
     "lodash": "^4.17.11",
-    "mongoose": "^5.5.5",
+    "mongoose": "^5.10.11",
     "nodemon": "^1.19.0",
     "passport": "^0.4.0",
     "passport-google-oauth": "^2.0.0",

@@ -1,7 +1,7 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import EnhancedTableHead from './TableHead';
 import EnhancedTableToolbar from './TableToolbar';
-
 import Checkbox from '@material-ui/core/Checkbox';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -9,12 +9,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-
 import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
-import * as _ from 'lodash';
-
-import {Link} from "react-router-dom";
+import {NavLink} from "react-router-dom";
 
 /*
 interface DataInterface {
@@ -84,10 +81,11 @@ interface EnhancedTablePropsI {
         table: string,
         tableWrapper: string
     },
+    createLocationPath?: string | '/',
     data: any,
     headCells: any[],
     idField: string,
-    route?: string,
+    editRoute?: string | '/',
     title: string
 }
 
@@ -114,12 +112,12 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
     }
 
     public render() {
-        const {classes, title} = this.props;
+        const {classes,createLocationPath, title} = this.props;
         const {data, order, orderBy, selected, rowsPerPage, page} = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
         return (
             <Paper className={classes.root}>
-                <EnhancedTableToolbar title={title} numSelected={selected.length}/>
+                <EnhancedTableToolbar location={createLocationPath} title={title} numSelected={selected.length}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
                         <EnhancedTableHead
@@ -161,12 +159,12 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                     return cellCounter === 0 ?
                                                         <TableCell key={cellCounter} id={labelId} component="th"
                                                                    scope="row" padding="none">
-                                                            <Link color='black'
-                                                                  to={`${this.props.route}\\${rowId}`}>{item}</Link>
+                                                            <NavLink style={{color: 'black'}}
+                                                                  to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
                                                         </TableCell> :
                                                         <TableCell key={cellCounter}>
-                                                            <Link color='black'
-                                                                  to={`${this.props.route}\\${rowId}`}>{item}</Link>
+                                                            <NavLink style={{color: 'black'}}
+                                                                  to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
                                                         </TableCell>
                                                 }
                                             )}

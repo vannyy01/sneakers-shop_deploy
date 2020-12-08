@@ -9,15 +9,32 @@ import Landing from './Main';
 import {fetchUser} from '../actions';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ProtectedRoute from "./ProtectedRoute";
+
 
 interface AppPropsI {
-    fetchUser: any
+    fetchUser: any,
+    auth: object | ''
 }
 
-class App extends React.Component<AppPropsI, any> {
+class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
+    constructor(props: AppPropsI) {
+        super(props);
+        this.state = {
+            auth: false
+        }
+    }
+
     public componentDidMount() {
         document.title = 'Sneakers-shop';
         this.props.fetchUser();
+     //  this.setState({auth: !!this.props.auth});
+    }
+
+    public componentDidUpdate(prevProps: Readonly<AppPropsI>): void {
+        if(JSON.stringify(this.props.auth) !== JSON.stringify(prevProps.auth)) {
+            this.setState({auth: !!this.props.auth});
+        }
     }
 
     public render() {
@@ -28,7 +45,14 @@ class App extends React.Component<AppPropsI, any> {
                     <div>
                         <Switch>
                             <Route exact={true} path="/" component={Landing}/>
-                            <Route path="/admin" component={AdminModule}/>
+                            {this.props.auth !== null &&
+                            <ProtectedRoute
+                                authenticationPath="/auth/google"
+                                isAuthenticated={!!this.props.auth}
+                                path='/admin'
+                                component={AdminModule}
+                            />
+                            }
                         </Switch>
                     </div>
                 </div>
@@ -37,4 +61,7 @@ class App extends React.Component<AppPropsI, any> {
     }
 }
 
-export default connect<any, AppPropsI>(null, {fetchUser})(App);
+const mapStateToProps = ({auth}: any) => {
+    return {auth};
+};
+export default connect(mapStateToProps, {fetchUser})(App);

@@ -4,17 +4,10 @@ import {connect} from "react-redux";
 import GridView from '../GridView/index';
 
 import {fetchUsers} from "../../actions";
-
-interface UserInterface {
-    googleID: string,
-    email: string,
-    _id: string,
-    role: 0 | 10 | 20,
-    __v: number
-}
+import {UserInterface} from "../../actions/types";
 
 interface PropsInterface {
-    users: UserInterface[] | [],
+    users: UserInterface[],
     fetchUsers: () => void
 }
 interface HeadCell {
@@ -28,6 +21,8 @@ const headCells: HeadCell[] = [
     { id: 'role', numeric: true, disablePadding: false, label: 'Роль' },
     { id: 'googleID', numeric: false, disablePadding: true, label: 'GoogleID' },
     { id: 'email', numeric: false, disablePadding: true, label: 'Ел.Пошта' },
+    { id: 'givenName', numeric: false, disablePadding: true, label: "Ім'я" },
+    { id: 'familyName', numeric: false, disablePadding: true, label: 'Прізвище' },
 ];
 
 
@@ -38,8 +33,8 @@ class Users extends React.Component<PropsInterface, any> {
 
     public render() {
         if (this.props.users.length > 0) {
-            console.log(this.props.users);
-            return <GridView idField="_id" data={this.props.users} headCells={headCells} title="Користувачі"/>
+            return <GridView idField="_id" createLocationPath='/admin/users/create' editRoute='/admin/users/edit' data={this.props.users}
+                             headCells={headCells} title="Користувачі"/>
         }
         return <div>Loading...</div>
     }

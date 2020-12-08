@@ -79,11 +79,11 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
     }
 
     protected renderContent() {
-        switch (this.props.auth) {
+        switch (!!this.props.auth) {
             case null:
                 return 'Still logging';
             case false:
-                return <Button className={this.props.classes.aStyle} href="/auth/google">Війти через
+                return <Button className={this.props.classes.aStyle} href="/auth/google">Ввійти через
                     гугл</Button>;
             default:
                 return <Button className={this.props.classes.aStyle} href="/api/logout">Вийти</Button>

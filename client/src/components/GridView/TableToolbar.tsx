@@ -1,21 +1,22 @@
 import * as React from 'react';
 
 import classNames from "classnames";
-
 import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
-
 import {Theme, withStyles} from "@material-ui/core/styles";
 import {lighten} from '@material-ui/core/styles/colorManipulator';
 import createStyles from "@material-ui/core/styles/createStyles";
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import Add from '@material-ui/icons/Add';
+import {NavLink} from "react-router-dom";
 
 const toolbarStyles = (theme: Theme) => createStyles({
     actions: {
         color: theme.palette.text.secondary,
+        display: 'flex'
     },
     highlight:
         theme.palette.type === 'light'
@@ -47,11 +48,12 @@ interface EnhancedTableToolbarPropsI {
         title: string
     },
     numSelected: number,
-    title: string
+    title: string,
+    location: string
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
-    const {numSelected, classes, title} = props;
+    const {numSelected, classes, title, location} = props;
     return (
         <Toolbar
             className={classNames(classes.root, {
@@ -78,11 +80,20 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
                         </IconButton>
                     </Tooltip>
                 ) : (
-                    <Tooltip title="Filter list">
-                        <IconButton aria-label="Filter list">
-                            <FilterListIcon/>
-                        </IconButton>
-                    </Tooltip>
+                    <React.Fragment>
+                        <Tooltip title="Створити новий запис">
+                            <NavLink to={location}>
+                                <IconButton aria-label="Створити новий запис">
+                                <Add/>
+                            </IconButton>
+                            </NavLink>
+                        </Tooltip>
+                        <Tooltip title="Filter list">
+                            <IconButton aria-label="Filter list">
+                                <FilterListIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    </React.Fragment>
                 )}
             </div>
         </Toolbar>

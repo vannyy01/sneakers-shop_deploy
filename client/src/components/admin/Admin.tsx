@@ -2,16 +2,19 @@ import * as React from 'react';
 
 import AddShoppingCart from '@material-ui/icons/AddShoppingCart';
 import PeopleIcon from '@material-ui/icons/People';
-
+import Bookmark from '@material-ui/icons/Bookmark';
+import Payment from '@material-ui/icons/Payment';
 import AdminMenu from './AdminMenu';
-
 import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {Route, Switch} from "react-router-dom";
 import Default from "./Default";
-import Edit from "./Edit";
+import Edit from "./EditGood";
 import Goods from "./Goods";
 import Users from "./Users";
+import CreateGood from "./CreateGood";
+import CreateUser from "./CreateUser";
+import EditUser from "./EditUser";
 
 const drawerWidth = 250;
 
@@ -20,7 +23,7 @@ const styles = (theme: Theme) => createStyles({
         zIndex: theme.zIndex.drawer + 1,
     },
     content: {
-        alignItems: 'center',
+        alignItems: 'flex-start',
         backgroundColor: theme.palette.background.default,
         display: 'flex',
         flexGrow: 1,
@@ -55,7 +58,7 @@ interface AdminModulePropsI {
     }
 }
 
-const AdminModule = (props: AdminModulePropsI) => {
+function AdminModule(props: AdminModulePropsI) {
     const {classes} = props;
 
     return (
@@ -72,12 +75,12 @@ const AdminModule = (props: AdminModulePropsI) => {
                     title: 'Користувачі'
                 },
                 {
-                    icon: <PeopleIcon/>,
+                    icon: <Bookmark/>,
                     route: `/`,
                     title: 'Замовлення'
                 },
                 {
-                    icon: <PeopleIcon/>,
+                    icon: <Payment/>,
                     route: `/`,
                     title: 'Оплата'
                 }
@@ -86,12 +89,17 @@ const AdminModule = (props: AdminModulePropsI) => {
                 <Switch>
                     <Route path="/" exact={true} component={Default}/>
                     <Route path="/admin/goods" exact={true} component={Goods}/>
-                    <Route path="/admin/goods/edit/:commID" component={Edit} />
-                    <Route path="/admin/users" component={Users}/>
+                    <Route path="/admin/goods/create" component={CreateGood}/>
+                    <Route path="/admin/goods/edit/:commID" component={Edit}/>
+                    <Route path="/admin/users" exact={true} component={Users}/>
+                    <Route path="/admin/users/create" component={CreateUser}/>
+                    <Route path="/admin/users/edit/:userID" component={EditUser}/>
+                    <Route path="/admin/orders" component={Default}/>
+                    <Route path="/admin/payments" component={Default}/>
                 </Switch>
             </main>
         </div>
     );
-};
+}
 
 export default withStyles(styles)(AdminModule);

@@ -1,8 +1,9 @@
 import {
-    FETCH_USERS, FetchUsersAction
+    CREATE_USER, CreateUserAction, DELETE_USER, DeleteUserAction, FETCH_USER_BY_ID,
+    FETCH_USERS, FetchUserByIdAction, FetchUsersAction, UPDATE_USER, UpdateUserAction
 } from "../actions/types";
 
-type AuthAction = FetchUsersAction;
+type AuthAction = FetchUsersAction | FetchUserByIdAction | CreateUserAction | UpdateUserAction | DeleteUserAction;
 
 /**
  * @param {any} state
@@ -17,6 +18,14 @@ export const usersReducer = (state: any[] = [], action: AuthAction) => {
                 return state[0]._id === action.payload[0]._id ? state : [...state, ...action.payload];
             }
             return action.payload;
+        case FETCH_USER_BY_ID:
+            return action.payload;
+        case CREATE_USER:
+            return [];
+        case UPDATE_USER:
+            return [];
+        case DELETE_USER:
+            return [];
         default:
             return state;
     }

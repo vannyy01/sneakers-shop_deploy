@@ -13,7 +13,7 @@ type AuthAction = FetchUserAction;
 export const authReducer = (state:any = null, action: AuthAction) => {
     switch (action.type) {
         case FETCH_USER:
-            return action.payload || false;
+            return action.payload;
         default:
             return state;
     }

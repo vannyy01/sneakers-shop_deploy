@@ -84,7 +84,7 @@ class Goods extends React.PureComponent<GoodsPropsI, GoodsStateI> {
                 </FormControl>
                 </div>
                 <div className={`row ${this.props.justifyCards}`}>
-                    {!this.props.goods ?
+                    {!Array.isArray(this.props.goods) ?
                         <div>Loading...</div> :
                         _.map(this.props.goods.sort(this.getSorting(order, orderBy)), (good, index) =>
                             <CommodityCard key={index} good={good}/>

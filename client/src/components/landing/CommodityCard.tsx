@@ -104,9 +104,9 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
         );
     }
 
-       public render() {
+    public render() {
         const {classes} = this.props;
-        const {mainImage, description, title, price, brand, size, sex, _id} = this.props.good;
+        const {mainImage, description, title, price, brand, sizes, sex, _id} = this.props.good;
         return (
             <Card className={classes.card}>
                 <CardMedia
@@ -154,7 +154,7 @@ class CommodityCard extends React.PureComponent<CommodityCardPropsI, CommodityCa
                         <Typography className="d-flex justify-content-between" variant="inherit" component="h2">
                             <p className={classes.par}>Розміри:</p>
                             <div>
-                                {size ? size.map((data: SizeInterface, index: number) =>
+                                {sizes ? sizes.map((data: SizeInterface, index: number) =>
                                     (
                                         <Chip
                                             title={"В наявності " + data.count + " пари"}

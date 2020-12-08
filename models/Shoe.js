@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Size = require('./Size');
 
 const ShoeSchema = commoditySchema({
-    size: [Size],
+    sizes: [Size],
     type: String,
     sex: String,
 });

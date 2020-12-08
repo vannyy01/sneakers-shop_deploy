@@ -1,20 +1,16 @@
 import * as React from 'react';
-
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-
 import Paper, {PaperProps} from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-
-import {createStyles, Theme} from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
 import {RouteComponentProps} from 'react-router-dom';
-
 import Button from "@material-ui/core/Button";
 import DeleteIcon from '@material-ui/icons/Delete';
+import ArrowBack from '@material-ui/icons/ArrowBackIos';
 import {connect} from 'react-redux';
-import {fetchGoodByID} from "../../actions";
+import {deleteGood, fetchGoodByID, updateGood} from "../../actions";
 import {ShoeInterface} from "../../actions/types";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, {AlertProps} from '@material-ui/lab/Alert';
@@ -24,6 +20,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Draggable from 'react-draggable';
+import {GoodStyles} from "./BaseGood";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -37,26 +34,6 @@ function PaperComponent(props: PaperProps) {
     );
 }
 
-const styles = (theme: Theme) => createStyles({
-    alert: {
-        marginTop: theme.spacing(7)
-    },
-    button: {
-        margin: theme.spacing(1)
-    },
-    paper: {
-        marginBottom: theme.spacing(3),
-        marginTop: theme.spacing(3),
-        padding: theme.spacing(2),
-        [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
-            marginBottom: theme.spacing(6),
-            marginTop: theme.spacing(6),
-            padding: theme.spacing(3),
-        },
-        width: "60em"
-    }
-});
-
 interface PathParams {
     commID: string
 }
@@ -64,12 +41,15 @@ interface PathParams {
 interface PropsType extends RouteComponentProps<PathParams> {
     classes: { alert: string, button: string, paper: string },
     fetchGoodByID: (id: string) => void,
-    good: ShoeInterface
+    good: ShoeInterface,
+    updateGood: (good: ShoeInterface | {}, callback: () => void) => void,
+    deleteGood: (id: string, callback: () => void) => void
 }
 
 interface StateType {
     showAlert: boolean,
     showDialog: boolean,
+    showDeleteDialog: boolean,
     formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, sex: string, price: string },
     formValid: boolean
     good: ShoeInterface | {},
@@ -108,6 +88,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
         this.state = {
             showAlert: false,
             showDialog: false,
+            showDeleteDialog: false,
             formErrors: {
                 title: '',
                 brand: '',
@@ -259,6 +240,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
                                            autoComplete="sex-name" select={true} value={sex}
                                            helperText={this.state.formErrors.sex}
                                            error={this.state.formErrors.sex.length > 0}
+                                           onChange={event => this.handleChange(event, 'sex')}
                                 >
                                     {sexes.map((option) => (
                                         <MenuItem key={option.value} value={option.value}>
@@ -295,7 +277,17 @@ class AddressForm extends React.Component<PropsType, StateType> {
                                     error={this.state.formErrors.price.length > 0}
                                 />
                             </Grid>
-                            <Grid item={true} xs={12} sm={6}>
+                            <Grid item={true} xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="inherit"
+                                    style={{backgroundColor: "#1fbd3a", color: "#fff"}}
+                                    startIcon={<ArrowBack/>}
+                                    className={this.props.classes.button}
+                                    onClick={event => this.handleComeBack()}
+                                >
+                                    Повернутися назад
+                                </Button>
                                 <Button
                                     type="submit"
                                     variant="contained"
@@ -310,6 +302,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
                                     color="secondary"
                                     startIcon={<DeleteIcon/>}
                                     className={this.props.classes.button}
+                                    onClick={event => this.showDeleteDialog()}
                                 >
                                     Видалити
                                 </Button>
@@ -317,31 +310,51 @@ class AddressForm extends React.Component<PropsType, StateType> {
                         </Grid>
                     </form>
                     <Dialog
+                        open={this.state.showDeleteDialog}
+                        onClose={event => this.handleClose("cancel")}
+                        PaperComponent={PaperComponent}
+                        aria-labelledby="draggable-dialog-title"
+                    >
+                        <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
+                            Видалити товар
+                        </DialogTitle>
+                        <DialogActions>
+                            <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
+                                    color="primary">
+                                Відміна
+                            </Button>
+                            <Button name="save" onClick={event => this.handleDelete()} color="primary">
+                                Видалити товар
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                    <Dialog
                         open={this.state.showDialog}
                         onClose={event => this.handleClose("cancel")}
                         PaperComponent={PaperComponent}
                         aria-labelledby="draggable-dialog-title"
                     >
                         <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
-                            Subscribe
+                            Оновити товар
                         </DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                To subscribe to this website, please enter your email address here. We will send updates
-                                occasionally.
+                                Щоб оноваити товар, натисність "Зберегти зміни"
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
-                            <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")} color="primary">
+                            <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
+                                    color="primary">
                                 Відміна
                             </Button>
-                            <Button name="save" onClick={event => this.handleClose("save")} color="primary">
+                            <Button name="save" onClick={event => this.handleSave()} color="primary">
                                 Зберегти зміни
                             </Button>
                         </DialogActions>
                     </Dialog>
                     <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={this.state.showAlert}
-                              autoHideDuration={6000} className={this.props.classes.alert}  onClose={event => this.handleClose("alert")}>
+                              autoHideDuration={6000} className={this.props.classes.alert}
+                              onClose={event => this.handleClose("alert")}>
                         <Alert onClose={event => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
                     </Snackbar>
                 </React.Fragment>
@@ -350,6 +363,9 @@ class AddressForm extends React.Component<PropsType, StateType> {
         return <div>Loading...</div>;
     }
 
+    protected handleComeBack = (): void => {
+        this.props.history.goBack();
+    };
 
     protected handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, label: keyof ShoeInterface) => {
         const newState: ShoeInterface | {} = this.state.good;
@@ -386,16 +402,20 @@ class AddressForm extends React.Component<PropsType, StateType> {
     protected handleClose = (name: "cancel" | "alert" | "save"): void => {
         switch (name) {
             case "cancel":
-                this.setState({showDialog: false});
+                this.setState({showDialog: false, showDeleteDialog: false});
                 break;
             case "alert":
                 this.setState({showAlert: false});
                 break;
             default:
                 alert('Збережено');
-                console.log(this.state.good);
                 break;
         }
+    };
+    protected handleSave = (): void => {
+        this.props.updateGood(this.state.good, () =>
+            this.props.history.push('/admin/goods')
+        );
     };
     protected validateField = (fieldName: string, value: any): void => {
         const fieldValidationErrors = this.state.formErrors;
@@ -517,9 +537,20 @@ class AddressForm extends React.Component<PropsType, StateType> {
             }
         }
         this.setState({formValid: isValid});
+    };
+
+    protected showDeleteDialog = ():void => {
+        this.setState({showDeleteDialog: true});
+    };
+
+    protected handleDelete(): void {
+        this.props.deleteGood(this.state.good["_id"],
+            () => this.props.history.push('/admin/goods'));
+
     }
+
 }
 
 const mapStateToProps = ({goods}: { goods: ShoeInterface }) => ({good: goods});
 
-export default connect(mapStateToProps, {fetchGoodByID})(withStyles(styles)(AddressForm));
+export default connect(mapStateToProps, {fetchGoodByID, updateGood, deleteGood})(withStyles(GoodStyles)(AddressForm));
