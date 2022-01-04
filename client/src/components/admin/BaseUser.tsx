@@ -46,29 +46,16 @@ export interface StateTypeUser {
     showDeleteDialog: boolean,
     formErrors: { givenName: string, familyName: string, email: string, photo: string, role: string },
     formValid: boolean
-    user: UserInterface,
+    user?: UserInterface,
     isValid: { givenNameValid: boolean, familyNameValid: boolean, emailValid: boolean, photoValid: boolean, roleValid: boolean },
 }
 
 export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser> extends React.Component<P, S> {
-    constructor(props: P) {
-        super(props);
-        this.state = this.defaultState() as S;
-    }
 
     protected defaultState = (): StateTypeUser => ({
         showAlert: false,
         showDialog: false,
         showDeleteDialog: false,
-        user: {
-            googleID: '',
-            email: '',
-            _id: '',
-            role: 0,
-            givenName: '',
-            familyName: '',
-            photo: ''
-        },
         isValid: {
             givenNameValid: true, familyNameValid: true, emailValid: true, photoValid: true, roleValid: true
         },

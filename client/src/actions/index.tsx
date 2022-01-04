@@ -71,6 +71,7 @@ export const fetchGoods = (to: number) => async (dispatch: any) => {
 
 export const fetchGoodByID = (id: string) => async (dispatch: any) => {
     const res = await axios.get(`/api/commodity/get/${id}`);
+    // TODO fix find good error case
     dispatch({type: FETCH_GOOD, payload: res.data})
 };
 

@@ -20,6 +20,7 @@ export const goodsReducer = (state: StateType = [], action: AuthAction) => {
             // }
             return action.payload;
         case FETCH_GOOD:
+            // TODO process find good error
             return action.payload;
         case UPDATE_GOOD:
             return [];

@@ -52,7 +52,7 @@ interface StateType {
     showDeleteDialog: boolean,
     formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, sex: string, price: string },
     formValid: boolean
-    good: ShoeInterface | {},
+    good?: ShoeInterface,
     isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, sexValid: boolean, priceValid: boolean },
 }
 
@@ -100,7 +100,6 @@ class AddressForm extends React.Component<PropsType, StateType> {
                 price: ''
             },
             formValid: true,
-            good: {},
             isValid: {
                 titleValid: true,
                 brandValid: true,
@@ -126,8 +125,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
     }
 
     public render() {
-        if (this.state.good.hasOwnProperty('_id')) {
-            // @ts-ignore
+        if (this.state.good && this.state.good._id) {
             const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
             return <Paper className={this.props.classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
@@ -368,7 +366,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
     };
 
     protected handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, label: keyof ShoeInterface) => {
-        const newState: ShoeInterface | {} = this.state.good;
+        const newState: ShoeInterface = this.state.good;
 
         const {name, value} = event.target;
         if (label === "images") {
@@ -544,7 +542,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
     };
 
     protected handleDelete(): void {
-        this.props.deleteGood(this.state.good["_id"],
+        this.props.deleteGood(this.state.good._id,
             () => this.props.history.push('/admin/goods'));
 
     }

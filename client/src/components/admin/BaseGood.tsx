@@ -82,10 +82,7 @@ export interface StateType {
 }
 
 abstract class BaseGood<P extends PropsType, S extends StateType> extends React.Component<P, S> {
-    constructor(props: P) {
-        super(props);
-        this.state = this.defaultState() as S;
-    }
+
     protected defaultState = ():StateType => ({
         showAlert: false,
         showDialog: false,

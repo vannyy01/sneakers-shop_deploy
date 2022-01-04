@@ -12,10 +12,14 @@ interface EditUserProps extends PropsTypeUser {
     updateUser: (user: UserInterface, callback: () => void) => void;
     fetchUserByID: (id: string) => void,
     deleteUser: (id: string, callback: () => void) => void,
-    user: UserInterface;
+    user?: UserInterface;
 }
 
 class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
+    constructor(props: EditUserProps) {
+        super(props);
+        this.state = this.defaultState();
+    }
     public componentDidMount() {
         this.props.fetchUserByID(this.props.match.params.userID);
         this.setState({user: this.props.user})
@@ -28,7 +32,7 @@ class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
     }
 
     public render() {
-        if (this.state.user.hasOwnProperty('_id')) {
+        if (this.state.user && this.state.user._id) {
             return <Paper className={this.props.classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
                     Користувач
