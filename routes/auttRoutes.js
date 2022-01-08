@@ -27,14 +27,20 @@ module.exports = (app) => {
         else
             res.send('');
     });
-    app.get('/api/users/get/:id', requireLogin, async (req, res) => {
-        await User.findById(req.params.id, function (err, user){
-            if (err)
-                res.status(404).send(`Cannot get the user with id ${req.params.id}!`);
-            else {
-                res.status(200).send(user);
-            }
-        })
+    app.get('/api/users/get/:id', requireLogin, async (req, res, next) => {
+        try {
+            await User.findById(req.params.id, function (err, user) {
+                if (user === null)
+                    res.status(404).send(`Cannot get the user with id ${req.params.id}!`);
+                if (err)
+                    res.status(500).send(`Server error occurred: ${err}`);
+                else
+                    res.status(200).send(user);
+            });
+        } catch (e) {
+            next(e);
+            console.log('next is called');
+        }
     });
     app.post('/api/user/create', requireLogin, async (req, res) => {
         //Google
@@ -66,8 +72,8 @@ module.exports = (app) => {
     });
 
     app.put('/api/users/edit/:id', requireLogin, async (req, res) => {
-        await User.updateOne({_id: req.params.id}, req.body, function (err){
-            if(err)
+        await User.updateOne({_id: req.params.id}, req.body, function (err) {
+            if (err)
                 res.status(404).send(`Cannot update the user with email: ${req.body.email}. Error: !${err}`);
             else
                 res.status(200).send('User has been updated.');
@@ -83,8 +89,8 @@ module.exports = (app) => {
     });
 
     app.delete('/api/users/delete/:id', requireLogin, async (req, res) => {
-        await User.deleteOne({_id: req.params.id}, function (err){
-            if(err)
+        await User.deleteOne({_id: req.params.id}, function (err) {
+            if (err)
                 res.status(404).send(`Cannot delete the user with _id: ${req.params.id}. Error: !${err}`);
             else
                 res.status(200).send(`Item ${req.params.id} has successfully deleted`);

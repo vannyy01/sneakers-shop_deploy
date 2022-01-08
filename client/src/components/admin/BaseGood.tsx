@@ -83,7 +83,7 @@ export interface StateType {
 
 abstract class BaseGood<P extends PropsType, S extends StateType> extends React.Component<P, S> {
 
-    protected defaultState = ():StateType => ({
+    protected defaultState = (): StateType => ({
         showAlert: false,
         showDialog: false,
         good: {
@@ -139,6 +139,9 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
             this.setState({good: newState}, () => {
                 this.validateField(name, newState[label]);
             });
+            return;
+        }
+        if (label === "sizes") {
             return;
         }
         newState[label] = value;

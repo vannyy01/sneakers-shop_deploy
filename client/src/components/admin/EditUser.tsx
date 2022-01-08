@@ -32,7 +32,7 @@ class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
     }
 
     public render() {
-        if (this.state.user && this.state.user._id) {
+        if (this.state.user?._id) {
             return <Paper className={this.props.classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
                     Користувач

@@ -123,7 +123,7 @@ const questions: QuestionI[] = [
 function HorizontalLabelPositionBelowStepper(props: { onNext: (id: number, answerKey: string) => void, onFinish: () => void }) {
     const classes = useStyles();
     const [activeStep, setActiveStep] = React.useState(0);
-    const [value, setValue] = React.useState();
+    const [value, setValue] = React.useState<string>();
     document.title = `Пит. ${activeStep}`;
     const {answerA, answerB, answerC, id, image, question} = questions[activeStep];
 

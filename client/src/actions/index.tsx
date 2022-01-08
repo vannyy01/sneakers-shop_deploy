@@ -37,7 +37,32 @@ export const fetchUser = () => async (dispatch: any) => {
  * @param id
  */
 export const fetchUserByID = (id: string) => async (dispatch: any) => {
-    const res = await axios.get(`/api/users/get/${id}`);
+    let res;
+    try {
+        res = await axios.get(`/api/users/get/${id}`);
+        console.log(res);
+    } catch (error) {
+        if(error.response) {
+            console.log('response', error.data);
+        } else if(error.request) {
+            console.log('request', error.data);
+        } else {
+            console.log('Error', error.message);
+        }
+        console.log(error.toJSON());
+
+        // console.error('FFFFFF',e);
+        // console.log(e.response, e.request, e.message, e.config);
+        // if (e.respone.status === 404) {
+        //     alert(`User with ${id} did not found.`);
+        //     return;
+        // }
+        // if (e.response.status === 500) {
+        //     console.error(`Error 500`, e);
+        //     return;
+        // }
+        // return;
+    }
     dispatch({type: FETCH_USER_BY_ID, payload: res.data});
 };
 

@@ -125,7 +125,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
     }
 
     public render() {
-        if (this.state.good && this.state.good._id) {
+        if (this.state.good?._id) {
             const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
             return <Paper className={this.props.classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
@@ -381,6 +381,9 @@ class AddressForm extends React.Component<PropsType, StateType> {
             this.setState({good: newState}, () => {
                 this.validateField(name, newState[label]);
             });
+            return;
+        }
+        if (label === "sizes") {
             return;
         }
         newState[label] = value;
