@@ -34,22 +34,31 @@ export const fetchUser = () => async (dispatch: any) => {
 };
 
 /**
+ *
  * @param id
+ * @param onErrorCallback
  */
-export const fetchUserByID = (id: string) => async (dispatch: any) => {
+export const fetchUserByID = (id: string, onErrorCallback: () => void) => async (dispatch: any) => {
     let res;
     try {
         res = await axios.get(`/api/users/get/${id}`);
-        console.log(res);
+        dispatch({type: FETCH_USER_BY_ID, payload: res.data});
     } catch (error) {
-        if(error.response) {
-            console.log('response', error.data);
-        } else if(error.request) {
+        if (error.response) {
+            if (error.response.status === 500) {
+                alert('Server error 500: ' + error.response.data);
+            } else if (error.response.status === 404) {
+                alert(`User with id: ${id} did not found`);
+            } else {
+                alert('Response error: ' + error.response.data);
+            }
+        } else if (error.request) {
             console.log('request', error.data);
         } else {
             console.log('Error', error.message);
         }
-        console.log(error.toJSON());
+        console.log(error.message);
+        onErrorCallback();
 
         // console.error('FFFFFF',e);
         // console.log(e.response, e.request, e.message, e.config);
@@ -63,7 +72,6 @@ export const fetchUserByID = (id: string) => async (dispatch: any) => {
         // }
         // return;
     }
-    dispatch({type: FETCH_USER_BY_ID, payload: res.data});
 };
 
 /**
@@ -80,8 +88,8 @@ export const updateUser = (user: UserInterface, callback: () => void) => async (
 };
 
 export const deleteUser = (id: string, callback: () => void) => async (dispatch: any) => {
-  const res = await axios.delete(`/api/users/delete/${id}`);
-  dispatch({type: DELETE_USER, payload: res.data, callback: callback()});
+    const res = await axios.delete(`/api/users/delete/${id}`);
+    dispatch({type: DELETE_USER, payload: res.data, callback: callback()});
 };
 
 /**

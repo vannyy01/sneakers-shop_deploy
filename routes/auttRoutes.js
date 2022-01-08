@@ -30,16 +30,17 @@ module.exports = (app) => {
     app.get('/api/users/get/:id', requireLogin, async (req, res, next) => {
         try {
             await User.findById(req.params.id, function (err, user) {
-                if (user === null)
+                if (user === null) {
                     res.status(404).send(`Cannot get the user with id ${req.params.id}!`);
-                if (err)
+                    next(new Error(`User with id: ${req.params.id} did not found.`));
+                } else if (err) {
                     res.status(500).send(`Server error occurred: ${err}`);
-                else
+                } else {
                     res.status(200).send(user);
+                }
             });
         } catch (e) {
             next(e);
-            console.log('next is called');
         }
     });
     app.post('/api/user/create', requireLogin, async (req, res) => {

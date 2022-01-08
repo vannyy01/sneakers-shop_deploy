@@ -10,7 +10,7 @@ import {deleteUser, fetchUserByID, updateUser} from "../../actions";
 
 interface EditUserProps extends PropsTypeUser {
     updateUser: (user: UserInterface, callback: () => void) => void;
-    fetchUserByID: (id: string) => void,
+    fetchUserByID: (id: string, onErrorCallback: () => void) => void,
     deleteUser: (id: string, callback: () => void) => void,
     user?: UserInterface;
 }
@@ -21,7 +21,9 @@ class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
         this.state = this.defaultState();
     }
     public componentDidMount() {
-        this.props.fetchUserByID(this.props.match.params.userID);
+        this.props.fetchUserByID(this.props.match.params.userID,
+            () => this.props.history.push('/admin/users')
+            );
         this.setState({user: this.props.user})
     }
 
