@@ -159,13 +159,13 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
         const good = {
             _id,
             title: title.trim(),
+            brand: brand.trim(),
             description: description.trim(),
+            price,
             mainImage: mainImage.trim(),
             images,
             type: type.trim(),
-            brand: brand.trim(),
             sex: sex.trim(),
-            price
         };
         this.setState({showDialog: true, good});
     };

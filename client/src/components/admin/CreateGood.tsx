@@ -24,8 +24,13 @@ interface CreateGoodProps extends PropsType {
 }
 
 class CreateGood extends BaseGood<CreateGoodProps, StateType> {
+    constructor(props: CreateGoodProps) {
+        super(props);
+        this.state = this.defaultState();
+    }
 
     public render() {
+        console.log(this.state.good);
         const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
 
         return <Paper className={this.props.classes.paper}>

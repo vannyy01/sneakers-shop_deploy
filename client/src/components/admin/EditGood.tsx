@@ -40,7 +40,7 @@ interface PathParams {
 
 interface PropsType extends RouteComponentProps<PathParams> {
     classes: { alert: string, button: string, paper: string },
-    fetchGoodByID: (id: string) => void,
+    fetchGoodByID: (id: string, onErrorCallback: () => void) => void,
     good: ShoeInterface,
     updateGood: (good: ShoeInterface | {}, callback: () => void) => void,
     deleteGood: (id: string, callback: () => void) => void
@@ -114,7 +114,9 @@ class AddressForm extends React.Component<PropsType, StateType> {
     }
 
     public componentDidMount() {
-        this.props.fetchGoodByID(this.props.match.params.commID);
+        this.props.fetchGoodByID(this.props.match.params.commID,
+            () => this.props.history.push('/admin/goods')
+            );
         this.setState({good: this.props.good})
     }
 

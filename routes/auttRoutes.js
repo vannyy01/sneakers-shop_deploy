@@ -39,8 +39,8 @@ module.exports = (app) => {
                     res.status(200).send(user);
                 }
             });
-        } catch (e) {
-            next(e);
+        } catch (error) {
+            next(error);
         }
     });
     app.post('/api/user/create', requireLogin, async (req, res) => {

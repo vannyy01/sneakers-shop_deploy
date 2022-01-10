@@ -59,18 +59,6 @@ export const fetchUserByID = (id: string, onErrorCallback: () => void) => async 
         }
         console.log(error.message);
         onErrorCallback();
-
-        // console.error('FFFFFF',e);
-        // console.log(e.response, e.request, e.message, e.config);
-        // if (e.respone.status === 404) {
-        //     alert(`User with ${id} did not found.`);
-        //     return;
-        // }
-        // if (e.response.status === 500) {
-        //     console.error(`Error 500`, e);
-        //     return;
-        // }
-        // return;
     }
 };
 
@@ -102,28 +90,48 @@ export const fetchGoods = (to: number) => async (dispatch: any) => {
 };
 
 
-export const fetchGoodByID = (id: string) => async (dispatch: any) => {
-    const res = await axios.get(`/api/commodity/get/${id}`);
-    // TODO fix find good error case
-    dispatch({type: FETCH_GOOD, payload: res.data})
+export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.get(`/api/commodity/get/${id}`);
+        dispatch({type: FETCH_GOOD, payload: res.data});
+    } catch(error) {
+        if (error.response) {
+            if (error.response.status === 500) {
+                alert('Server error 500: ' + error.response.data);
+            } else if (error.response.status === 404) {
+                alert(`Good with id: ${id} did not found`);
+            } else {
+                alert('Response error: ' + error.response.data);
+            }
+        } else if (error.request) {
+            console.log('request', error.data);
+        } else {
+            console.log('Error', error.message);
+        }
+        console.log(error.message);
+        onErrorCallback();
+    }
 };
 
 export const createGood = (good: ShoeInterface, callback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.post(`/api/commodity/create`, good);
-        dispatch({type: CREATE_GOOD, payload: res.data, callback: callback()});
+        dispatch({type: CREATE_GOOD, payload: res.data});
+        callback();
     } catch (err) {
         alert('Помилка ' + err.response.data.message);
     }
 };
 export const updateGood = (good: ShoeInterface, callback: () => void) => async (dispatch: any) => {
     const res = await axios.put(`/api/commodity/edit/${good._id}`, good);
-    dispatch({type: UPDATE_GOOD, payload: res.data, callback: callback()});
+    dispatch({type: UPDATE_GOOD, payload: res.data});
+    callback();
 };
 
 export const deleteGood = (id: string, callback: () => void) => async (dispatch: any) => {
     const res = await axios.delete(`/api/commodity/delete/${id}`);
-    dispatch({type: DELETE_GOOD, payload: res.data, callback: callback()});
+    dispatch({type: DELETE_GOOD, payload: res.data});
+    callback();
 };
 /**
  * @param item

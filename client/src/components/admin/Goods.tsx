@@ -41,6 +41,7 @@ class Goods extends React.Component<PropsInterface, any> {
                 delete item.mainImage;
                 delete item.sizes;
             }
+            console.log(this.props.goods);
             return (
                 <React.Fragment>
                         <GridView idField="_id" createLocationPath='/admin/goods/create' editRoute='/admin/goods/edit' data={this.props.goods} headCells={headCells}
