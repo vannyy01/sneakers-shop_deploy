@@ -46,7 +46,7 @@ export interface StateTypeUser {
     showDeleteDialog: boolean,
     formErrors: { givenName: string, familyName: string, email: string, photo: string, role: string },
     formValid: boolean
-    user?: UserInterface,
+    user: UserInterface,
     isValid: { givenNameValid: boolean, familyNameValid: boolean, emailValid: boolean, photoValid: boolean, roleValid: boolean },
 }
 
@@ -63,10 +63,18 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
             givenName: '', familyName: '', email: '', photo: '', role: ''
         },
         formValid: false,
+        user: {
+            _id: '',
+            givenName: '',
+            familyName: '',
+            email: '',
+            photo: '',
+            role: 10
+        }
     });
 
 
-    protected baseRender = (operation: string, {deleteButton}:
+    protected baseRender = (operation: 'Створення' | 'Оновлення' | 'Видалення', {deleteButton}:
         { deleteButton: { renderDialog?: boolean, disabled?: boolean } } = {
         deleteButton: {
             renderDialog: false,
@@ -198,7 +206,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                 aria-labelledby="draggable-dialog-title"
             >
                 <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
-                    Видалити товар
+                    Видалити користувача
                 </DialogTitle>
                 <DialogActions>
                     <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
@@ -206,7 +214,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                         Відміна
                     </Button>
                     <Button name="save" onClick={event => this.handleDelete()} color="primary">
-                        Видалити товар
+                        Видалити користувача
                     </Button>
                 </DialogActions>
             </Dialog>}
@@ -217,11 +225,12 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                 aria-labelledby="draggable-dialog-title"
             >
                 <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
-                    Оновити користувача
+                    {operation === 'Створення' ? 'Створити користувача' : 'Оновити користувача'}
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Щоб оноваити користувача, натисність "Зберегти зміни"
+                        {operation === 'Створення' ? 'Щоб створити користувача, натисність "Свторити"'
+                            : 'Щоб оноваити користувача, натисність "Зберегти зміни"'}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -230,7 +239,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                         Відміна
                     </Button>
                     <Button name="save" onClick={event => this.handleSave()} color="primary">
-                        Зберегти зміни
+                        {operation === 'Створення' ? 'Створити' : 'Оновити користувача'}
                     </Button>
                 </DialogActions>
             </Dialog>

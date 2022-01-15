@@ -30,7 +30,6 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
     }
 
     public render() {
-        console.log(this.state.good);
         const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
 
         return <Paper className={this.props.classes.paper}>

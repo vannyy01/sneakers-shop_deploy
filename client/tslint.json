@@ -9,6 +9,7 @@
   },
   "linterOptions": {
     "exclude": [
+      "public",
       "config/**/*.js",
       "node_modules/**/*.ts"
     ]

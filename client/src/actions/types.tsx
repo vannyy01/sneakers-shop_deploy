@@ -1,5 +1,5 @@
 export interface UserInterface {
-    googleID: string,
+    googleID?: string,
     email: string,
     _id: string,
     role: 0 | 10 | 20,

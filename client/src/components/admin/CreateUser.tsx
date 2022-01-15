@@ -13,6 +13,10 @@ interface CreateUserProps extends PropsTypeUser {
 }
 
 class CreateUser extends BaseUser<CreateUserProps, StateTypeUser> {
+    constructor(props:CreateUserProps) {
+        super(props);
+        this.state = this.defaultState();
+    }
 
     public render() {
         return <Paper className={this.props.classes.paper}>

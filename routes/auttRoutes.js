@@ -22,14 +22,15 @@ module.exports = (app) => {
         res.redirect('/');
     });
     app.get('/api/current_user', (req, res) => {
-        if (req.user)
+        if (req.user) {
             res.send(req.user);
-        else
+        } else {
             res.send('');
+        }
     });
     app.get('/api/users/get/:id', requireLogin, async (req, res, next) => {
         try {
-            await User.findById(req.params.id, function (err, user) {
+            await User.findById(req.params.id).exec(function (err, user) {
                 if (user === null) {
                     res.status(404).send(`Cannot get the user with id ${req.params.id}!`);
                     next(new Error(`User with id: ${req.params.id} did not found.`));
@@ -59,42 +60,47 @@ module.exports = (app) => {
         }
         req.body.googleID = req.body.googleID || '-';
         await new User({
+            role: req.body.role,
             googleID: req.body.googleID,
             email: req.body.email,
             givenName: req.body.givenName,
             familyName: req.body.familyName,
             photo: req.body.photo
         }).save(err => {
-            if (err)
+            if (err) {
                 res.status(404).send({message: `Cannot create the user with email: ${req.body.email}. Error: !${err}`});
-            else
+            } else {
                 res.status(200).send("Commodity successfully created.");
+            }
         });
     });
 
     app.put('/api/users/edit/:id', requireLogin, async (req, res) => {
-        await User.updateOne({_id: req.params.id}, req.body, function (err) {
-            if (err)
+        await User.updateOne({_id: req.params.id}, req.body).exec(function (err) {
+            if (err) {
                 res.status(404).send(`Cannot update the user with email: ${req.body.email}. Error: !${err}`);
-            else
+            } else {
                 res.status(200).send('User has been updated.');
+            }
         });
     });
     app.get('/api/users', requireLogin, async (req, res) => {
-        await User.find({}, function (err, users) {
-            if (err)
-                res.status(404).send('Cannot get the users list!');
-            else
+        await User.find().limit(10).select(['googleID', '__id', 'email', 'role', 'givenName', 'familyName']).exec(function (err, users) {
+            if (err) {
+                res.status(500).send('Cannot get the users list!');
+            } else {
                 res.send(users);
-        }).select(['googleID', '__id', 'email', 'role', 'givenName', 'familyName']).limit(10);
+            }
+        });
     });
 
     app.delete('/api/users/delete/:id', requireLogin, async (req, res) => {
-        await User.deleteOne({_id: req.params.id}, function (err) {
-            if (err)
+        await User.deleteOne({_id: req.params.id}).exec(function (err) {
+            if (err) {
                 res.status(404).send(`Cannot delete the user with _id: ${req.params.id}. Error: !${err}`);
-            else
+            } else {
                 res.status(200).send(`Item ${req.params.id} has successfully deleted`);
+            }
         });
     });
 };

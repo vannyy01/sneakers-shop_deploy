@@ -9,6 +9,7 @@ require('./services/passport');
 
 mongoose.connect(keys.mongoDBConnect);
 const app = express();
+global.__basedir = __dirname;
 
 app.use(
     cookieSession({
@@ -24,6 +25,7 @@ app.use(express.json());
 require('./routes/auttRoutes')(app);
 require('./routes/orderRoutes')(app);
 require('./routes/commodityRoutes')(app);
+require('./routes/fileRoutes')(app);
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('client/build'));

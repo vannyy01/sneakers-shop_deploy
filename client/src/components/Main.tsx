@@ -40,12 +40,13 @@ interface LandingStateI {
     expanded: boolean,
     goodsCount: number,
     justifyCards: string,
-    showCard: boolean
+    showCard: boolean,
+    fields: string[]
 }
 
 interface LandingPropsI {
     goods?: ShoeInterface[],
-    fetchGoods: (to: number) => void
+    fetchGoods: (to: number, fields?: string[]) => void
 }
 
 class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
@@ -57,13 +58,14 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
             expanded: false,
             goodsCount: 3,
             justifyCards: innerWidth < 767 ? "justify-content-around" : "justify-content-between",
-            showCard: false
+            showCard: false,
+            fields: ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'mainImage']
         };
         this.ScrollRef = React.createRef();
     }
 
     public componentDidMount() {
-        this.props.fetchGoods(this.state.goodsCount);
+        this.props.fetchGoods(this.state.goodsCount, this.state.fields);
         window.addEventListener('scroll', this.handleScroll);
     }
 
@@ -124,7 +126,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
 
     protected handleLoadClick = (): void => {
         this.setState((state) => ({expanded: true, goodsCount: state.goodsCount + 3}));
-        this.props.fetchGoods(this.state.goodsCount + 3);
+        this.props.fetchGoods(this.state.goodsCount + 3, this.state.fields);
     }
 }
 

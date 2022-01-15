@@ -14,12 +14,13 @@ import {
 
 /**
  * @param user
- * @param callback
+ * @param onSuccessCallback
  */
-export const createUser = (user: UserInterface, callback: () => void) => async (dispatch: any) => {
+export const createUser = (user: UserInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.post('/api/user/create', user);
-        dispatch({type: CREATE_USER, payload: res.data, callback: callback()});
+        dispatch({type: CREATE_USER, payload: res.data});
+        onSuccessCallback();
     } catch (err) {
         alert('Помилка ' + err.response.data.message);
     }
@@ -29,8 +30,12 @@ export const createUser = (user: UserInterface, callback: () => void) => async (
  * @returns {(dispatch: any) => Promise<void>}
  */
 export const fetchUser = () => async (dispatch: any) => {
-    const res = await axios.get('/api/current_user');
-    dispatch({type: FETCH_USER, payload: res.data});
+    try {
+        const res = await axios.get('/api/current_user');
+        dispatch({type: FETCH_USER, payload: res.data});
+    } catch (error) {
+        console.log('Unable to fetch user', error);
+    }
 };
 
 /**
@@ -39,10 +44,9 @@ export const fetchUser = () => async (dispatch: any) => {
  * @param onErrorCallback
  */
 export const fetchUserByID = (id: string, onErrorCallback: () => void) => async (dispatch: any) => {
-    let res;
     try {
-        res = await axios.get(`/api/users/get/${id}`);
-        dispatch({type: FETCH_USER_BY_ID, payload: res.data});
+        const user = await axios.get(`/api/users/get/${id}`);
+        dispatch({type: FETCH_USER_BY_ID, payload: user.data});
     } catch (error) {
         if (error.response) {
             if (error.response.status === 500) {
@@ -66,35 +70,56 @@ export const fetchUserByID = (id: string, onErrorCallback: () => void) => async 
  *
  */
 export const fetchUsers = () => async (dispatch: any) => {
-    const res = await axios.get('/api/users');
-    dispatch({type: FETCH_USERS, payload: res.data});
+    try {
+        const user = await axios.get('/api/users');
+        dispatch({type: FETCH_USERS, payload: user.data});
+    } catch (error) {
+        console.log('Unable to fetch list of users', error);
+    }
 };
 
-export const updateUser = (user: UserInterface, callback: () => void) => async (dispatch: any) => {
-    const res = await axios.put(`/api/users/edit/${user._id}`, user);
-    dispatch({type: UPDATE_USER, payload: res.data, callback: callback()});
+export const updateUser = (user: UserInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.put(`/api/users/edit/${user._id}`, user);
+        dispatch({type: UPDATE_USER, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to update user. ${error}`);
+    }
 };
 
-export const deleteUser = (id: string, callback: () => void) => async (dispatch: any) => {
-    const res = await axios.delete(`/api/users/delete/${id}`);
-    dispatch({type: DELETE_USER, payload: res.data, callback: callback()});
+export const deleteUser = (id: string, onSuccessCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.delete(`/api/users/delete/${id}`);
+        dispatch({type: DELETE_USER, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to delete user. ${error}`);
+    }
 };
 
 /**
- *
  * @param to
+ * @param fields
  */
-export const fetchGoods = (to: number) => async (dispatch: any) => {
-    const res = await axios.get(`/api/commodity/${to}`);
-    dispatch({type: FETCH_GOODS, payload: res.data})
+export const fetchGoods = (to: number, fields?: string[]) => async (dispatch: any) => {
+    try {
+        const res = await axios.get(`/api/commodity`, {params: {to, fields}});
+        dispatch({type: FETCH_GOODS, payload: res.data});
+    } catch (error) {
+        console.log(error);
+    }
 };
 
-
+/**
+ * @param id
+ * @param onErrorCallback
+ */
 export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.get(`/api/commodity/get/${id}`);
         dispatch({type: FETCH_GOOD, payload: res.data});
-    } catch(error) {
+    } catch (error) {
         if (error.response) {
             if (error.response.status === 500) {
                 alert('Server error 500: ' + error.response.data);
@@ -113,25 +138,47 @@ export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async 
     }
 };
 
-export const createGood = (good: ShoeInterface, callback: () => void) => async (dispatch: any) => {
+/**
+ * @param good
+ * @param onSuccessCallback
+ */
+export const createGood = (good: ShoeInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.post(`/api/commodity/create`, good);
         dispatch({type: CREATE_GOOD, payload: res.data});
-        callback();
-    } catch (err) {
-        alert('Помилка ' + err.response.data.message);
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to create good. ${error}`);
     }
 };
-export const updateGood = (good: ShoeInterface, callback: () => void) => async (dispatch: any) => {
-    const res = await axios.put(`/api/commodity/edit/${good._id}`, good);
-    dispatch({type: UPDATE_GOOD, payload: res.data});
-    callback();
+
+/**
+ * @param good
+ * @param onSuccessCallback
+ */
+export const updateGood = (good: ShoeInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.put(`/api/commodity/edit/${good._id}`, good);
+        dispatch({type: UPDATE_GOOD, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to update good. ${error}`);
+
+    }
 };
 
-export const deleteGood = (id: string, callback: () => void) => async (dispatch: any) => {
-    const res = await axios.delete(`/api/commodity/delete/${id}`);
-    dispatch({type: DELETE_GOOD, payload: res.data});
-    callback();
+/**
+ * @param id
+ * @param onSuccessCallback
+ */
+export const deleteGood = (id: string, onSuccessCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.delete(`/api/commodity/delete/${id}`);
+        dispatch({type: DELETE_GOOD, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to delete good. ${error}`);
+    }
 };
 /**
  * @param item

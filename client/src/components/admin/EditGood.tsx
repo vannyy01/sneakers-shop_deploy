@@ -21,6 +21,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Draggable from 'react-draggable';
 import {GoodStyles} from "./BaseGood";
+import UploadImages from "./UploadImages";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -116,7 +117,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
     public componentDidMount() {
         this.props.fetchGoodByID(this.props.match.params.commID,
             () => this.props.history.push('/admin/goods')
-            );
+        );
         this.setState({good: this.props.good})
     }
 
@@ -197,6 +198,9 @@ class AddressForm extends React.Component<PropsType, StateType> {
                                     helperText={this.state.formErrors.mainImage}
                                     error={this.state.formErrors.mainImage.length > 0}
                                 />
+                            </Grid>
+                            <Grid item={true} xs={12}>
+                                <UploadImages commID={this.props.match.params.commID}/>
                             </Grid>
                             <Grid item={true} xs={12}>
                                 <TextField
@@ -542,7 +546,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
         this.setState({formValid: isValid});
     };
 
-    protected showDeleteDialog = ():void => {
+    protected showDeleteDialog = (): void => {
         this.setState({showDeleteDialog: true});
     };
 

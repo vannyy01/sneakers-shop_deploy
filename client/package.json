@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
-    "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/icons": "^4.0.0-beta.0",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.6",
     "lodash": "^4.17.11",
@@ -21,12 +21,12 @@
     "react-addons-css-transition-group": "^15.6.2",
     "react-custom-scrollbars": "latest",
     "react-dom": "^16.8.6",
+    "react-draggable": "latest",
     "react-redux": "^5.1.1",
     "react-router-dom": "^5.2.0",
     "react-scripts-ts": "2.16.0",
     "redux": "^4.0.1",
-    "redux-thunk": "^2.3.0",
-    "react-draggable": "latest"
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts-ts start",

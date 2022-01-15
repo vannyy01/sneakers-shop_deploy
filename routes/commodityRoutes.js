@@ -15,22 +15,7 @@ function hasJsonStructure(str) {
 }
 
 module.exports = app => {
-    app.get('/api/commodity/:to', async (req, res, next) => {
-        try {
-            await Commodity.find({}).limit(Number.parseInt(req.params.to)).select(['_id', 'brand', 'description', 'price', 'title', 'sex', 'type']).
-                exec(function (err, comms) {
-                    if (comms === null) {
-                        res.status(404).send(`Did not found ${err}`);
-                    } else if (err) {
-                        res.status(500).send(err);
-                    } else {
-                        res.send(comms);
-                    }
-            });
-        } catch (error) {
-            next(error);
-        }
-    });
+
     app.post('/api/commodity/create', async (req, res, next) => {
         try {
             const existingCommodity = await Commodity.findOne({
@@ -46,15 +31,17 @@ module.exports = app => {
             req.body.sizes = [];
             const newCommodity = new Commodity(req.body);
             await newCommodity.save(err => {
-                if (err)
+                if (err) {
                     res.status(500).send({message: `Cannot create the good. Error: !${err}`});
-                else
+                } else {
                     res.status(200).send("Commodity successfully created.");
+                }
             });
         } catch (error) {
             next(error);
         }
     });
+
     app.get('/api/commodity/get/:id', async (req, res, next) => {
         try {
             await Commodity.findById(req.params.id).exec(function (err, comm) {
@@ -72,22 +59,49 @@ module.exports = app => {
         }
     });
 
-    app.put('/api/commodity/edit/:id', requireLogin, async (req, res) => {
-        await Commodity.updateOne({_id: req.params.id}, req.body, {upsert: true}).
-            exec(function (err, comm) {
-                if (err)
+    app.put('/api/commodity/edit/:id', requireLogin, async (req, res, next) => {
+        try {
+            await Commodity.updateOne({_id: req.params.id}, req.body, {upsert: true}).exec(function (err, comm) {
+                if (err) {
                     res.status(500).send(`Cannot update the good with _id: ${req.params.id}. Error: !${err}`);
-                else
+                } else {
                     res.status(200).send(comm);
-        });
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     });
 
-    app.delete('/api/commodity/delete/:id', requireLogin, async (req, res) => {
-        await Commodity.deleteOne({_id: req.params.id}).exec(function (err) {
-            if (err)
-                res.status(500).send(`Cannot delete the good with _id: ${req.params.id}. Error: !${err}`);
-            else
-                res.status(200).send(`Item ${req.params.id} has successfully deleted`);
-        });
+    app.delete('/api/commodity/delete/:id', requireLogin, async (req, res, next) => {
+        try {
+            await Commodity.deleteOne({_id: req.params.id}).exec(function (err) {
+                if (err) {
+                    res.status(500).send(`Cannot delete the good with _id: ${req.params.id}. Error: !${err}`);
+                } else {
+                    res.status(200).send(`Item ${req.params.id} has successfully deleted`);
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
     });
+    app.get('/api/commodity', async (req, res, next) => {
+        try {
+            const defaultFields = ['_id', 'brand', 'title', 'description', 'price' , 'type', 'sex'];
+            const fields = req.query.fields ? req.query.fields : defaultFields;
+            await Commodity.find().limit(Number.parseInt(req.query.to)).select(fields).exec(function (err, comms) {
+                if (comms === null) {
+                    res.status(404).send(`Did not found ${err}`);
+                } else if (err) {
+                    res.status(500).send(err);
+                } else {
+                    res.status(200).send(comms);
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+
 };

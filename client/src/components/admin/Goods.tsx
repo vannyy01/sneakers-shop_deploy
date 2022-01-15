@@ -9,7 +9,7 @@ import {ShoeInterface} from "../../actions/types";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
-    fetchGoods: (to: number) => void
+    fetchGoods: (to: number, fields?: string[]) => void
 }
 
 interface HeadCell {
@@ -36,12 +36,6 @@ class Goods extends React.Component<PropsInterface, any> {
 
     public render() {
         if (this.props.goods.length > 0 && Array.isArray(this.props.goods)) {
-            for (const item of this.props.goods) {
-                delete item.images;
-                delete item.mainImage;
-                delete item.sizes;
-            }
-            console.log(this.props.goods);
             return (
                 <React.Fragment>
                         <GridView idField="_id" createLocationPath='/admin/goods/create' editRoute='/admin/goods/edit' data={this.props.goods} headCells={headCells}

@@ -29,7 +29,8 @@
     "passport-google-oauth": "^2.0.0",
     "passport-google-oauth20": "^2.0.0",
     "react-async-hook": "^3.6.2",
-    "use-constant": "^1.0.0"
+    "use-constant": "^1.0.0",
+    "multer": "^1.4.4"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",
