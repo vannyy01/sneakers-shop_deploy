@@ -3,8 +3,14 @@ import UploadService from "../../actions/upload-files.service";
 import LinearProgress from '@material-ui/core/LinearProgress';
 import {Box, Typography, Button, ListItem, withStyles} from '@material-ui/core';
 
-function Image({id,name}:{id: string, name: string}){
-    const imgSrc = require('../../../public/resources/commodities/' + id + '/' + name);
+function Image({id, name}: { id: string, name: string }) {
+    let imgSrc;
+    console.log(process.env.NODE_ENV);
+    if (process.env.NODE_ENV === 'production'){
+        imgSrc = `../../../resources/commodities/${id}/${name}`;
+    } else {
+        imgSrc = require(`../../../public/resources/commodities/${id}/${name}`);
+    }
     return (
         <img src={imgSrc} alt={name} style={{height: "120px"}}
              className="mr20"/>
@@ -52,11 +58,9 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
     public async componentDidMount() {
         try {
             const uploadFiles = await UploadService.getFiles(this.props.commID);
-            console.log(uploadFiles.data[0]);
             const imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
                     {url: item.url, name: item.name}
-                ))
-            ;
+                ));
             this.setState({
                 imageInfos
             });
@@ -138,8 +142,6 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
                             divider={true}
                             key={index}>
                             <Image id={this.props.commID} name={image.name}/>
-                            {/*<img src={this.getImageUrl(image.name)} alt={image.name} style={{height: "80px"}}*/}
-                            {/*     className="mr20"/>*/}
                             <a href={image.url}>{image.name}</a>
                         </ListItem>
                     ))}

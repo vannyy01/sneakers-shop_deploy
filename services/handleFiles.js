@@ -1,9 +1,12 @@
 const fs = require("fs/promises");
 const uploadFile = require("../middlewares/upload");
-const relativePath = "/commodities";
-const directoryPath = __basedir + "/client/public/resources/commodities";
+const relativePath = "/resources/commodities";
+const envPath = process.env.__ENV__ === 'production' ? "/client/build/resources/commodities"
+    : "/client/public/resources/commodities";
+const directoryPath = __basedir + envPath;
 
 const upload = async (req, res, next) => {
+    console.log(process.env.__ENV__);
     try {
         await uploadFile(req, res);
         if (req.file === undefined) {
