@@ -1,5 +1,5 @@
 import {
-    CREATE_GOOD, CreateGoodAction, DELETE_GOOD, DeleteGoodAction,
+    CREATE_GOOD, CreateGoodAction, DELETE_GOOD, DELETE_MANY_GOODS, DeleteGoodAction, DeleteManyGoodsAction,
     FETCH_GOOD,
     FETCH_GOODS,
     FetchGoodAction,
@@ -9,7 +9,7 @@ import {
     UpdateGoodAction
 } from "../actions/types";
 
-type AuthAction =  FetchGoodAction | FetchGoodsAction | UpdateGoodAction | CreateGoodAction | DeleteGoodAction;
+type AuthAction =  FetchGoodAction | FetchGoodsAction | UpdateGoodAction | CreateGoodAction | DeleteGoodAction | DeleteManyGoodsAction;
 type StateType = ShoeInterface[] | [];
 
 export const goodsReducer = (state: StateType = [], action: AuthAction) => {
@@ -27,6 +27,8 @@ export const goodsReducer = (state: StateType = [], action: AuthAction) => {
         case CREATE_GOOD:
             return  [];
         case DELETE_GOOD:
+            return [];
+        case DELETE_MANY_GOODS:
             return [];
         default:
             return state;

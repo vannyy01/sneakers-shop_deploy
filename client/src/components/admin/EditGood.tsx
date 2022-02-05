@@ -121,7 +121,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
         this.setState({good: this.props.good})
     }
 
-    public componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StateType>, snapshot?: any): void {
+    public componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StateType>): void {
         if (JSON.stringify(prevProps.good) !== JSON.stringify(this.props.good)) {
             this.setState({good: this.props.good})
         }
@@ -129,7 +129,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
 
     public render() {
         if (this.state.good?._id) {
-            const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
+            const {title, brand, description, mainImage, type, sex, price} = this.state.good;
             return <Paper className={this.props.classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
                     Товар
@@ -187,35 +187,21 @@ class AddressForm extends React.Component<PropsType, StateType> {
                             <Grid item={true} xs={12}>
                                 <TextField
                                     required={true}
+                                    disabled={true}
                                     id="mainImage"
                                     name="mainImage"
-                                    label="Заставка"
+                                    label="Заставка. Оберіть одне із зображень нижче"
                                     multiline={true}
                                     fullWidth={true}
                                     autoComplete="mainImage-name"
                                     value={mainImage}
-                                    onChange={event => this.handleChange(event, 'mainImage')}
                                     helperText={this.state.formErrors.mainImage}
                                     error={this.state.formErrors.mainImage.length > 0}
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>
-                                <UploadImages commID={this.props.match.params.commID}/>
-                            </Grid>
-                            <Grid item={true} xs={12}>
-                                <TextField
-                                    required={true}
-                                    id="images"
-                                    name="images"
-                                    label="Вводити через ','"
-                                    fullWidth={true}
-                                    multiline={true}
-                                    autoComplete="mainImage-name"
-                                    value={images}
-                                    onChange={event => this.handleChange(event, 'images')}
-                                    helperText={this.state.formErrors.images}
-                                    error={this.state.formErrors.images.length > 0}
-                                />
+                                <UploadImages commID={this.props.match.params.commID} mainImage={mainImage}
+                                              setMainImage={this.setMainImage}/>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
                                 <TextField
@@ -375,13 +361,6 @@ class AddressForm extends React.Component<PropsType, StateType> {
         const newState: ShoeInterface = this.state.good;
 
         const {name, value} = event.target;
-        if (label === "images") {
-            newState[label] = value.split(",");
-            this.setState({good: newState}, () => {
-                this.validateField(name, newState[label]);
-            });
-            return;
-        }
         if (label === "price") {
             newState[label] = value !== '' ? Number.parseInt(value) : 0;
             this.setState({good: newState}, () => {
@@ -550,10 +529,16 @@ class AddressForm extends React.Component<PropsType, StateType> {
         this.setState({showDeleteDialog: true});
     };
 
-    protected handleDelete(): void {
+    protected handleDelete = (): void => {
         this.props.deleteGood(this.state.good._id,
             () => this.props.history.push('/admin/goods'));
 
+    }
+
+    protected setMainImage = (mainImage: string): void => {
+        const newState: ShoeInterface = this.state.good;
+        newState.mainImage = mainImage;
+        this.setState({good: newState});
     }
 
 }

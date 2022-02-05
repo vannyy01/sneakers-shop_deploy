@@ -94,7 +94,9 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
         this.setState(state => ({showCart: !state.showCart}))
     };
     protected handleShowModal = (): void => {
-        if (this.state.showModal) {document.title = 'Sneakers-shop';}
+        if (this.state.showModal) {
+            document.title = 'Sneakers-shop';
+        }
         this.setState(state => ({showModal: !state.showModal}))
     };
 }

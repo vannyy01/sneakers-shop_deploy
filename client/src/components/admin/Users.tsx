@@ -34,6 +34,8 @@ class Users extends React.Component<PropsInterface, any> {
     public render() {
         if (this.props.users.length > 0) {
             return <GridView idField="_id" createLocationPath='/admin/users/create' editRoute='/admin/users/edit' data={this.props.users}
+                             deleteMessage={"Ви справді хочете видалити виділених користувачів?"}
+                             deleteButtons={["Скасувати", "Видалити"]}
                              headCells={headCells} title="Користувачі"/>
         }
         return <div>Loading...</div>

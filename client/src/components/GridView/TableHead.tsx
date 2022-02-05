@@ -39,7 +39,7 @@ class EnhancedTableHead extends React.Component<EnhancedTableHeadPropsI, any> {
                         return (
                             <TableCell
                                 key={row.id}
-                                padding={row.disablePadding ? 'none' : 'default'}
+                                padding={row.disablePadding ? 'none' : 'normal'}
                                 sortDirection={orderBy === row.id ? order : false}
                             >
                                 <Tooltip

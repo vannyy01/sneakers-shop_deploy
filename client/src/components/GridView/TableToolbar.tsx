@@ -12,6 +12,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Add from '@material-ui/icons/Add';
 import {NavLink} from "react-router-dom";
+import {connect} from "react-redux";
+import {deleteManyGoods} from "../../actions";
 
 const toolbarStyles = (theme: Theme) => createStyles({
     actions: {
@@ -47,23 +49,24 @@ interface EnhancedTableToolbarPropsI {
         root: string,
         title: string
     },
-    numSelected: number,
+    deleteItems: () => void,
+    selected: any[],
     title: string,
     location: string
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
-    const {numSelected, classes, title, location} = props;
+    const {selected, classes, title, location, deleteItems} = props;
     return (
         <Toolbar
             className={classNames(classes.root, {
-                [classes.highlight]: numSelected > 0,
+                [classes.highlight]: selected.length > 0,
             })}
         >
             <div className={classes.title}>
-                {numSelected > 0 ? (
+                {selected.length > 0 ? (
                     <Typography color="inherit" variant="subtitle2">
-                        {numSelected} selected
+                        {selected.length} selected
                     </Typography>
                 ) : (
                     <Typography variant="subtitle1" id="tableTitle">
@@ -73,9 +76,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
             </div>
             <div className={classes.spacer}/>
             <div className={classes.actions}>
-                {numSelected > 0 ? (
+                {selected.length > 0 ? (
                     <Tooltip title="Delete">
-                        <IconButton aria-label="Delete">
+                        <IconButton aria-label="Delete" onClick={deleteItems}>
                             <DeleteIcon/>
                         </IconButton>
                     </Tooltip>
@@ -84,8 +87,8 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
                         <Tooltip title="Створити новий запис">
                             <NavLink to={location}>
                                 <IconButton aria-label="Створити новий запис">
-                                <Add/>
-                            </IconButton>
+                                    <Add/>
+                                </IconButton>
                             </NavLink>
                         </Tooltip>
                         <Tooltip title="Filter list">
@@ -101,4 +104,4 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
 };
 
 
-export default withStyles(toolbarStyles)(EnhancedTableToolbar);
+export default connect(null, {deleteManyGoods})(withStyles(toolbarStyles)(EnhancedTableToolbar));

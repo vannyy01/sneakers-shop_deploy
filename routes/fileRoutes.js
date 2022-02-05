@@ -1,5 +1,5 @@
 const requireLogin = require('../middlewares/requireLogin');
-const {upload, download, getListFiles} = require("../services/handleFiles");
+const {upload, download, getListFiles, replaceTempDir} = require("../services/handleFiles");
 
 
 module.exports = (app) => {

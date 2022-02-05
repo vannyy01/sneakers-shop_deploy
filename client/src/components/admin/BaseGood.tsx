@@ -91,7 +91,6 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
             title: '',
             description: '',
             mainImage: '',
-            images: [''],
             type: '',
             sex: '',
             price: 0,
@@ -127,13 +126,6 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
     protected handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, label: keyof ShoeInterface) => {
         const newState: ShoeInterface = this.state.good;
         const {name, value} = event.target;
-        if (label === "images") {
-            newState[label] = value.split(",");
-            this.setState({good: newState}, () => {
-                this.validateField(name, newState[label]);
-            });
-            return;
-        }
         if (label === "price") {
             newState[label] = value !== '' ? Number.parseInt(value) : 0;
             this.setState({good: newState}, () => {
@@ -155,7 +147,7 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
             this.setState({showAlert: true});
             return;
         }
-        const {_id, title, description, mainImage, images, type, sex, price, brand} = this.state.good;
+        const {_id, title, description, mainImage, type, sex, price, brand} = this.state.good;
         const good = {
             _id,
             title: title.trim(),
@@ -163,7 +155,6 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
             description: description.trim(),
             price,
             mainImage: mainImage.trim(),
-            images,
             type: type.trim(),
             sex: sex.trim(),
         };

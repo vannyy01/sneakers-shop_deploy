@@ -1,19 +1,32 @@
 import * as React from 'react';
 import UploadService from "../../actions/upload-files.service";
 import LinearProgress from '@material-ui/core/LinearProgress';
-import {Box, Typography, Button, ListItem, withStyles} from '@material-ui/core';
+import {
+    Box,
+    Typography,
+    Button,
+    ImageList,
+    ImageListItem,
+    ImageListItemBar,
+    IconButton,
+    withStyles
+} from '@material-ui/core';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import createStyles from "@material-ui/core/styles/createStyles";
+import Star from "@material-ui/icons/Star";
 
-function Image({id, name}: { id: string, name: string }) {
-    let imgSrc;
-    console.log(process.env.NODE_ENV);
-    if (process.env.NODE_ENV === 'production'){
-        imgSrc = `../../../resources/commodities/${id}/${name}`;
-    } else {
-        imgSrc = require(`../../../public/resources/commodities/${id}/${name}`);
-    }
+function Image({name, url}: { name: string, url: string }) {
+    // let imgSrc;
+    // if (process.env.NODE_ENV === 'production') {
+    //     imgSrc = `../../../resources/commodities/${id}/${name}`;
+    // } else {
+    //     imgSrc = `/resources/commodities/${id}/${name}`;
+    // }
     return (
-        <img src={imgSrc} alt={name} style={{height: "120px"}}
-             className="mr20"/>
+        <a href={url} style={{cursor: "pointer"}}>
+            <img src={url} alt={name} style={{height: "320px", width: "300px"}}
+                 className="mr20"/>
+        </a>
     )
 }
 
@@ -28,39 +41,73 @@ const BorderLinearProgress = withStyles(() => ({
     bar: {
         borderRadius: 5,
         backgroundColor: '#1a90ff',
-    },
+    }
 }))(LinearProgress);
+
+const styles = () => createStyles({
+    imageList: {
+        width: 600,
+        height: 450,
+        transform: 'translateZ(0)',
+    },
+    titleBar: {
+        background:
+            'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
+            'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+    },
+    icon: {
+        color: 'white',
+    }
+});
 
 interface UploadImagesState {
     currentFile?: File,
     previewImage?: string,
     progress: number,
-    renderImage?: { name: string, url: string }
+    renderImage?: { name: string, url: string },
+    mainImage?: string,
+    imageInfos: Array<{ name: string, url: string }>,
     message: string,
     isError: boolean,
-    imageInfos: Array<{ name: string, url: string }>,
 }
 
-export default class UploadImages extends React.Component<{ commID: string }, UploadImagesState> {
-    constructor(props: { commID: string }) {
+interface UploadImageProps {
+    commID?: string,
+    mainImage?: string,
+    classes?: {
+        imageList: string,
+        titleBar: string,
+        icon: string,
+    },
+    setMainImage: (mainImage: string) => void,
+}
+
+class UploadImages extends React.Component<UploadImageProps, UploadImagesState> {
+    constructor(props: UploadImageProps) {
         super(props);
         this.state = {
             currentFile: undefined,
             previewImage: undefined,
             progress: 0,
             renderImage: undefined,
+            mainImage: undefined,
+            imageInfos: [],
             message: "",
             isError: false,
-            imageInfos: [],
         };
     }
 
     public async componentDidMount() {
         try {
+            let imageInfos;
+
             const uploadFiles = await UploadService.getFiles(this.props.commID);
-            const imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
-                    {url: item.url, name: item.name}
-                ));
+            imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
+                {url: item.url, name: item.name}
+            ));
+
+            this.setState({mainImage: this.props.mainImage});
+            imageInfos.sort(this.sortImageInfos);
             this.setState({
                 imageInfos
             });
@@ -69,16 +116,24 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
         }
     }
 
+    public componentDidUpdate(prevProps: Readonly<UploadImageProps>, prevState: Readonly<UploadImagesState>) {
+        if (this.state.mainImage !== prevState.mainImage) {
+            this.setState({imageInfos: this.state.imageInfos.sort(this.sortImageInfos)},
+                () => this.props.setMainImage(this.state.mainImage));
+        }
+    }
 
     public render() {
         const {
             currentFile,
             previewImage,
             progress,
-            message,
+            mainImage,
             imageInfos,
+            message,
             isError
         } = this.state;
+        const {classes} = this.props;
         return (
             <div className="mg20">
                 <label htmlFor="btn-upload">
@@ -93,7 +148,7 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
                         className="btn-choose"
                         variant="outlined"
                         component="span">
-                        Choose Image
+                        Виберіть зображення
                     </Button>
                 </label>
                 <div className="file-name">
@@ -106,7 +161,7 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
                     component="span"
                     disabled={!currentFile}
                     onClick={this.upload}>
-                    Upload
+                    Завантажити
                 </Button>
 
                 {currentFile && (
@@ -133,19 +188,32 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
                 )}
 
                 <Typography variant="h6" className="list-header">
-                    List of Images
+                    Зображення товару
                 </Typography>
-                <ul className="list-group">
+                <ImageList rowHeight={280} gap={1} className={classes.imageList}>
                     {imageInfos.length > 0 &&
-                    imageInfos.map((image: { name: string, url: string }, index: number) => (
-                        <ListItem
-                            divider={true}
-                            key={index}>
-                            <Image id={this.props.commID} name={image.name}/>
-                            <a href={image.url}>{image.name}</a>
-                        </ListItem>
-                    ))}
-                </ul>
+                        imageInfos.map((image: { name: string, url: string }) => (
+                            <ImageListItem key={image.name}>
+                                <Image name={image.name} url={image.url}/>
+                                <ImageListItemBar
+                                    title={image.name}
+                                    position="top"
+                                    actionIcon={
+                                        <IconButton aria-label={`star ${image.name}`}
+                                                    onClick={event => this.pickMainImage(image.name)}>
+                                            {mainImage === image.name ?
+                                                <Star style={{color: '#FFDF00'}}/>
+                                                :
+                                                <StarBorderIcon className={classes.icon}/>
+                                            }
+                                        </IconButton>
+                                    }
+                                    actionPosition="left"
+                                    className={classes.titleBar}
+                                />
+                            </ImageListItem>
+                        ))}
+                </ImageList>
             </div>
         );
     }
@@ -166,6 +234,7 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
                 isError: false
             });
             const uploadFiles = await UploadService.getFiles(this.props.commID);
+            uploadFiles.data.sort(this.sortImageInfos);
             this.setState({
                 imageInfos: uploadFiles.data,
             });
@@ -188,4 +257,17 @@ export default class UploadImages extends React.Component<{ commID: string }, Up
         });
     }
 
+    private pickMainImage = (imageName: string): void => {
+        if (!this.state.mainImage || this.state.mainImage !== imageName) {
+            this.setState({mainImage: imageName});
+        } else {
+            this.setState({mainImage: undefined});
+        }
+
+    }
+
+    private sortImageInfos = (item: { name: string, url: string }) =>
+        (this.state.mainImage === item.name ? -1 : 1);
 }
+
+export default withStyles(styles)(UploadImages);

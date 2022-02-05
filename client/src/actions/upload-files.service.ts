@@ -24,6 +24,10 @@ class UploadFilesService {
     public async getFiles(commID: string): Promise<AxiosResponse> {
         return axios.get(`/api/files/${commID}`);
     }
+
+    // public async swapDir(goodBody: { brand: string, title: string, sex: string }) {
+    //     return await axios.post(`/api/files/swap`, goodBody);
+    // }
 }
 
 export default new UploadFilesService();

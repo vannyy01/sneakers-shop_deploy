@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Commodity = mongoose.model('commodities');
 const requireLogin = require('../middlewares/requireLogin');
+const {replaceTempDir} = require("../services/handleFiles");
+const _difference = require("lodash/difference");
 
 function hasJsonStructure(str) {
     if (typeof str !== 'string') return false;
@@ -24,8 +26,7 @@ module.exports = app => {
                 sex: req.body.sex
             });
             if (existingCommodity) {
-                res.status(445).json({message: "Commodity has already created."});
-                return;
+                return res.status(200).send({message: "Commodity has already created.", error: true});
             }
             req.body._id = undefined;
             req.body.sizes = [];
@@ -37,7 +38,16 @@ module.exports = app => {
                     res.status(200).send("Commodity successfully created.");
                 }
             });
+            const createdCommodity = await Commodity.findOne({
+                brand: req.body.brand,
+                title: req.body.title,
+                sex: req.body.sex
+            });
+            await replaceTempDir(createdCommodity, req.user.email);
         } catch (error) {
+            res.status(500).send({
+                message: `Error during creating. ${error}`
+            });
             next(error);
         }
     });
@@ -86,20 +96,35 @@ module.exports = app => {
             next(error);
         }
     });
+
+    app.delete('/api/commodity/delete_many', requireLogin, async (req, res, next) => {
+        let result = [];
+        try {
+            for (let id of req.query.items) {
+                await Commodity.deleteOne({_id: id});
+                result.push(id);
+            }
+            res.status(200).send(`Items: ${[...result]} has successfully deleted.`);
+        } catch (error) {
+            const nonDeletedGoods = _difference(req.query.items, result);
+            res.status(500).send(`Cannot delete the goods: ${[...nonDeletedGoods]}. Error: !${error}`);
+            next(error);
+        }
+    });
+
     app.get('/api/commodity', async (req, res, next) => {
         try {
-            const defaultFields = ['_id', 'brand', 'title', 'description', 'price' , 'type', 'sex'];
+            const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
             const fields = req.query.fields ? req.query.fields : defaultFields;
-            await Commodity.find().limit(Number.parseInt(req.query.to)).select(fields).exec(function (err, comms) {
-                if (comms === null) {
-                    res.status(404).send(`Did not found ${err}`);
-                } else if (err) {
-                    res.status(500).send(err);
-                } else {
-                    res.status(200).send(comms);
-                }
-            });
+            const goods = await Commodity.find().limit(Number.parseInt(req.query.to)).select(fields).exec();
+            if (goods !== null) {
+                res.status(200).send(goods);
+            } else {
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
+            }
         } catch (error) {
+            res.status(500).send(error);
             next(error);
         }
     });

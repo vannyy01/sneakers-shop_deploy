@@ -12,24 +12,12 @@ import TableRow from '@material-ui/core/TableRow';
 import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {NavLink} from "react-router-dom";
-
-/*
-interface DataInterface {
-    calories: number,
-    carbs: number,
-    fat: number,
-    id: number,
-    name: string,
-    protein: number
-}
-
-let counter = 0;
-
-function createData(name: string, calories: number, fat: number, carbs: number, protein: number): DataInterface {
-    counter += 1;
-    return {id: counter, name, calories, fat, carbs, protein};
-}
-*/
+import Dialog from "@material-ui/core/Dialog";
+import {PaperComponent} from "../admin/BaseGood";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -83,6 +71,9 @@ interface EnhancedTablePropsI {
     },
     createLocationPath?: string | '/',
     data: any,
+    deleteItems?: [(items: string[], onSuccessCallback: () => void) => void, () => void],
+    deleteMessage: string,
+    deleteButtons: [cancelButton: string, actionButton: string],
     headCells: any[],
     idField: string,
     editRoute?: string | '/',
@@ -96,6 +87,7 @@ interface EnhancedTableStateI {
     selected: string[],
     page: number,
     rowsPerPage: number,
+    showDialog: boolean,
 }
 
 class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI> {
@@ -106,18 +98,20 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
             order: 'asc',
             orderBy: 'calories',
             page: 0,
-            rowsPerPage: 5,
+            rowsPerPage: 10,
             selected: [],
+            showDialog: false
         };
     }
 
     public render() {
-        const {classes,createLocationPath, title} = this.props;
-        const {data, order, orderBy, selected, rowsPerPage, page} = this.state;
+        const {classes, createLocationPath, title, deleteMessage, deleteButtons} = this.props;
+        const {data, order, orderBy, selected, rowsPerPage, page, showDialog} = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
         return (
             <Paper className={classes.root}>
-                <EnhancedTableToolbar location={createLocationPath} title={title} numSelected={selected.length}/>
+                <EnhancedTableToolbar location={createLocationPath} title={title}
+                                      selected={selected} deleteItems={this.handleSave}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
                         <EnhancedTableHead
@@ -160,11 +154,11 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                         <TableCell key={cellCounter} id={labelId} component="th"
                                                                    scope="row" padding="none">
                                                             <NavLink style={{color: 'black'}}
-                                                                  to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
+                                                                     to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
                                                         </TableCell> :
                                                         <TableCell key={cellCounter}>
                                                             <NavLink style={{color: 'black'}}
-                                                                  to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
+                                                                     to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
                                                         </TableCell>
                                                 }
                                             )}
@@ -190,12 +184,37 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                     nextIconButtonProps={{
                         'aria-label': 'Next Page',
                     }}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                    onPageChange={this.handleChangePage}
+                    onRowsPerPageChange={this.handleChangeRowsPerPage}
                 />
+                <Dialog
+                    open={showDialog}
+                    onClose={this.handleSave}
+                    PaperComponent={PaperComponent}
+                    aria-labelledby="draggable-dialog-title"
+                >
+                    <DialogContent>
+                        <DialogContentText>
+                            {deleteMessage}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button autoFocus={true} name="cancel" onClick={this.handleSave}
+                                color="primary">
+                            {deleteButtons[0]}
+                        </Button>
+                        <Button name="save" onClick={this.handleDeleteManyItems} color="primary">
+                            {deleteButtons[1]}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Paper>
         );
     }
+
+    protected handleSave = (): void => {
+        this.setState({showDialog: !this.state.showDialog});
+    };
 
     protected handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
         const orderBy = property;
@@ -216,6 +235,10 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         this.setState({selected: []});
     };
 
+    protected handleDeleteManyItems = (): void => {
+        this.props.deleteItems[0](this.state.selected, this.props.deleteItems[1]);
+        this.setState({showDialog: false});
+    };
 
     protected handleClick = (event: React.MouseEvent<HTMLTableRowElement>, id: string): void => {
         const {selected} = this.state;

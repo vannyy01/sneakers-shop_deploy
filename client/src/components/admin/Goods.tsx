@@ -2,14 +2,15 @@ import * as React from 'react';
 
 import {connect} from "react-redux";
 
-import {fetchGoods} from "../../actions";
+import {deleteManyGoods, fetchGoods} from "../../actions";
 import GridView from '../GridView';
 
 import {ShoeInterface} from "../../actions/types";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
-    fetchGoods: (to: number, fields?: string[]) => void
+    fetchGoods: (to: number, fields?: string[]) => void,
+    deleteManyGoods: (goods: string[], onSuccessCallback: () => void) => void
 }
 
 interface HeadCell {
@@ -28,25 +29,42 @@ const headCells: HeadCell[] = [
     {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
 ];
 
-class Goods extends React.Component<PropsInterface, any> {
+class Goods extends React.Component<PropsInterface, { goodsCount: 5 | 10 | 25 | 50 }> {
+    constructor(props: PropsInterface) {
+        super(props);
+        this.state = {goodsCount: 25};
+    }
 
     public componentDidMount() {
-        this.props.fetchGoods(6);
+        this.props.fetchGoods(this.state.goodsCount);
     }
 
     public render() {
         if (this.props.goods.length > 0 && Array.isArray(this.props.goods)) {
             return (
                 <React.Fragment>
-                        <GridView idField="_id" createLocationPath='/admin/goods/create' editRoute='/admin/goods/edit' data={this.props.goods} headCells={headCells}
-                                  title="Товари"/>
+                    <GridView idField="_id"
+                              createLocationPath='/admin/goods/create'
+                              editRoute='/admin/goods/edit'
+                              data={this.props.goods}
+                              headCells={headCells}
+                              deleteMessage={"Ви справді хочете видалити виділенні товари?"}
+                              deleteButtons={["Скасувати", "Видалити"]}
+                              title="Товари"
+                              deleteItems={[this.props.deleteManyGoods, this.onDeleteCallback]}
+                    />
                 </React.Fragment>
             )
         }
         return <div>Loading...</div>
     }
+
+    protected onDeleteCallback = (): void => {
+        alert('Items are successfully deleted.');
+        this.props.fetchGoods(this.state.goodsCount);
+    };
 }
 
 const mapStateToProps = ({goods}: any) => ({goods});
 
-export default connect(mapStateToProps, {fetchGoods})(Goods);
+export default connect(mapStateToProps, {fetchGoods, deleteManyGoods})(Goods);

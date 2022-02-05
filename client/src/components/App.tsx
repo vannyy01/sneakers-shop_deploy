@@ -8,6 +8,7 @@ import Landing from './Main';
 
 import {fetchUser} from '../actions';
 
+import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -28,11 +29,11 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
     public componentDidMount() {
         document.title = 'Sneakers-shop';
         this.props.fetchUser();
-     //  this.setState({auth: !!this.props.auth});
+        //  this.setState({auth: !!this.props.auth});
     }
 
     public componentDidUpdate(prevProps: Readonly<AppPropsI>): void {
-        if(JSON.stringify(this.props.auth) !== JSON.stringify(prevProps.auth)) {
+        if (JSON.stringify(this.props.auth) !== JSON.stringify(prevProps.auth)) {
             this.setState({auth: !!this.props.auth});
         }
     }

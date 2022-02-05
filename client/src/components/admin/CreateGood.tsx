@@ -18,6 +18,7 @@ import {withStyles} from "@material-ui/core";
 import {createGood} from "../../actions";
 import {connect} from "react-redux";
 import {ShoeInterface} from "../../actions/types";
+import UploadImages from "./UploadImages";
 
 interface CreateGoodProps extends PropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -30,7 +31,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
     }
 
     public render() {
-        const {title, brand, description, mainImage, images, type, sex, price} = this.state.good;
+        const {title, brand, description, mainImage, type, sex, price} = this.state.good;
 
         return <Paper className={this.props.classes.paper}>
             <Typography component="h1" variant="h4" align="center">
@@ -89,32 +90,21 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                         <Grid item={true} xs={12}>
                             <TextField
                                 required={true}
+                                disabled={true}
                                 id="mainImage"
                                 name="mainImage"
-                                label="Заставка"
+                                label="Заставка. Оберіть одне із зображень нижче"
                                 multiline={true}
                                 fullWidth={true}
                                 autoComplete="mainImage-name"
                                 value={mainImage}
-                                onChange={event => this.handleChange(event, 'mainImage')}
                                 helperText={this.state.formErrors.mainImage}
                                 error={this.state.formErrors.mainImage.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
-                            <TextField
-                                required={true}
-                                id="images"
-                                name="images"
-                                label="Вводити через ','"
-                                fullWidth={true}
-                                multiline={true}
-                                autoComplete="mainImage-name"
-                                value={images}
-                                onChange={event => this.handleChange(event, 'images')}
-                                helperText={this.state.formErrors.images}
-                                error={this.state.formErrors.images.length > 0}
-                            />
+                            <UploadImages mainImage={mainImage}
+                                          setMainImage={this.setMainImage}/>
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
                             <TextField
@@ -219,11 +209,11 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                     aria-labelledby="draggable-dialog-title"
                 >
                     <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
-                        Оновити товар
+                        Створити товар
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Щоб оноваити товар, натисність "Зберегти зміни"
+                            Щоб створити товар, натисність "Створити товар"
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -232,7 +222,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                             Відміна
                         </Button>
                         <Button name="save" onClick={event => this.handleSave()} color="primary">
-                            Зберегти зміни
+                            Створити товар
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -245,14 +235,23 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
         </Paper>
     }
 
-    protected handleSave(): void {
+    protected handleSave = (): void => {
         this.props.createGood(this.state.good,
-            () => this.props.history.push('/admin/goods'));
+            () => {
+                this.props.history.push('/admin/goods');
+            });
     };
 
-    protected handleDelete(): void {
+    protected handleDelete = (): void => {
         this.setState(this.defaultState())
     }
+
+    protected setMainImage = (mainImage: string): void => {
+        const newState: ShoeInterface = this.state.good;
+        newState.mainImage = mainImage;
+        this.setState({good: newState});
+    }
+
 }
 
 export default connect(null, {createGood})(withStyles(GoodStyles)(CreateGood));

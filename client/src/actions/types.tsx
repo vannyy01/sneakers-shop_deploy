@@ -99,19 +99,24 @@ export interface DeleteGoodAction {
 }
 
 
+type DELETE_MANY_GOODS = 'DELETE_MANY_GOODS';
+export const DELETE_MANY_GOODS: DELETE_MANY_GOODS = 'DELETE_MANY_GOODS';
+
+export interface DeleteManyGoodsAction {
+    type: DELETE_MANY_GOODS,
+}
+
 export interface SizeInterface {
     sizeValue: number,
     count: number,
 }
 
 export interface ShoeInterface {
-
     description?: string,
     brand: string,
     price: number,
     _id: string,
     mainImage: string,
-    images?: string[],
     sizes?: [
         SizeInterface
         ],

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {
     ANSWER_POLL, CALC_POLL, CREATE_GOOD, CREATE_USER,
-    DELETE_CART_ITEM, DELETE_GOOD, DELETE_USER,
+    DELETE_CART_ITEM, DELETE_GOOD, DELETE_MANY_GOODS, DELETE_USER,
     FETCH_GOOD,
     FETCH_GOODS,
     FETCH_USER, FETCH_USER_BY_ID,
@@ -145,6 +145,9 @@ export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async 
 export const createGood = (good: ShoeInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.post(`/api/commodity/create`, good);
+        if(res.data.error) {
+            throw new Error(res.data.message);
+        }
         dispatch({type: CREATE_GOOD, payload: res.data});
         onSuccessCallback();
     } catch (error) {
@@ -171,7 +174,7 @@ export const updateGood = (good: ShoeInterface, onSuccessCallback: () => void) =
  * @param id
  * @param onSuccessCallback
  */
-export const deleteGood = (id: string, onSuccessCallback: () => void) => async (dispatch: any) => {
+export const deleteGood = (id: string, onSuccessCallback?: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.delete(`/api/commodity/delete/${id}`);
         dispatch({type: DELETE_GOOD, payload: res.data});
@@ -180,6 +183,17 @@ export const deleteGood = (id: string, onSuccessCallback: () => void) => async (
         alert(`Failed to delete good. ${error}`);
     }
 };
+
+export const deleteManyGoods = (goods: string[], onSuccessCallback?: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.delete(`/api/commodity/delete_many`, {params: {items: goods}});
+        dispatch({type: DELETE_MANY_GOODS, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to delete goods. ${error}`);
+    }
+};
+
 /**
  * @param item
  */
