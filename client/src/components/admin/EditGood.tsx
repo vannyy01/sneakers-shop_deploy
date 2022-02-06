@@ -174,7 +174,7 @@ class AddressForm extends React.Component<PropsType, StateType> {
                                     id="description"
                                     name="description"
                                     multiline={true}
-                                    rowsMax={4}
+                                    maxRows={4}
                                     label="Опис товару"
                                     fullWidth={true}
                                     autoComplete="description-name"

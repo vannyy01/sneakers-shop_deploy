@@ -30,24 +30,12 @@ module.exports = app => {
             }
             req.body._id = undefined;
             req.body.sizes = [];
-            const newCommodity = new Commodity(req.body);
-            await newCommodity.save(err => {
-                if (err) {
-                    res.status(500).send({message: `Cannot create the good. Error: !${err}`});
-                } else {
-                    res.status(200).send("Commodity successfully created.");
-                }
-            });
-            const createdCommodity = await Commodity.findOne({
-                brand: req.body.brand,
-                title: req.body.title,
-                sex: req.body.sex
-            });
+            let createdCommodity = new Commodity(req.body);
+            createdCommodity = await createdCommodity.save();
             await replaceTempDir(createdCommodity, req.user.email);
+            res.status(200).send("Commodity successfully created.");
         } catch (error) {
-            res.status(500).send({
-                message: `Error during creating. ${error}`
-            });
+            res.status(500).send({message: `Cannot create the good. Error: !${error}`});
             next(error);
         }
     });

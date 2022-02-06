@@ -105,13 +105,17 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
     }
 
     public render() {
-        const {classes, createLocationPath, title, deleteMessage, deleteButtons} = this.props;
+        const {classes, headCells, createLocationPath, editRoute, title, deleteMessage, deleteButtons} = this.props;
         const {data, order, orderBy, selected, rowsPerPage, page, showDialog} = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
         return (
             <Paper className={classes.root}>
-                <EnhancedTableToolbar location={createLocationPath} title={title}
-                                      selected={selected} deleteItems={this.handleSave}/>
+                <EnhancedTableToolbar
+                    location={createLocationPath}
+                    title={title}
+                    selected={selected}
+                    deleteItems={this.handleSave}
+                />
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
                         <EnhancedTableHead
@@ -120,15 +124,15 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                             orderBy={orderBy}
                             onSelectAllClick={this.handleSelectAllClick}
                             onRequestSort={this.handleRequestSort}
-                            rows={this.props.headCells}
+                            rows={headCells}
                             rowCount={data.length}
                         />
                         <TableBody>
-                            {stableSort(this.state.data, getComparator(order, orderBy))
+                            {stableSort(data, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((tableRow, index) => {
                                     const row = Object.assign({}, tableRow);
-                                    const rowId: string = row._id;
+                                    const rowId = row._id;
                                     const isItemSelected = this.isSelected(rowId);
                                     const labelId = `enhanced-table-checkbox-${index}`;
                                     let cellCounter = -1;
@@ -136,7 +140,7 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                     return (
                                         <TableRow
                                             hover={true}
-                                            onClick={(event) => this.handleClick(event, rowId)}
+                                            onClick={() => this.handleClick(rowId)}
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
@@ -154,11 +158,11 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                                                         <TableCell key={cellCounter} id={labelId} component="th"
                                                                    scope="row" padding="none">
                                                             <NavLink style={{color: 'black'}}
-                                                                     to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
+                                                                     to={`${editRoute}/${rowId}`}>{item}</NavLink>
                                                         </TableCell> :
                                                         <TableCell key={cellCounter}>
                                                             <NavLink style={{color: 'black'}}
-                                                                     to={`${this.props.editRoute}\\${rowId}`}>{item}</NavLink>
+                                                                     to={`${editRoute}/${rowId}`}>{item}</NavLink>
                                                         </TableCell>
                                                 }
                                             )}
@@ -240,7 +244,7 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
         this.setState({showDialog: false});
     };
 
-    protected handleClick = (event: React.MouseEvent<HTMLTableRowElement>, id: string): void => {
+    protected handleClick = (id: string): void => {
         const {selected} = this.state;
         const selectedIndex = this.state.selected.indexOf(id);
         let newSelected: any = [];

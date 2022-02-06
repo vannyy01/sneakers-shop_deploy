@@ -65,7 +65,6 @@ const getListFiles = async (req, res, next) => {
         const userDir = `temp-${req.user.email}`;
         const nonExistedDir = `${directoryPath}/${userDir}`;
         let files = req.params.id === "undefined" ? [] : await fs.readdir(`${directoryPath}/${req.params.id}`);
-        console.log(files);
         if (files.length === 0) {
             const isDirExisted = await dirExists(nonExistedDir);
             if (!isDirExisted) {
