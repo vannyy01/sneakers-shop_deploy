@@ -14,6 +14,12 @@ import {
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import createStyles from "@material-ui/core/styles/createStyles";
 import Star from "@material-ui/icons/Star";
+import {DeleteOutline} from "@material-ui/icons";
+import Dialog from "@material-ui/core/Dialog";
+import {PaperComponent} from "./BaseGood";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
 
 function Image({name, url}: { name: string, url: string }) {
     // let imgSrc;
@@ -66,9 +72,11 @@ interface UploadImagesState {
     progress: number,
     renderImage?: { name: string, url: string },
     mainImage?: string,
+    delImageName?: string,
     imageInfos: Array<{ name: string, url: string }>,
     message: string,
     isError: boolean,
+    showDialog: boolean,
 }
 
 interface UploadImageProps {
@@ -94,26 +102,12 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
             imageInfos: [],
             message: "",
             isError: false,
+            showDialog: false,
         };
     }
 
     public async componentDidMount() {
-        try {
-            let imageInfos;
-
-            const uploadFiles = await UploadService.getFiles(this.props.commID);
-            imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
-                {url: item.url, name: item.name}
-            ));
-
-            this.setState({mainImage: this.props.mainImage});
-            imageInfos.sort(this.sortImageInfos);
-            this.setState({
-                imageInfos
-            });
-        } catch (error) {
-            console.log(error);
-        }
+        await this.loadImages();
     }
 
     public componentDidUpdate(prevProps: Readonly<UploadImageProps>, prevState: Readonly<UploadImagesState>) {
@@ -199,14 +193,19 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
                                     title={image.name}
                                     position="top"
                                     actionIcon={
-                                        <IconButton aria-label={`star ${image.name}`}
-                                                    onClick={event => this.pickMainImage(image.name)}>
-                                            {mainImage === image.name ?
-                                                <Star style={{color: '#FFDF00'}}/>
-                                                :
-                                                <StarBorderIcon className={classes.icon}/>
-                                            }
-                                        </IconButton>
+                                        <div style={{display: 'flex'}}>
+                                            <IconButton aria-label={`star ${image.name}`}
+                                                        onClick={() => this.pickMainImage(image.name)}>
+                                                {mainImage === image.name ?
+                                                    <Star style={{color: '#FFDF00'}}/>
+                                                    :
+                                                    <StarBorderIcon className={classes.icon}/>
+                                                }
+                                            </IconButton>
+                                            <IconButton onClick={() => this.showDeleteDialog(image.name)}>
+                                                <DeleteOutline className={classes.icon}/>
+                                            </IconButton>
+                                        </div>
                                     }
                                     actionPosition="left"
                                     className={classes.titleBar}
@@ -214,9 +213,49 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
                             </ImageListItem>
                         ))}
                 </ImageList>
+                <Dialog
+                    open={this.state.showDialog}
+                    onClose={this.showDeleteDialog}
+                    PaperComponent={PaperComponent}
+                    aria-labelledby="draggable-dialog-title"
+                >
+                    <DialogContent>
+                        <DialogContentText>
+                            Ви справді бажаєте видалити зображення?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button autoFocus={true} name="cancel" onClick={() => this.showDeleteDialog()}
+                                color="primary">
+                            Скасувати
+                        </Button>
+                        <Button name="delete" onClick={this.handleDeleteImage} color="primary">
+                            Видалити
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
+
+    private loadImages = async (): Promise<void> => {
+        try {
+            let imageInfos;
+
+            const uploadFiles = await UploadService.getFiles(this.props.commID);
+            imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
+                {url: item.url, name: item.name}
+            ));
+
+            this.setState({mainImage: this.props.mainImage});
+            imageInfos.sort(this.sortImageInfos);
+            this.setState({
+                imageInfos
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     private upload = async () => {
         this.setState({
@@ -228,7 +267,7 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
                 this.setState({
                     progress: Math.round((100 * event.loaded) / event.total),
                 });
-            })
+            });
             this.setState({
                 message: uploadResponse.data.message,
                 isError: false
@@ -263,8 +302,24 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
         } else {
             this.setState({mainImage: undefined});
         }
-
     }
+
+    private handleDeleteImage = async (): Promise<void> => {
+        try {
+            await UploadService.deleteFile(this.state.delImageName, this.props.commID);
+            await this.loadImages();
+            this.showDeleteDialog();
+        } catch (error) {
+            alert(`Не вдалося видалити зображення ${this.state.delImageName}. ${error}`);
+        }
+    };
+
+    private showDeleteDialog = (imageName?: string): void => {
+        if (imageName) {
+            this.setState({showDialog: !this.state.showDialog, delImageName: imageName});
+        }
+        this.setState({showDialog: !this.state.showDialog});
+    };
 
     private sortImageInfos = (item: { name: string, url: string }) =>
         (this.state.mainImage === item.name ? -1 : 1);

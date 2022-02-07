@@ -100,6 +100,26 @@ const getListFiles = async (req, res, next) => {
     }
 };
 
+const deleteFile = async (req, res, next) => {
+    try {
+        const {name, id} = req.query;
+        const filePath = id ? `${directoryPath}/${id}` : `${directoryPath}/temp-${req.user.email}`;
+        await fs.rm(`${filePath}/${name}`);
+        res.status(200).send({
+            message: `File ${name} in the directory ${directoryPath}/${id} has been successfully deleted.`
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: `Unable to delete file! ${error}`,
+        });
+        next(error);
+    }
+};
+
+const deleteFilesDir = async (id) => {
+    await fs.rmdir(`${directoryPath}/${id}`, {recursive: true});
+};
+
 const download = (req, res) => {
     const fileName = req.params.name;
 
@@ -117,4 +137,6 @@ module.exports = {
     replaceTempDir,
     getListFiles,
     download,
+    deleteFile,
+    deleteFilesDir
 };

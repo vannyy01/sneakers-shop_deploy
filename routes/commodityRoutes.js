@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Commodity = mongoose.model('commodities');
 const requireLogin = require('../middlewares/requireLogin');
-const {replaceTempDir} = require("../services/handleFiles");
+const {replaceTempDir, deleteFilesDir} = require("../services/handleFiles");
 const _difference = require("lodash/difference");
 
 function hasJsonStructure(str) {
@@ -71,16 +71,13 @@ module.exports = app => {
         }
     });
 
-    app.delete('/api/commodity/delete/:id', requireLogin, async (req, res, next) => {
+    app.delete('/api/commodity/delete', requireLogin, async (req, res, next) => {
         try {
-            await Commodity.deleteOne({_id: req.params.id}).exec(function (err) {
-                if (err) {
-                    res.status(500).send(`Cannot delete the good with _id: ${req.params.id}. Error: !${err}`);
-                } else {
-                    res.status(200).send(`Item ${req.params.id} has successfully deleted`);
-                }
-            });
+            await Commodity.deleteOne({_id: req.params.id}).exec();
+            await deleteFilesDir(req.params.id);
+            res.status(200).send(`Item ${req.params.id} has successfully deleted`);
         } catch (error) {
+            res.status(500).send(`Cannot delete the good with _id: ${req.params.id}. Error: !${error}`);
             next(error);
         }
     });

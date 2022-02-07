@@ -177,7 +177,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 style={{backgroundColor: "#1fbd3a", color: "#fff"}}
                                 startIcon={<ArrowBack/>}
                                 className={this.props.classes.button}
-                                onClick={event => this.handleComeBack()}
+                                onClick={this.handleComeBack}
                             >
                                 Повернутися назад
                             </Button>
@@ -195,7 +195,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 color="secondary"
                                 startIcon={<DeleteIcon/>}
                                 className={this.props.classes.button}
-                                onClick={event => this.handleDelete()}
+                                onClick={this.handleDelete}
                             >
                                 Видалити
                             </Button>
@@ -204,7 +204,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                 </form>
                 <Dialog
                     open={this.state.showDialog}
-                    onClose={event => this.handleClose("cancel")}
+                    onClose={() => this.handleClose("cancel")}
                     PaperComponent={PaperComponent}
                     aria-labelledby="draggable-dialog-title"
                 >
@@ -217,19 +217,19 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
+                        <Button autoFocus={true} name="cancel" onClick={() => this.handleClose("cancel")}
                                 color="primary">
                             Відміна
                         </Button>
-                        <Button name="save" onClick={event => this.handleSave()} color="primary">
+                        <Button name="save" onClick={() => this.handleSave()} color="primary">
                             Створити товар
                         </Button>
                     </DialogActions>
                 </Dialog>
                 <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={this.state.showAlert}
                           autoHideDuration={6000} className={this.props.classes.alert}
-                          onClose={event => this.handleClose("alert")}>
-                    <Alert onClose={event => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
+                          onClose={() => this.handleClose("alert")}>
+                    <Alert onClose={() => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
                 </Snackbar>
             </React.Fragment>
         </Paper>

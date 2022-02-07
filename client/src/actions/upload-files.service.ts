@@ -25,6 +25,10 @@ class UploadFilesService {
         return axios.get(`/api/files/${commID}`);
     }
 
+    public async deleteFile(imageName: string, commID: string): Promise<AxiosResponse> {
+        return axios.delete(`/api/files/delete`, {params: {name: imageName, id: commID}});
+    }
+
     // public async swapDir(goodBody: { brand: string, title: string, sex: string }) {
     //     return await axios.post(`/api/files/swap`, goodBody);
     // }

@@ -1,8 +1,0 @@
-{
-  "name": "resources_sneakers_shop",
-  "version": "0.1.0",
-  "bin": {
-    "resources_sneakers_shop": "./"
-  }
-
-}
