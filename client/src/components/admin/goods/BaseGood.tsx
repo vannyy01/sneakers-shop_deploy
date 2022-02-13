@@ -1,10 +1,11 @@
 import * as React from "react";
-import {ShoeInterface} from "../../actions/types";
+import {ShoeInterface, SizeInterface} from "../../../actions/types";
 import {RouteComponentProps} from "react-router-dom";
 import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
 import Paper, {PaperProps} from "@material-ui/core/Paper";
 import Draggable from "react-draggable";
 import {createStyles, Theme} from "@material-ui/core";
+import {validateNumberInput} from "../../../actions/validation";
 
 export const sexes = [
     {
@@ -68,98 +69,94 @@ interface PathParams {
     commID: string
 }
 
-export interface PropsType extends RouteComponentProps<PathParams> {
+export interface BaseGoodPropsType extends RouteComponentProps<PathParams> {
     classes: { alert: string, button: string, paper: string },
 }
 
-export interface StateType {
+export interface BaseGoodStateType {
     showAlert: boolean,
     showDialog: boolean,
+    typing: boolean,
+    typingTimeout?: any,
     formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, sex: string, price: string },
     formValid: boolean
     good: ShoeInterface,
     isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, sexValid: boolean, priceValid: boolean },
 }
 
-abstract class BaseGood<P extends PropsType, S extends StateType> extends React.Component<P, S> {
+abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType> extends React.Component<P, S> {
 
-    protected defaultState = (): StateType => ({
-        showAlert: false,
-        showDialog: false,
-        good: {
-            _id: '',
-            title: '',
-            description: '',
-            mainImage: '',
-            type: '',
-            sex: '',
-            price: 0,
-            brand: ''
-        },
-        isValid: {
-            titleValid: true,
-            brandValid: true,
-            descriptionValid: true,
-            mainImageValid: true,
-            imagesValid: true,
-            typeValid: true,
-            sexValid: true,
-            priceValid: true
-        },
-        formErrors: {
-            title: '',
-            brand: '',
-            description: '',
-            mainImage: '',
-            images: '',
-            type: '',
-            sex: '',
-            price: ''
-        },
-        formValid: false,
-    });
+    protected static defaultState(): BaseGoodStateType {
+        return {
+            showAlert: false,
+            showDialog: false,
+            typing: false,
+            good: {
+                _id: '',
+                title: '',
+                description: '',
+                mainImage: '',
+                sizes: [],
+                type: '',
+                sex: '',
+                price: 0,
+                brand: ''
+            },
+            isValid: {
+                titleValid: true,
+                brandValid: true,
+                descriptionValid: true,
+                mainImageValid: true,
+                imagesValid: true,
+                typeValid: true,
+                sexValid: true,
+                priceValid: true
+            },
+            formErrors: {
+                title: '',
+                brand: '',
+                description: '',
+                mainImage: '',
+                images: '',
+                type: '',
+                sex: '',
+                price: ''
+            },
+            formValid: false,
+        }
+    };
 
     protected handleComeBack = (): void => {
         this.props.history.goBack();
     };
 
-    protected handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, label: keyof ShoeInterface) => {
+    protected handleAddChips = (chipArray: SizeInterface[]): void => {
         const newState: ShoeInterface = this.state.good;
-        const {name, value} = event.target;
-        if (label === "price") {
-            newState[label] = value !== '' ? Number.parseInt(value) : 0;
-            this.setState({good: newState}, () => {
-                this.validateField(name, newState[label]);
-            });
-            return;
-        }
-        if (label === "sizes") {
-            return;
-        }
-        newState[label] = value;
-        this.setState({good: newState}, () => {
-            this.validateField(name, newState[label]);
-        });
+        newState.sizes = chipArray;
+        this.setState({good: newState});
     };
+
     protected handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
         if (!this.state.formValid) {
             this.setState({showAlert: true});
             return;
         }
-        const {_id, title, description, mainImage, type, sex, price, brand} = this.state.good;
-        const good = {
+        const {_id, title, description, mainImage, type, sex, price, brand, sizes} = this.state.good;
+        const good: ShoeInterface = {
             _id,
             title: title.trim(),
             brand: brand.trim(),
             description: description.trim(),
             price,
             mainImage: mainImage.trim(),
+            sizes,
             type: type.trim(),
             sex: sex.trim(),
         };
         this.setState({showDialog: true, good});
     };
+
     protected handleClose = (name: "cancel" | "alert" | "save"): void => {
         switch (name) {
             case "cancel":
@@ -174,6 +171,7 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
                 break;
         }
     };
+
     protected validateField = (fieldName: string, value: any): void => {
         const fieldValidationErrors = this.state.formErrors;
         const {isValid} = this.state;
@@ -264,7 +262,7 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
                 isValid.imagesValid = true;
                 break;
             case 'price':
-                if (Number.parseInt(value) === 0 || value === '') {
+                if (+value === 0) {
                     fieldValidationErrors.price = 'ви ввели 0';
                     isValid.priceValid = false;
                     break;
@@ -294,6 +292,42 @@ abstract class BaseGood<P extends PropsType, S extends StateType> extends React.
             }
         }
         this.setState({formValid: isValid});
+    };
+
+    protected setMainImage = (mainImage: string): void => {
+        const newState: ShoeInterface = this.state.good;
+        newState.mainImage = mainImage;
+        this.setState({good: newState});
+    }
+
+    protected handleOnChange = ({
+                                    target: {name, value},
+                                }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+        const self = this;
+        if (self.state.typingTimeout) {
+            clearTimeout(self.state.typingTimeout);
+        }
+
+        const newState: ShoeInterface = this.state.good;
+        if (name === "price") {
+            newState[name] = validateNumberInput(value);
+        } else if (name !== "sizes") {
+            newState[name] = value;
+        }
+
+        console.log(name, name, name === name);
+
+        self.setState({
+            typing: false,
+            typingTimeout: setTimeout(() => {
+                    self.setState({
+                        good: newState
+                    }, () => {
+                        self.validateField(name, newState[name]);
+                    });
+                }
+                , 200)
+        });
     };
 
     protected abstract handleSave(): void;

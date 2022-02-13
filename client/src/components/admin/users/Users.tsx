@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import {connect} from "react-redux";
-import GridView from '../GridView/index';
+import GridView from '../../GridView';
 
-import {fetchUsers} from "../../actions";
-import {UserInterface} from "../../actions/types";
+import {fetchUsers} from "../../../actions";
+import {UserInterface} from "../../../actions/types";
 
 interface PropsInterface {
     users: UserInterface[],

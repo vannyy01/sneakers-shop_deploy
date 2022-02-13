@@ -31,3 +31,7 @@ export function removeStorage(name: string, item: string): void {
 export function validateEmail(mail: string): boolean {
     return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(mail);
 }
+
+export function validateNumberInput(value: string): number {
+    return +value >= 0 ? +value : 0;
+}

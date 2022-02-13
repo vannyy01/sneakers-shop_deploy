@@ -1,7 +1,7 @@
 import {RouteComponentProps} from "react-router-dom";
-import {UserInterface} from "../../actions/types";
+import {UserInterface} from "../../../actions/types";
 import * as React from "react";
-import {validateEmail} from "../../actions/validation";
+import {validateEmail} from "../../../actions/validation";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -10,7 +10,7 @@ import Button from "@material-ui/core/Button";
 import ArrowBack from "@material-ui/icons/ArrowBackIos";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Dialog from "@material-ui/core/Dialog";
-import {Alert, PaperComponent} from "./BaseGood";
+import {Alert, PaperComponent} from "../goods/BaseGood";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";

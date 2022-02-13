@@ -13,27 +13,37 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Snackbar from "@material-ui/core/Snackbar";
 import Paper from "@material-ui/core/Paper";
 import MenuItem from "@material-ui/core/MenuItem";
-import BaseGood, {Alert, GoodStyles, PaperComponent, PropsType, StateType, sexes, types} from "./BaseGood";
+import BaseGood, {
+    Alert,
+    GoodStyles,
+    PaperComponent,
+    sexes,
+    types,
+    BaseGoodPropsType, BaseGoodStateType
+} from "./BaseGood";
 import {withStyles} from "@material-ui/core";
-import {createGood} from "../../actions";
+import {createGood} from "../../../actions";
 import {connect} from "react-redux";
-import {ShoeInterface} from "../../actions/types";
-import UploadImages from "./UploadImages";
+import {ShoeInterface} from "../../../actions/types";
+import UploadImages from "../UploadImages";
+import ChipManager from "./ChipManager";
 
-interface CreateGoodProps extends PropsType {
+interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
 }
 
-class CreateGood extends BaseGood<CreateGoodProps, StateType> {
+class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
     constructor(props: CreateGoodProps) {
         super(props);
-        this.state = this.defaultState();
+        this.state = CreateGood.defaultState();
     }
 
     public render() {
-        const {title, brand, description, mainImage, type, sex, price} = this.state.good;
+        const {classes} = this.props;
+        const {title, brand, description, mainImage, type, sex, price, sizes} = this.state.good;
+        const {showAlert, showDialog, formErrors} = this.state;
 
-        return <Paper className={this.props.classes.paper}>
+        return <Paper className={classes.paper}>
             <Typography component="h1" variant="h4" align="center">
                 Товар
             </Typography>
@@ -41,7 +51,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                 <Typography variant="h6" gutterBottom={true}>
                     Створення
                 </Typography>
-                <form noValidate={true} onSubmit={event => this.handleSubmit(event)}>
+                <form noValidate={true} onSubmit={this.handleSubmit}>
                     <Grid container={true} spacing={3}>
                         <Grid item={true} xs={12} sm={6}>
                             <TextField
@@ -52,9 +62,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="title-name"
                                 value={title}
-                                onChange={event => this.handleChange(event, 'title')}
-                                helperText={this.state.formErrors.title}
-                                error={this.state.formErrors.title.length > 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.title}
+                                error={formErrors.title.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
@@ -66,9 +76,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="brand-name"
                                 value={brand}
-                                onChange={event => this.handleChange(event, 'brand')}
-                                helperText={this.state.formErrors.brand}
-                                error={this.state.formErrors.brand.length > 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.brand}
+                                error={formErrors.brand.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
@@ -82,9 +92,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="description-name"
                                 value={description}
-                                onChange={event => this.handleChange(event, 'description')}
-                                helperText={this.state.formErrors.description}
-                                error={this.state.formErrors.description.length > 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.description}
+                                error={formErrors.description.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
@@ -98,13 +108,16 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="mainImage-name"
                                 value={mainImage}
-                                helperText={this.state.formErrors.mainImage}
-                                error={this.state.formErrors.mainImage.length > 0}
+                                helperText={formErrors.mainImage}
+                                error={formErrors.mainImage.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
                             <UploadImages mainImage={mainImage}
                                           setMainImage={this.setMainImage}/>
+                        </Grid>
+                        <Grid item={true} xs={12}>
+                            <ChipManager label="Вкажіть розміри" sizes={sizes} setChips={this.handleAddChips}/>
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
                             <TextField
@@ -116,9 +129,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 autoComplete="type-name"
                                 select={true}
                                 value={type}
-                                onChange={event => this.handleChange(event, 'type')}
-                                helperText={this.state.formErrors.type}
-                                error={this.state.formErrors.type.length > 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.type}
+                                error={formErrors.type.length > 0}
                             >
                                 {types.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
@@ -131,9 +144,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                             <TextField required={true}
                                        id="sex" name="sex" label="Стать" fullWidth={true}
                                        autoComplete="sex-name" select={true} value={sex}
-                                       helperText={this.state.formErrors.sex}
-                                       error={this.state.formErrors.sex.length > 0}
-                                       onChange={event => this.handleChange(event, 'sex')}
+                                       helperText={formErrors.sex}
+                                       error={formErrors.sex.length > 0}
+                                       onChange={this.handleOnChange}
                             >
                                 {sexes.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
@@ -151,9 +164,9 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="shipping postal-code"
                                 value={price}
-                                onChange={event => this.handleChange(event, 'price')}
-                                helperText={this.state.formErrors.price}
-                                error={this.state.formErrors.price.length > 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.price}
+                                error={formErrors.price.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
@@ -166,8 +179,8 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 fullWidth={true}
                                 autoComplete="price_vat-name"
                                 value={(price * 1.2).toFixed(2)}
-                                helperText={this.state.formErrors.price}
-                                error={this.state.formErrors.price.length > 0}
+                                helperText={formErrors.price}
+                                error={formErrors.price.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
@@ -176,7 +189,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 color="inherit"
                                 style={{backgroundColor: "#1fbd3a", color: "#fff"}}
                                 startIcon={<ArrowBack/>}
-                                className={this.props.classes.button}
+                                className={classes.button}
                                 onClick={this.handleComeBack}
                             >
                                 Повернутися назад
@@ -186,7 +199,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 variant="contained"
                                 color="primary"
                                 startIcon={<DeleteIcon/>}
-                                className={this.props.classes.button}
+                                className={classes.button}
                             >
                                 Зберегти
                             </Button>
@@ -194,16 +207,16 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                                 variant="contained"
                                 color="secondary"
                                 startIcon={<DeleteIcon/>}
-                                className={this.props.classes.button}
+                                className={classes.button}
                                 onClick={this.handleDelete}
                             >
-                                Видалити
+                                Очистити
                             </Button>
                         </Grid>
                     </Grid>
                 </form>
                 <Dialog
-                    open={this.state.showDialog}
+                    open={showDialog}
                     onClose={() => this.handleClose("cancel")}
                     PaperComponent={PaperComponent}
                     aria-labelledby="draggable-dialog-title"
@@ -226,8 +239,8 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
                         </Button>
                     </DialogActions>
                 </Dialog>
-                <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={this.state.showAlert}
-                          autoHideDuration={6000} className={this.props.classes.alert}
+                <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={showAlert}
+                          autoHideDuration={6000} className={classes.alert}
                           onClose={() => this.handleClose("alert")}>
                     <Alert onClose={() => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
                 </Snackbar>
@@ -243,7 +256,7 @@ class CreateGood extends BaseGood<CreateGoodProps, StateType> {
     };
 
     protected handleDelete = (): void => {
-        this.setState(this.defaultState())
+        this.setState(CreateGood.defaultState())
     }
 
     protected setMainImage = (mainImage: string): void => {

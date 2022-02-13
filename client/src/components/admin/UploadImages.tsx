@@ -16,7 +16,7 @@ import createStyles from "@material-ui/core/styles/createStyles";
 import Star from "@material-ui/icons/Star";
 import {DeleteOutline} from "@material-ui/icons";
 import Dialog from "@material-ui/core/Dialog";
-import {PaperComponent} from "./BaseGood";
+import {PaperComponent} from "./goods/BaseGood";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";

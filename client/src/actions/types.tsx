@@ -112,16 +112,14 @@ export interface SizeInterface {
 }
 
 export interface ShoeInterface {
-    description?: string,
-    brand: string,
-    price: number,
     _id: string,
-    mainImage: string,
-    sizes?: [
-        SizeInterface
-        ],
-    type?: string,
     title: string,
+    brand: string,
+    description?: string,
+    mainImage: string,
+    price: number,
+    sizes?: SizeInterface[],
+    type?: string,
     sex?: string
 }
 

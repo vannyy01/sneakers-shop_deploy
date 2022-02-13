@@ -9,12 +9,12 @@ import {Theme, withStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {Route, Switch} from "react-router-dom";
 import Default from "./Default";
-import Edit from "./EditGood";
-import Goods from "./Goods";
-import Users from "./Users";
-import CreateGood from "./CreateGood";
-import CreateUser from "./CreateUser";
-import EditUser from "./EditUser";
+import Edit from "./goods/EditGood";
+import Goods from "./goods/Goods";
+import Users from "./users/Users";
+import CreateGood from "./goods/CreateGood";
+import CreateUser from "./users/CreateUser";
+import EditUser from "./users/EditUser";
 
 const drawerWidth = 250;
 

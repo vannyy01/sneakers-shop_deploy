@@ -2,11 +2,11 @@ import {BaseUser, PropsTypeUser, StateTypeUser} from "./BaseUser";
 import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 import Paper from "@material-ui/core/Paper";
-import {UserInterface} from "../../actions/types";
-import {GoodStyles as UserStyles} from "./BaseGood";
+import {UserInterface} from "../../../actions/types";
+import {GoodStyles as UserStyles} from "../goods/BaseGood";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/core";
-import {createUser} from "../../actions";
+import {createUser} from "../../../actions";
 
 interface CreateUserProps extends PropsTypeUser {
     createUser: (user: UserInterface, callback: () => void) => void;

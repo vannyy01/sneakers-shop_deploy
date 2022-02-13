@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import {connect} from "react-redux";
 
-import {deleteManyGoods, fetchGoods} from "../../actions";
-import GridView from '../GridView';
+import {deleteManyGoods, fetchGoods} from "../../../actions";
+import GridView from '../../GridView';
 
-import {ShoeInterface} from "../../actions/types";
+import {ShoeInterface} from "../../../actions/types";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],

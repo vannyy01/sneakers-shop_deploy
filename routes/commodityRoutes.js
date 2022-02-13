@@ -29,7 +29,6 @@ module.exports = app => {
                 return res.status(200).send({message: "Commodity has already created.", error: true});
             }
             req.body._id = undefined;
-            req.body.sizes = [];
             let createdCommodity = new Commodity(req.body);
             createdCommodity = await createdCommodity.save();
             await replaceTempDir(createdCommodity, req.user.email);
@@ -71,7 +70,7 @@ module.exports = app => {
         }
     });
 
-    app.delete('/api/commodity/delete', requireLogin, async (req, res, next) => {
+    app.delete('/api/commodity/delete/:id', requireLogin, async (req, res, next) => {
         try {
             await Commodity.deleteOne({_id: req.params.id}).exec();
             await deleteFilesDir(req.params.id);

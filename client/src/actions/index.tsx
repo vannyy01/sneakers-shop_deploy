@@ -144,6 +144,7 @@ export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async 
  */
 export const createGood = (good: ShoeInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
+        console.log(good);
         const res = await axios.post(`/api/commodity/create`, good);
         if(res.data.error) {
             throw new Error(res.data.message);

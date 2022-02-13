@@ -20,6 +20,7 @@ interface CardI {
 class Card extends React.Component <CardI> {
     public render() {
         const {animationProperties, headerText, Icon, styles, text} = this.props;
+        // @ts-ignore
         return (
             <div className="col-12 col-md-4">
                 <ReactCSSTransitionGroup
