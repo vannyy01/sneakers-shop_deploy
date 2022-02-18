@@ -1,14 +1,9 @@
 import * as React from "react";
-import * as ReactCSSTransitionGroup from "react-addons-css-transition-group";
 
 interface CardI {
-    animationProperties: {
-        enter: number,
-        exit: number,
-    },
     headerText: string,
     Icon: any,
-    showCard: boolean,
+    showCard?: boolean,
     styles:
         {
             headerStyle: object,
@@ -17,32 +12,18 @@ interface CardI {
     text: string
 }
 
-class Card extends React.Component <CardI> {
-    public render() {
-        const {animationProperties, headerText, Icon, styles, text} = this.props;
-        // @ts-ignore
-        return (
-            <div className="col-12 col-md-4">
-                <ReactCSSTransitionGroup
-                    transitionEnterTimeout={animationProperties.enter}
-                    transitionLeaveTimeout={animationProperties.exit}
-                    transitionName="message"
-                >
-                    {this.props.showCard ?
-                        (
-                            <div className="single-special text-center">
-                                <div className="single-icon">
-                                    <Icon style={styles.iconStyle}/>
-                                </div>
-                                <h4 style={styles.headerStyle}>{headerText}</h4>
-                                <p>{text}</p>
-                            </div>
-                        ) : null
-                    }
-                </ReactCSSTransitionGroup>
+const Card: React.FC<CardI> = ({headerText, Icon, styles, text}) => {
+    return (
+        <div className="col-12 col-md-4">
+            <div className="single-special text-center">
+                <div className="single-icon">
+                    <Icon style={styles.iconStyle}/>
+                </div>
+                <h4 style={styles.headerStyle}>{headerText}</h4>
+                <p>{text}</p>
             </div>
-        )
-    }
-}
+        </div>
+    )
+};
 
 export default Card;

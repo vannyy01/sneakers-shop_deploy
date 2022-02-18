@@ -12,6 +12,7 @@ import {ShoeInterface} from "../actions/types";
 import Shopping from '@material-ui/icons/ShoppingBasket';
 
 import './landing/landing.css';
+import {TransitionGroup, CSSTransition} from 'react-transition-group';
 
 
 const shoppingStyle = {
@@ -35,6 +36,30 @@ const animationProperties = {
     enter: 1200,
     exit: 1400
 };
+
+interface CardContent {
+    id: string,
+    headerText: string,
+    text: string
+}
+
+const cardsContent: CardContent[] = [
+    {
+        id: '1',
+        headerText: "Easy to use",
+        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
+    },
+    {
+        id: '2',
+        headerText: "Comfy",
+        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
+    },
+    {
+        id: '3',
+        headerText: "Customizable",
+        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
+    }
+];
 
 interface LandingStateI {
     expanded: boolean,
@@ -82,25 +107,16 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
                     <div className="container">
                         <div className="row">
                             <ParagraphHeader title="Чому ми?"/>
-                            <Card animationProperties={animationProperties} Icon={Shopping}
-                                  showCard={this.state.showCard}
-                                  styles={{headerStyle, iconStyle: shoppingStyle}}
-                                  headerText="Easy to use"
-                                  text="We build pretty complex tools and this allows us
-                        to take designs and turn them"/>
-                            <Card animationProperties={animationProperties} Icon={Shopping}
-                                  showCard={this.state.showCard}
-                                  styles={{headerStyle, iconStyle: shoppingStyle}}
-                                  headerText="Easy to use"
-                                  text="We build pretty complex tools and this allows us
-                        to take designs and turn them
-                        into functional quickly."/>
-                            <Card animationProperties={animationProperties} Icon={Shopping}
-                                  showCard={this.state.showCard}
-                                  styles={{headerStyle, iconStyle: shoppingStyle}}
-                                  headerText="Customizable"
-                                  text="We build pretty complex tools and this allows us to take designs and turn them
-                        into functional quickly."/>
+                            <TransitionGroup className="d-flex justify-content-around">
+                                {this.state.showCard && cardsContent.map(({id, headerText, text}) =>
+                                    <CSSTransition key={id} timeout={500} classNames="card">
+                                        <Card Icon={Shopping}
+                                              styles={{headerStyle, iconStyle: shoppingStyle}}
+                                              headerText={headerText}
+                                              text={text}/>
+                                    </CSSTransition>
+                                )}
+                            </TransitionGroup>
                         </div>
                     </div>
                 </section>
