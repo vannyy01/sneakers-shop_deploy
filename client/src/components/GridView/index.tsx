@@ -9,7 +9,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import {Theme, withStyles} from '@material-ui/core/styles';
+import {makeStyles, Theme} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {NavLink} from "react-router-dom";
 import Dialog from "@material-ui/core/Dialog";
@@ -18,6 +18,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
+import {useEffect, useState} from "react";
+import {TablePaginationActions} from "./TablePaginationActions";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -49,7 +51,7 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme: Theme) => createStyles({
     root: {
         marginTop: theme.spacing(3),
         width: '100%',
@@ -60,17 +62,17 @@ const styles = (theme: Theme) => createStyles({
     tableWrapper: {
         overflowX: 'auto',
     },
-});
+}));
 
 // For @data and @headCells used any type due to delegation typechecking to a client class
 interface EnhancedTablePropsI {
-    classes: {
-        root: string,
-        table: string,
-        tableWrapper: string
-    },
     createLocationPath?: string | '/',
+    rowsCount: number,
+    count: number,
     data: any,
+    fetchItems: (skip: number, limit: number, count: boolean) => void,
+    searchItems?: (condition: string, skip: number, limit: number, count: boolean) => void,
+    clearItems: () => void,
     deleteItems?: [(items: string[], onSuccessCallback: () => void) => void, () => void],
     deleteMessage: string,
     deleteButtons: [cancelButton: string, actionButton: string],
@@ -80,173 +82,105 @@ interface EnhancedTablePropsI {
     title: string
 }
 
-interface EnhancedTableStateI {
-    data: any[],
-    order: Order,
-    orderBy: string,
-    selected: string[],
-    page: number,
-    rowsPerPage: number,
-    showDialog: boolean,
-}
+const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
+                                                          headCells,
+                                                          createLocationPath,
+                                                          editRoute,
+                                                          rowsCount,
+                                                          count,
+                                                          data = [],
+                                                          title,
+                                                          deleteMessage,
+                                                          deleteButtons,
+                                                          deleteItems,
+                                                          fetchItems,
+                                                          searchItems,
+                                                          clearItems
+                                                      }) => {
 
-class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableStateI> {
-    constructor(props: EnhancedTablePropsI) {
-        super(props);
-        this.state = {
-            data: props.data,
-            order: 'asc',
-            orderBy: 'calories',
-            page: 0,
-            rowsPerPage: 10,
-            selected: [],
-            showDialog: false
-        };
-    }
+    const [rowsData, setRowsData] = useState<any[]>(data);
+    const [order, setOrder] = useState<Order>('asc');
+    const [orderBy, setOrderBy] = useState<string>('calories');
+    const [page, setPage] = useState<number>(0);
+    const [countItems, setCountItems] = useState<number>(count);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(rowsCount);
+    const [selected, setSelected] = useState<string[]>([]);
+    const [searchCondition, setSearchCondition] = useState<string>();
+    const [typingTimeout, setTypingTimeout] = useState<any>();
+    const [showDialog, setShowDialog] = useState<boolean>(false);
+    const [skip, setSkip] = useState<number>(0);
+    const [limit, setLimit] = useState<number>(rowsCount);
 
-    public render() {
-        const {classes, headCells, createLocationPath, editRoute, title, deleteMessage, deleteButtons} = this.props;
-        const {data, order, orderBy, selected, rowsPerPage, page, showDialog} = this.state;
-        const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
-        return (
-            <Paper className={classes.root}>
-                <EnhancedTableToolbar
-                    location={createLocationPath}
-                    title={title}
-                    selected={selected}
-                    deleteItems={this.handleSave}
-                />
-                <div className={classes.tableWrapper}>
-                    <Table className={classes.table} aria-labelledby="tableTitle">
-                        <EnhancedTableHead
-                            numSelected={selected.length}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={this.handleSelectAllClick}
-                            onRequestSort={this.handleRequestSort}
-                            rows={headCells}
-                            rowCount={data.length}
-                        />
-                        <TableBody>
-                            {stableSort(data, getComparator(order, orderBy))
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((tableRow, index) => {
-                                    const row = Object.assign({}, tableRow);
-                                    const rowId = row._id;
-                                    const isItemSelected = this.isSelected(rowId);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    let cellCounter = -1;
-                                    delete row._id;
-                                    return (
-                                        <TableRow
-                                            hover={true}
-                                            onClick={() => this.handleClick(rowId)}
-                                            role="checkbox"
-                                            aria-checked={isItemSelected}
-                                            tabIndex={-1}
-                                            key={rowId}
-                                            selected={isItemSelected}
-                                        >
-                                            <TableCell padding="checkbox">
-                                                <Checkbox checked={isItemSelected}
-                                                          inputProps={{'aria-labelledby': labelId}}
-                                                />
-                                            </TableCell>
-                                            {_.map(row, item => {
-                                                    cellCounter++;
-                                                    return cellCounter === 0 ?
-                                                        <TableCell key={cellCounter} id={labelId} component="th"
-                                                                   scope="row" padding="none">
-                                                            <NavLink style={{color: 'black'}}
-                                                                     to={`${editRoute}/${rowId}`}>{item}</NavLink>
-                                                        </TableCell> :
-                                                        <TableCell key={cellCounter}>
-                                                            <NavLink style={{color: 'black'}}
-                                                                     to={`${editRoute}/${rowId}`}>{item}</NavLink>
-                                                        </TableCell>
-                                                }
-                                            )}
-                                        </TableRow>
-                                    );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{height: 49 * emptyRows}}>
-                                    <TableCell colSpan={6}/>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-                <TablePagination
-                    component="div"
-                    count={data.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    backIconButtonProps={{
-                        'aria-label': 'Previous Page',
-                    }}
-                    nextIconButtonProps={{
-                        'aria-label': 'Next Page',
-                    }}
-                    onPageChange={this.handleChangePage}
-                    onRowsPerPageChange={this.handleChangeRowsPerPage}
-                />
-                <Dialog
-                    open={showDialog}
-                    onClose={this.handleSave}
-                    PaperComponent={PaperComponent}
-                    aria-labelledby="draggable-dialog-title"
-                >
-                    <DialogContent>
-                        <DialogContentText>
-                            {deleteMessage}
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button autoFocus={true} name="cancel" onClick={this.handleSave}
-                                color="primary">
-                            {deleteButtons[0]}
-                        </Button>
-                        <Button name="save" onClick={this.handleDeleteManyItems} color="primary">
-                            {deleteButtons[1]}
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </Paper>
-        );
-    }
+    // Firstly, request must be sent.
+    useEffect(() => {
+        if (data.length === 0) {
+            fetchItems(skip, limit, true);
+        }
+    }, []);
 
-    protected handleSave = (): void => {
-        this.setState({showDialog: !this.state.showDialog});
+    // Then data must be passed to the GridView.
+    useEffect(() => {
+        setRowsData(data);
+    }, [data]);
+
+    useEffect(() => {
+        setCountItems(count);
+    }, [count]);
+
+    useEffect(() => {
+        //  console.log('componentDidUpdate');
+        if (rowsData.length < countItems && searchCondition) {
+            searchItems(searchCondition, skip, limit, true);
+        } else if (rowsData.length < countItems && !searchCondition) {
+            fetchItems(skip, limit, true);
+        }
+    }, [skip, limit]);
+
+    useEffect(() => {
+        //  console.log('componentDidUpdate');
+        if (rowsData.length < countItems) {
+            setSkip(limit);
+            setLimit(rowsPerPage);
+        }
+    }, [rowsPerPage])
+
+    useEffect(() => {
+        return () => {
+            clearItems();
+        }
+    }, []);
+
+    const handleSave = (): void => {
+        setShowDialog(!showDialog);
     };
 
-    protected handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
-        const orderBy = property;
-        let order: 'asc' | 'desc' = 'desc';
+    const handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
+        const newOrderBy = property;
+        let newOrder: 'asc' | 'desc' = 'desc';
 
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
+        if (orderBy === property && order === 'desc') {
+            newOrder = 'asc';
         }
 
-        this.setState(() => ({order, orderBy}));
+        setOrder(newOrder);
+        setOrderBy(newOrderBy);
     };
 
-    protected handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
         if (event.target.checked) {
-            this.setState(state => ({selected: state.data.map(n => n._id)}));
+            setSelected(rowsData.map(n => n._id));
             return;
         }
-        this.setState({selected: []});
+        setSelected([]);
     };
 
-    protected handleDeleteManyItems = (): void => {
-        this.props.deleteItems[0](this.state.selected, this.props.deleteItems[1]);
-        this.setState({showDialog: false});
+    const handleDeleteManyItems = (): void => {
+        deleteItems[0](selected, deleteItems[1]);
+        setShowDialog(false);
     };
 
-    protected handleClick = (id: string): void => {
-        const {selected} = this.state;
-        const selectedIndex = this.state.selected.indexOf(id);
+    const handleClick = (id: string): void => {
+        const selectedIndex = selected.indexOf(id);
         let newSelected: any = [];
 
         if (selectedIndex === -1) {
@@ -261,22 +195,174 @@ class EnhancedTable extends React.Component<EnhancedTablePropsI, EnhancedTableSt
                 selected.slice(selectedIndex + 1),
             );
         }
-        this.setState({selected: newSelected});
+        setSelected(newSelected);
     };
 
-    protected handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, page: number) => {
-        this.setState(() => ({page}));
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, pageNumber: number) => {
+        if (event.currentTarget.name === "last_page") {
+            setSkip(limit);
+            setLimit(countItems - limit);
+        } else if (pageNumber > page) {
+            setSkip(rowsPerPage * pageNumber);
+        }
+        setPage(pageNumber);
     };
 
-    protected handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-        this.setState({
-            rowsPerPage: Number.parseInt(event.target.value)
-        });
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+        setRowsPerPage(+event.target.value);
     };
 
-    protected isSelected = (id: string): boolean => {
-        return this.state.selected.indexOf(id) !== -1;
+    const handleSearchItems = ({target: {value}}: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+
+        setTypingTimeout(setTimeout(() => {
+            const searchValue = value.trim();
+            const isNewSearch = searchValue !== searchCondition;
+            setSearchCondition(searchValue);
+            if (searchValue.length === 0) {
+                fetchItems(0, rowsPerPage, true);
+                setSkip(0);
+                setLimit(rowsPerPage);
+                setPage(0);
+            } else if (isNewSearch) {
+                searchItems(searchValue, 0, rowsPerPage, true);
+                setSkip(0);
+                setLimit(rowsPerPage);
+                setPage(0);
+            } else {
+                searchItems(searchValue, skip, limit, true);
+            }
+        }, 300));
+    };
+
+    const isSelected = (id: string): boolean => {
+        return selected.indexOf(id) !== -1;
     }
+
+    const classes = useStyles();
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rowsData.length - page * rowsPerPage);
+    return (
+        <Paper className={classes.root}>
+            <EnhancedTableToolbar
+                searchItems={handleSearchItems}
+                location={createLocationPath}
+                title={title}
+                selected={selected}
+                deleteItems={handleSave}
+            />
+            <div className={classes.tableWrapper}>
+                {rowsData && countItems !== undefined ? (
+                        (rowsData.length > 0 && countItems) ?
+                            <Table className={classes.table} aria-labelledby="tableTitle">
+                                <EnhancedTableHead
+                                    numSelected={selected.length}
+                                    order={order}
+                                    orderBy={orderBy}
+                                    onSelectAllClick={handleSelectAllClick}
+                                    onRequestSort={handleRequestSort}
+                                    rows={headCells}
+                                    rowCount={data.length}
+                                />
+                                <TableBody>
+                                    {stableSort(rowsData, getComparator(order, orderBy))
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map((tableRow, index) => {
+                                            const row = Object.assign({}, tableRow);
+                                            const rowId: any = row._id;
+                                            const isItemSelected = isSelected(rowId);
+                                            const labelId = `enhanced-table-checkbox-${index}`;
+                                            let cellCounter = -1;
+                                            delete row._id;
+                                            return (
+                                                <TableRow
+                                                    hover={true}
+                                                    onClick={() => handleClick(rowId)}
+                                                    role="checkbox"
+                                                    aria-checked={isItemSelected}
+                                                    tabIndex={-1}
+                                                    key={rowId}
+                                                    selected={isItemSelected}
+                                                >
+                                                    <TableCell padding="checkbox">
+                                                        <Checkbox checked={isItemSelected}
+                                                                  inputProps={{'aria-labelledby': labelId}}
+                                                        />
+                                                    </TableCell>
+                                                    {_.map(row, item => {
+                                                            cellCounter++;
+                                                            return cellCounter === 0 ?
+                                                                <TableCell key={cellCounter} id={labelId} component="th"
+                                                                           scope="row" padding="none">
+                                                                    <NavLink style={{color: 'black'}}
+                                                                             to={`${editRoute}/${rowId}`}>{item}</NavLink>
+                                                                </TableCell> :
+                                                                <TableCell key={cellCounter}>
+                                                                    <NavLink style={{color: 'black'}}
+                                                                             to={`${editRoute}/${rowId}`}>{item}</NavLink>
+                                                                </TableCell>
+                                                        }
+                                                    )}
+                                                </TableRow>
+                                            );
+                                        })}
+                                    {emptyRows > 0 && (
+                                        <TableRow style={{height: 49 * emptyRows}}>
+                                            <TableCell colSpan={6}/>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            :
+                            <div className="d-flex justify-content-center align-items-center">
+                                <h4>{title} не знайдено.</h4>
+                            </div>
+                    ) :
+                    <div className="d-flex justify-content-center align-items-center">
+                        <h4>Завантаження...</h4>
+                    </div>
+                }
+            </div>
+            <TablePagination
+                component="div"
+                count={countItems || 0}
+                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                backIconButtonProps={{
+                    'aria-label': 'Previous Page',
+                }}
+                nextIconButtonProps={{
+                    'aria-label': 'Next Page',
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+            />
+            <Dialog
+                open={showDialog}
+                onClose={handleSave}
+                PaperComponent={PaperComponent}
+                aria-labelledby="draggable-dialog-title"
+            >
+                <DialogContent>
+                    <DialogContentText>
+                        {deleteMessage}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button autoFocus={true} name="cancel" onClick={handleSave}
+                            color="primary">
+                        {deleteButtons[0]}
+                    </Button>
+                    <Button name="save" onClick={handleDeleteManyItems} color="primary">
+                        {deleteButtons[1]}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Paper>
+    );
 }
 
-export default withStyles(styles)(EnhancedTable);
+export default EnhancedTable;
