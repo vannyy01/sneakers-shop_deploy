@@ -22,7 +22,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 
-require('./routes/auttRoutes')(app);
+require('./routes/userRoutes')(app);
 require('./routes/orderRoutes')(app);
 require('./routes/commodityRoutes')(app);
 require('./routes/fileRoutes')(app);

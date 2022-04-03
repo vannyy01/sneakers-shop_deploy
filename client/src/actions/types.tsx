@@ -29,7 +29,7 @@ export const FETCH_USER_BY_ID: FETCH_USER_BY_ID = 'FETCH_USER_BY_ID';
 
 export interface FetchUserByIdAction {
     type: FETCH_USER_BY_ID,
-    payload: UserInterface
+    payload: {users: UserInterface}
 }
 
 type UPDATE_USER = 'UPDATE_USER';
@@ -45,15 +45,30 @@ export const DELETE_USER: DELETE_USER = 'DELETE_USER';
 
 export interface DeleteUserAction {
     type: DELETE_USER,
-    callback: () => void
 }
+
+type DELETE_MANY_USERS = 'DELETE_MANY_USERS';
+export const DELETE_MANY_USERS: DELETE_MANY_USERS = 'DELETE_MANY_USERS';
+
+export interface DeleteManyUsersAction {
+    type: DELETE_MANY_USERS,
+}
+
 
 type FETCH_USERS = 'FETCH_USERS';
 export const FETCH_USERS: FETCH_USERS = 'FETCH_USERS';
 
 export interface FetchUsersAction {
     type: FETCH_USERS,
-    payload: UserInterface[]
+    payload: {users: UserInterface[], count?: number}
+}
+
+
+type CLEAR_USERS = 'CLEAR_USERS';
+export const CLEAR_USERS: CLEAR_USERS = 'CLEAR_USERS';
+
+export interface ClearUsersAction {
+    type: CLEAR_USERS,
 }
 
 type FETCH_GOODS = 'FETCH_GOODS';
@@ -61,7 +76,24 @@ export const FETCH_GOODS: FETCH_GOODS = 'FETCH_GOODS';
 
 export interface FetchGoodsAction {
     type: FETCH_GOODS,
-    payload: UserInterface
+    payload: {goods: ShoeInterface[], count?: number}
+}
+
+type SEARCH_GOODS = 'SEARCH_GOODS';
+export const SEARCH_GOODS: SEARCH_GOODS = 'SEARCH_GOODS';
+
+export interface SearchGoodsAction {
+    type: SEARCH_GOODS,
+    payload: {goods: ShoeInterface[], count?: number}
+}
+
+
+type CLEAR_GOODS = 'CLEAR_GOODS';
+export const CLEAR_GOODS: CLEAR_GOODS = 'CLEAR_GOODS';
+
+export interface ClearGoodsAction {
+    type: CLEAR_GOODS,
+    payload: []
 }
 
 type CREATE_GOOD = 'CREATE_GOOD';
@@ -69,7 +101,6 @@ export const CREATE_GOOD: CREATE_GOOD = 'CREATE_GOOD';
 
 export interface CreateGoodAction {
     type: CREATE_GOOD,
-    payload: ShoeInterface
 }
 
 
@@ -78,7 +109,7 @@ export const FETCH_GOOD: FETCH_GOOD = 'FETCH_GOOD';
 
 export interface FetchGoodAction {
     type: FETCH_GOOD,
-    payload: ShoeInterface
+    payload: {goods: ShoeInterface}
 }
 
 type UPDATE_GOOD = 'UPDATE_GOOD';
@@ -86,7 +117,6 @@ export const UPDATE_GOOD: UPDATE_GOOD = 'UPDATE_GOOD';
 
 export interface UpdateGoodAction {
     type: UPDATE_GOOD,
-    payload: ShoeInterface,
     callback: () => void
 }
 

@@ -1,9 +1,11 @@
 const passport = require('passport');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
+const _difference = require("lodash/difference");
 const User = mongoose.model('users');
 
 module.exports = (app) => {
+
     app.get('/auth/google',
         passport.authenticate('google',
             {
@@ -17,10 +19,12 @@ module.exports = (app) => {
             res.redirect('/');
         }
     );
+
     app.get('/api/logout', (req, res) => {
         req.logout();
         res.redirect('/');
     });
+
     app.get('/api/current_user', (req, res) => {
         if (req.user) {
             res.send(req.user);
@@ -28,6 +32,7 @@ module.exports = (app) => {
             res.send('');
         }
     });
+
     app.get('/api/users/get/:id', requireLogin, async (req, res, next) => {
         try {
             await User.findById(req.params.id).exec(function (err, user) {
@@ -44,6 +49,7 @@ module.exports = (app) => {
             next(error);
         }
     });
+
     app.post('/api/user/create', requireLogin, async (req, res) => {
         //Google
         let existingUser;
@@ -84,23 +90,52 @@ module.exports = (app) => {
             }
         });
     });
-    app.get('/api/users', requireLogin, async (req, res) => {
-        await User.find().limit(10).select(['googleID', '__id', 'email', 'role', 'givenName', 'familyName']).exec(function (err, users) {
-            if (err) {
-                res.status(500).send('Cannot get the users list!');
+
+    app.get('/api/users', requireLogin, async (req, res, next) => {
+        try {
+            const defaultFields = ['googleID', '__id', 'email', 'role', 'givenName', 'familyName'];
+            const fields = req.query.fields ? req.query.fields : defaultFields;
+            let count;
+            const users = await User.find().skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            if (users !== null) {
+                if(req.query.count){
+                    count = await User.countDocuments();
+                    return res.status(200).send({users, count});
+                }
+                res.status(200).send({users});
             } else {
-                res.send(users);
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
             }
-        });
+        } catch (error) {
+            res.status(500).send(`Cannot get the users list! Error: ${error}`);
+            next(error);
+        }
     });
 
-    app.delete('/api/users/delete/:id', requireLogin, async (req, res) => {
-        await User.deleteOne({_id: req.params.id}).exec(function (err) {
-            if (err) {
-                res.status(404).send(`Cannot delete the user with _id: ${req.params.id}. Error: !${err}`);
-            } else {
-                res.status(200).send(`Item ${req.params.id} has successfully deleted`);
-            }
-        });
+    app.delete('/api/users/delete/:id', requireLogin, async (req, res, next) => {
+        try {
+            await User.deleteOne({_id: req.params.id}).exec();
+            res.status(200).send(`User ${req.params.id} has successfully deleted`);
+        } catch (error) {
+            res.status(500).send(`Cannot delete the user with _id: ${req.params.id}. Error: ${error}`);
+            next(error);
+        }
     });
+
+    app.delete('/api/users/delete_many', requireLogin, async (req, res, next) => {
+        let result = [];
+        try {
+            for (let id of req.query.users) {
+                await User.deleteOne({_id: req.params.id}).exec();
+                result.push(id);
+            }
+            res.status(200).send(`Users ${[...result]} has successfully deleted.`);
+        } catch (error) {
+            const nonDeletedGoods = _difference(req.query.users, result);
+            res.status(500).send(`Cannot delete the users with _id: ${[...nonDeletedGoods]}. Error: ${error}`);
+            next(error);
+        }
+    });
+
 };

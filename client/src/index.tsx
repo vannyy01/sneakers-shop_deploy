@@ -8,8 +8,8 @@ import reducers from './reducers';
 
 import {Provider} from 'react-redux';
 
-const store = createStore(reducers,
-    {}, applyMiddleware(reduxThunk));
+const store = createStore(reducers, applyMiddleware(reduxThunk));
+
 ReactDOM.render(<Provider store={store}><App/></Provider>,
     document.getElementById('root')
 );

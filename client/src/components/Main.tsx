@@ -6,7 +6,7 @@ import {connect} from "react-redux";
 import Header from './Header';
 import {Card, Goods, LoadCommodities, ParagraphHeader} from './landing';
 
-import {fetchGoods} from '../actions';
+import {fetchGoods, clearGoodsState} from '../actions';
 import {ShoeInterface} from "../actions/types";
 
 import Shopping from '@material-ui/icons/ShoppingBasket';
@@ -71,7 +71,8 @@ interface LandingStateI {
 
 interface LandingPropsI {
     goods?: ShoeInterface[],
-    fetchGoods: (to: number, fields?: string[]) => void
+    fetchGoods: (skip: number, limit: number, count?: boolean, fields?: string[]) => void,
+    clearGoodsState: () => void
 }
 
 class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
@@ -90,15 +91,17 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     }
 
     public componentDidMount() {
-        this.props.fetchGoods(this.state.goodsCount, this.state.fields);
+        this.props.fetchGoods(0, 3, false, this.state.fields);
         window.addEventListener('scroll', this.handleScroll);
     }
 
     public componentWillUnmount() {
+        this.props.clearGoodsState();
         window.removeEventListener('scroll', this.handleScroll);
     };
 
     public render() {
+        console.log(this.props.goods)
         return (
             <div ref={this.ScrollRef} onScroll={this.handleScroll}>
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
@@ -141,8 +144,8 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     };
 
     protected handleLoadClick = (): void => {
+        this.props.fetchGoods(this.state.goodsCount, 3, false, this.state.fields);
         this.setState((state) => ({expanded: true, goodsCount: state.goodsCount + 3}));
-        this.props.fetchGoods(this.state.goodsCount + 3, this.state.fields);
     }
 }
 
@@ -150,6 +153,6 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
  * @param {any} goods
  * @returns {{goods}}
  */
-const mapStateToProps = ({goods}: any) => ({goods});
+const mapStateToProps = ({goods:{goods}}: any) => ({goods});
 
-export default connect(mapStateToProps, {fetchGoods})(Main);
+export default connect(mapStateToProps, {fetchGoods, clearGoodsState})(Main);

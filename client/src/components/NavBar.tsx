@@ -64,9 +64,9 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
             <AppBar position="fixed" className={classes.root}>
                 <Toolbar>
                     <Typography variant="inherit" color="inherit" className={classes.flex}>
-                        <Link to='/' className={classes.aStyle}>
+                        <a href='/' className={classes.aStyle}>
                             Sneakers-shop
-                        </Link>
+                        </a>
                     </Typography>
                     <PollButton onClick={this.handleShowModal}/>
                     {modal}

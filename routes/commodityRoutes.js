@@ -100,9 +100,14 @@ module.exports = app => {
         try {
             const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
             const fields = req.query.fields ? req.query.fields : defaultFields;
-            const goods = await Commodity.find().limit(Number.parseInt(req.query.to)).select(fields).exec();
+            let count;
+            const goods = await Commodity.find().skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
             if (goods !== null) {
-                res.status(200).send(goods);
+                if (req.query.count) {
+                    count = await Commodity.countDocuments();
+                    return res.status(200).send({goods, count});
+                }
+                res.status(200).send({goods});
             } else {
                 res.status(404).send(`Did not found ${{...fields}}`);
                 next(new Error(`Nothing is found using: ${{...fields}}`));
@@ -112,5 +117,68 @@ module.exports = app => {
             next(error);
         }
     });
-
+    app.get('/api/commodity_search', async (req, res, next) => {
+        try {
+            const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
+            const fields = req.query.fields ? req.query.fields : defaultFields;
+            let count;
+            const goods = await Commodity.find().or([{
+                brand: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }, {
+                title: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }, {
+                type: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }, {
+                sex: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }]).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            if (goods !== null) {
+                if (req.query.count) {
+                    count = await Commodity.find().or([{
+                        brand: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }, {
+                        title: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }, {
+                        type: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }, {
+                        sex: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }]).countDocuments();
+                    if (count === 0) {
+                        return res.status(200).send({goods, count, goodsExists: false});
+                    }
+                    return res.status(200).send({goods, count});
+                }
+                res.status(200).send({goods});
+            } else {
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
+            }
+        } catch (error) {
+            res.status(500).send(error);
+            next(error);
+        }
+    });
 };
