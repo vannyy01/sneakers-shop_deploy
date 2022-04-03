@@ -1,12 +1,12 @@
 import axios from 'axios';
 import {
-    ANSWER_POLL, CALC_POLL, CLEAR_GOODS, CLEAR_USERS, CREATE_GOOD, CREATE_USER,
-    DELETE_CART_ITEM, DELETE_GOOD, DELETE_MANY_GOODS, DELETE_MANY_USERS, DELETE_USER,
+    ANSWER_POLL, CALC_POLL, CREATE_GOOD, CREATE_USER,
+    DELETE_CART_ITEM, DELETE_GOOD, DELETE_MANY_GOODS, DELETE_USER,
     FETCH_GOOD,
     FETCH_GOODS,
     FETCH_USER, FETCH_USER_BY_ID,
     FETCH_USERS,
-    GET_CART_ITEMS, SEARCH_GOODS,
+    GET_CART_ITEMS,
     SET_CART_ITEM,
     ShoeInterface, UPDATE_GOOD, UPDATE_USER, UserInterface
 }
@@ -67,28 +67,17 @@ export const fetchUserByID = (id: string, onErrorCallback: () => void) => async 
 };
 
 /**
- * @param skip
- * @param limit
- * @param count
- * @param fields
+ *
  */
-export const fetchUsers = (skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
+export const fetchUsers = () => async (dispatch: any) => {
     try {
-        const user = await axios.get('/api/users', {params: {skip, limit, count, fields}});
+        const user = await axios.get('/api/users');
         dispatch({type: FETCH_USERS, payload: user.data});
     } catch (error) {
         console.log('Unable to fetch list of users', error);
     }
 };
 
-export const clearUsersState = () => (dispatch: any) => {
-    dispatch({type: CLEAR_USERS});
-};
-
-/**
- * @param user
- * @param onSuccessCallback
- */
 export const updateUser = (user: UserInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.put(`/api/users/edit/${user._id}`, user);
@@ -99,14 +88,10 @@ export const updateUser = (user: UserInterface, onSuccessCallback: () => void) =
     }
 };
 
-/**
- * @param id
- * @param onSuccessCallback
- */
 export const deleteUser = (id: string, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
-        await axios.delete(`/api/users/delete/${id}`);
-        dispatch({type: DELETE_USER});
+        const res = await axios.delete(`/api/users/delete/${id}`);
+        dispatch({type: DELETE_USER, payload: res.data});
         onSuccessCallback();
     } catch (error) {
         alert(`Failed to delete user. ${error}`);
@@ -114,52 +99,16 @@ export const deleteUser = (id: string, onSuccessCallback: () => void) => async (
 };
 
 /**
- * @param users
- * @param onSuccessCallback
- */
-export const deleteManyUsers = (users: string[], onSuccessCallback: () => void) => async (dispatch: any) => {
-    try {
-        await axios.delete(`/api/users/delete_many`, {params: {users}});
-        dispatch({type: DELETE_MANY_USERS});
-        onSuccessCallback();
-    } catch (error) {
-        alert(`Failed to delete user. ${error}`);
-    }
-};
-
-/**
- * @param skip
- * @param limit
- * @param count
+ * @param to
  * @param fields
  */
-export const fetchGoods = (skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
+export const fetchGoods = (to: number, fields?: string[]) => async (dispatch: any) => {
     try {
-        const res = await axios.get(`/api/commodity`, {params: {skip, limit, count, fields}});
+        const res = await axios.get(`/api/commodity`, {params: {to, fields}});
         dispatch({type: FETCH_GOODS, payload: res.data});
     } catch (error) {
         console.log(error);
     }
-};
-
-/**
- * @param condition
- * @param skip
- * @param limit
- * @param count
- * @param fields
- */
-export const searchGoods = (condition: string, skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
-    try {
-        const res = await axios.get(`/api/commodity_search`, {params: {condition, skip, limit, count, fields}});
-        dispatch({type: SEARCH_GOODS, payload: res.data});
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-export const clearGoodsState = () => (dispatch: any) => {
-    dispatch({type: CLEAR_GOODS, payload: []});
 };
 
 /**
@@ -197,7 +146,7 @@ export const createGood = (good: ShoeInterface, onSuccessCallback: () => void) =
     try {
         console.log(good);
         const res = await axios.post(`/api/commodity/create`, good);
-        if (res.data.error) {
+        if(res.data.error) {
             throw new Error(res.data.message);
         }
         dispatch({type: CREATE_GOOD, payload: res.data});
@@ -228,8 +177,8 @@ export const updateGood = (good: ShoeInterface, onSuccessCallback: () => void) =
  */
 export const deleteGood = (id: string, onSuccessCallback?: () => void) => async (dispatch: any) => {
     try {
-        await axios.delete(`/api/commodity/delete/${id}`);
-        dispatch({type: DELETE_GOOD});
+        const res = await axios.delete(`/api/commodity/delete/${id}`);
+        dispatch({type: DELETE_GOOD, payload: res.data});
         onSuccessCallback();
     } catch (error) {
         alert(`Failed to delete good. ${error}`);
@@ -238,8 +187,8 @@ export const deleteGood = (id: string, onSuccessCallback?: () => void) => async 
 
 export const deleteManyGoods = (goods: string[], onSuccessCallback?: () => void) => async (dispatch: any) => {
     try {
-        await axios.delete(`/api/commodity/delete_many`, {params: {items: goods}});
-        dispatch({type: DELETE_MANY_GOODS});
+        const res = await axios.delete(`/api/commodity/delete_many`, {params: {items: goods}});
+        dispatch({type: DELETE_MANY_GOODS, payload: res.data});
         onSuccessCallback();
     } catch (error) {
         alert(`Failed to delete goods. ${error}`);
