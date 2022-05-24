@@ -16,8 +16,9 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Snackbar from "@material-ui/core/Snackbar";
+import {ItemDataType} from "../../types";
 
-export const roles = [
+export const roles:ItemDataType[] = [
     {
         label: 'заблокований',
         value: 0,

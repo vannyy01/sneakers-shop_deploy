@@ -67,7 +67,6 @@ export const goodsReducer = (state: StateType = Object.assign({}, initialState),
             }
             return state;
         case FETCH_GOOD:
-            // TODO process find good error
             return {...state, ...action.payload};
         case UPDATE_GOOD:
             return initialState;

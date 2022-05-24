@@ -6,8 +6,10 @@ import Paper, {PaperProps} from "@material-ui/core/Paper";
 import Draggable from "react-draggable";
 import {createStyles, Theme} from "@material-ui/core";
 import {validateNumberInput} from "../../../actions/validation";
+import {ItemDataType} from "../../types";
 
-export const sexes = [
+
+export const sexes: ItemDataType[] = [
     {
         label: 'чоловічі',
         value: 'чоловічі',
@@ -18,7 +20,7 @@ export const sexes = [
     }
 ];
 
-export const types = [
+export const shoeTypes: ItemDataType[] = [
     {
         label: "Кросівки",
         value: "Кросівки"

@@ -18,7 +18,7 @@ import BaseGood, {
     GoodStyles,
     PaperComponent,
     sexes,
-    types,
+    shoeTypes,
     BaseGoodPropsType, BaseGoodStateType
 } from "./BaseGood";
 import {withStyles} from "@material-ui/core";
@@ -133,7 +133,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 helperText={formErrors.type}
                                 error={formErrors.type.length > 0}
                             >
-                                {types.map((option) => (
+                                {shoeTypes.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                         {option.label}
                                     </MenuItem>

@@ -6,8 +6,10 @@ import {
     fetchGoods as fetchItems,
     searchGoods as searchItems
 } from "../../../actions";
-import GridView from '../../GridView';
+import GridView, {FilterListType} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
+import {ItemDataType} from "../../types";
+import {sexes, shoeTypes} from "./BaseGood";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
@@ -34,9 +36,27 @@ const headCells: HeadCell[] = [
     {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
 ];
 
+interface GoodsListType extends FilterListType {
+    filterName: HeadCell,
+    fields: ItemDataType[]
+}
+
+const filterList: GoodsListType[] = [
+    {
+        filterName: headCells[4],
+        filterLabel: "Тип",
+        fields: shoeTypes
+    },
+    {
+        filterName: headCells[5],
+        filterLabel: "Стать",
+        fields: sexes
+    }
+];
+
 const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods, clearGoodsState, deleteManyGoods}) => {
 
-    const goodsCount = 5;
+    const goodsCount = 10;
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
@@ -46,6 +66,7 @@ const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods,
     return (
         <GridView
             idField="_id"
+            filterList={filterList}
             createLocationPath='/admin/goods/create'
             editRoute='/admin/goods/edit'
             rowsCount={goodsCount}

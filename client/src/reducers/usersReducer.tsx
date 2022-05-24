@@ -10,7 +10,7 @@ import {
     FETCH_USER_BY_ID,
     FETCH_USERS,
     FetchUserByIdAction,
-    FetchUsersAction,
+    FetchUsersAction, SEARCH_USERS, SearchUsersAction,
     UPDATE_USER,
     UpdateUserAction, UserInterface
 } from "../actions/types";
@@ -18,6 +18,7 @@ import {
 type AuthAction =
     FetchUsersAction
     | FetchUserByIdAction
+    | SearchUsersAction
     | CreateUserAction
     | UpdateUserAction
     | DeleteUserAction
@@ -25,10 +26,11 @@ type AuthAction =
 
 interface StateType {
     users: UserInterface | UserInterface[],
-    count?: number
+    count?: number,
+    searchMode: boolean
 }
 
-const initialState: StateType = {users: []}
+const initialState: StateType = {users: [], searchMode: false};
 /**
  * @param {StateType} state
  * @param {AuthAction} action
@@ -37,15 +39,46 @@ const initialState: StateType = {users: []}
 export const usersReducer = (state: StateType = Object.assign({}, initialState), action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_USERS:
-            // if (action.payload.length > 0 && state.length > 0) {
-            //     return state[0]._id === action.payload[0]._id ? state : [...state, ...action.payload];
-            // }
-            return Array.isArray(state.users) ? {
+            // If previously SEARCH_USERS was used
+            if (state.searchMode) {
+                return {searchMode: false, ...action.payload};
+            }
+            // If loads the next part of the same query condition OR data from the new query condition
+            return Array.isArray(state.users) && state.users.length !== 0 ? {
+                ...state,
                 users: [...state.users, ...action.payload.users],
                 count: action.payload.count
-            } : action.payload;
+            } : {...state, ...action.payload};
+        case SEARCH_USERS:
+            // If previously FETCH_USERS was used
+            if (!state.searchMode) {
+                return {
+                    ...action.payload,
+                    searchMode: true
+                }
+            }
+            if (Array.isArray(state.users)) {
+                // If loads the next part of the same query condition
+                if (state.count === action.payload.count &&
+                    JSON.stringify(state.users) !== JSON.stringify(action.payload.users)) {
+                    return {
+                        ...state,
+                        users: [...state.users, ...action.payload.users],
+                    }
+                }
+                // If loads data from the new query condition
+                if (state.users.length < action.payload.users.length
+                    ||
+                    state.users.length > action.payload.users.length) {
+                    return {
+                        ...state,
+                        ...action.payload
+                    }
+                }
+            }
+            return state;
         case FETCH_USER_BY_ID:
-            return action.payload;
+            return {...state, ...action.payload};
         case CREATE_USER:
             return initialState;
         case UPDATE_USER:

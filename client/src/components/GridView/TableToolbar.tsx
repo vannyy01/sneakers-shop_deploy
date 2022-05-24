@@ -15,6 +15,9 @@ import {deleteManyGoods} from "../../actions";
 import {Search} from "@material-ui/icons";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
+import {useState} from "react";
+import {FilterListType} from "./index";
+import Select, {components, PlaceholderProps} from 'react-select';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     actions: {
@@ -36,6 +39,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     },
     spacer: {
         flex: '1 1 100%',
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
     },
     title: {
         display: 'flex',
@@ -66,6 +73,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 }));
 
 interface EnhancedTableToolbarPropsI {
+    filterList?: FilterListType[],
+    handleChangeFilter: (newValue: any, actionMeta: any) => void,
     searchItems: (event: React.ChangeEvent<HTMLTextAreaElement>) => void,
     deleteItems: () => void,
     selected: any[],
@@ -73,9 +82,23 @@ interface EnhancedTableToolbarPropsI {
     location: string
 }
 
-const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
+const Placeholder: React.FC<PlaceholderProps<{ label: string, value: string | number }>> = (props) => {
+    return <components.Placeholder {...props} children={props.children}/>;
+};
+
+const EnhancedTableToolbar: React.FC<EnhancedTableToolbarPropsI> = ({
+                                                                        selected,
+                                                                        title,
+                                                                        location,
+                                                                        deleteItems,
+                                                                        searchItems,
+                                                                        filterList,
+                                                                        handleChangeFilter
+                                                                    }) => {
     const classes = useStyles();
-    const {selected, title, location, deleteItems, searchItems} = props;
+    const [showFilters, setShowFilters] = useState<boolean>(false);
+    const handleShowFilters = (): void => setShowFilters(!showFilters);
+
     return (
         <Toolbar
             className={classNames(classes.root, {
@@ -115,6 +138,27 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
                 </div>
             )}
             <div className={classes.spacer}/>
+            {selected.length === 0 && showFilters && (filterList.map(({filterName, filterLabel, fields, selectedOption}) =>
+                <Select
+                    key={filterName.id}
+                    closeMenuOnSelect={true}
+                    isClearable={true}
+                    isSearchable={false}
+                    name={filterName.id}
+                    components={{Placeholder}}
+                    placeholder={filterLabel}
+                    onChange={handleChangeFilter}
+                    styles={{
+                        container: (base) => ({
+                            ...base,
+                            width: '50%',
+                            margin: '5px'
+                        })
+                    }}
+                    options={fields}
+                    value={selectedOption}
+                />
+            ))}
             <div className={classes.actions}>
                 {selected.length > 0 ? (
                     <Tooltip title="Delete">
@@ -131,8 +175,8 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarPropsI) => {
                                 </IconButton>
                             </NavLink>
                         </Tooltip>
-                        <Tooltip title="Filter list">
-                            <IconButton aria-label="Filter list">
+                        <Tooltip title="Фільтри">
+                            <IconButton aria-label="Фільтри" onClick={handleShowFilters}>
                                 <FilterListIcon/>
                             </IconButton>
                         </Tooltip>

@@ -63,6 +63,14 @@ export interface FetchUsersAction {
     payload: {users: UserInterface[], count?: number}
 }
 
+type SEARCH_USERS = 'SEARCH_USERS';
+export const SEARCH_USERS: SEARCH_USERS = 'SEARCH_USERS';
+
+export interface SearchUsersAction {
+    type: SEARCH_USERS,
+    payload: {users: UserInterface[], count: number}
+}
+
 
 type CLEAR_USERS = 'CLEAR_USERS';
 export const CLEAR_USERS: CLEAR_USERS = 'CLEAR_USERS';

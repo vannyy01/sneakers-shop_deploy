@@ -166,9 +166,6 @@ module.exports = app => {
                             $options: "i"
                         }
                     }]).countDocuments();
-                    if (count === 0) {
-                        return res.status(200).send({goods, count, goodsExists: false});
-                    }
                     return res.status(200).send({goods, count});
                 }
                 res.status(200).send({goods});

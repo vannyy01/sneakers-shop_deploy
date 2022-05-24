@@ -6,7 +6,7 @@ import {
     FETCH_GOODS,
     FETCH_USER, FETCH_USER_BY_ID,
     FETCH_USERS,
-    GET_CART_ITEMS, SEARCH_GOODS,
+    GET_CART_ITEMS, SEARCH_GOODS, SEARCH_USERS,
     SET_CART_ITEM,
     ShoeInterface, UPDATE_GOOD, UPDATE_USER, UserInterface
 }
@@ -78,6 +78,23 @@ export const fetchUsers = (skip: number, limit: number, count: boolean = false, 
         dispatch({type: FETCH_USERS, payload: user.data});
     } catch (error) {
         console.log('Unable to fetch list of users', error);
+    }
+};
+
+/**
+ * @param condition
+ * @param skip
+ * @param limit
+ * @param count
+ * @param fields
+ * @param filters
+ */
+export const searchUsers = (condition: string, skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], ...filters: string[]) => async (dispatch: any) => {
+    try {
+        const res = await axios.get(`/api/users_search`, {params: {condition, skip, limit, count, fields, filters}});
+        dispatch({type: SEARCH_USERS, payload: res.data});
+    } catch (error) {
+        console.log(error);
     }
 };
 

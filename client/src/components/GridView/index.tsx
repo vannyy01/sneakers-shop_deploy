@@ -11,7 +11,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import {makeStyles, Theme} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
-import {NavLink} from "react-router-dom";
+import {NavLink, useHistory} from "react-router-dom";
 import Dialog from "@material-ui/core/Dialog";
 import {PaperComponent} from "../admin/goods/BaseGood";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -64,8 +64,17 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     },
 }));
 
+
+export interface FilterListType {
+    filterName: { id: string, numeric: boolean, disablePadding: boolean, label: string },
+    filterLabel: string,
+    fields: Array<{ label: string, value: string | number }>,
+    selectedOption?: { label: string, value: string | number }
+}
+
 // For @data and @headCells used any type due to delegation typechecking to a client class
 interface EnhancedTablePropsI {
+    filterList?: FilterListType[],
     createLocationPath?: string | '/',
     rowsCount: number,
     count: number,
@@ -84,6 +93,7 @@ interface EnhancedTablePropsI {
 
 const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
                                                           headCells,
+                                                          filterList,
                                                           createLocationPath,
                                                           editRoute,
                                                           rowsCount,
@@ -108,8 +118,11 @@ const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
     const [searchCondition, setSearchCondition] = useState<string>();
     const [typingTimeout, setTypingTimeout] = useState<any>();
     const [showDialog, setShowDialog] = useState<boolean>(false);
+    // const filterList: FilterValuesType = filterList || [];
+    const [filterFieldValues, setFilterFieldValues] = useState<FilterListType[]>(filterList);
     const [skip, setSkip] = useState<number>(0);
     const [limit, setLimit] = useState<number>(rowsCount);
+//    const [searchParams, setSearchParams] = useSearchParams();
 
     // Firstly, request must be sent.
     useEffect(() => {
@@ -142,8 +155,13 @@ const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
             setSkip(limit);
             setLimit(rowsPerPage);
         }
-    }, [rowsPerPage])
+    }, [rowsPerPage]);
 
+    // useEffect(() => {
+    //
+    // }, [JSON.stringify(filterFieldValues)]);
+
+    // componentWillUnmount
     useEffect(() => {
         return () => {
             clearItems();
@@ -237,6 +255,19 @@ const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
         }, 300));
     };
 
+    const handleChangeFilterOption = (newValue: any, actionMeta: any): void => {
+        console.log(newValue, actionMeta.name);
+        const filterArr: FilterListType[] = filterFieldValues.map(field => field.filterName.id === actionMeta.name ? {
+            ...field,
+            selectedOption: newValue
+        } : field);
+        setFilterFieldValues(filterArr);
+        const URL: URLSearchParams = new URLSearchParams(window.location.pathname);
+        URL.set(filterArr[0].filterName.id, filterArr[0].selectedOption.value as string);
+        window.history.replaceState(null, null, URL.toString());
+        console.log(URL.toString());
+    };
+
     const isSelected = (id: string): boolean => {
         return selected.indexOf(id) !== -1;
     }
@@ -247,6 +278,8 @@ const EnhancedTable: React.FC<EnhancedTablePropsI> = ({
         <Paper className={classes.root}>
             <EnhancedTableToolbar
                 searchItems={handleSearchItems}
+                filterList={filterFieldValues}
+                handleChangeFilter={handleChangeFilterOption}
                 location={createLocationPath}
                 title={title}
                 selected={selected}

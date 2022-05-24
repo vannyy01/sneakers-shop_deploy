@@ -19,7 +19,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Draggable from 'react-draggable';
-import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles, sexes, types} from "./BaseGood";
+import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles, sexes, shoeTypes} from "./BaseGood";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 
@@ -166,7 +166,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     helperText={formErrors.type}
                                     error={formErrors.type.length > 0}
                                 >
-                                    {types.map((option) => (
+                                    {shoeTypes.map((option) => (
                                         <MenuItem key={option.value} value={option.value}>
                                             {option.label}
                                         </MenuItem>

@@ -94,12 +94,66 @@ module.exports = (app) => {
     app.get('/api/users', requireLogin, async (req, res, next) => {
         try {
             const defaultFields = ['googleID', '__id', 'email', 'role', 'givenName', 'familyName'];
-            const fields = req.query.fields ? req.query.fields : defaultFields;
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
             let count;
             const users = await User.find().skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
             if (users !== null) {
-                if(req.query.count){
+                if (req.query.count) {
                     count = await User.countDocuments();
+                    return res.status(200).send({users, count});
+                }
+                res.status(200).send({users});
+            } else {
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
+            }
+        } catch (error) {
+            res.status(500).send(`Cannot get the users list! Error: ${error}`);
+            next(error);
+        }
+    });
+
+    app.get('/api/users_search', requireLogin, async (req, res, next) => {
+        try {
+            const defaultFields = ['googleID', '__id', 'email', 'role', 'givenName', 'familyName'];
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+
+            let count;
+            const users = await User.find().or([{
+                email: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                },
+            }, {
+                givenName: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }, {
+                familyName: {
+                    $regex: req.query.condition,
+                    $options: "i"
+                }
+            }
+            ]).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            if (users !== null) {
+                if (req.query.count) {
+                    count = await User.find().or([{
+                        email: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        },
+                    }, {
+                        givenName: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }, {
+                        familyName: {
+                            $regex: req.query.condition,
+                            $options: "i"
+                        }
+                    }]).countDocuments();
                     return res.status(200).send({users, count});
                 }
                 res.status(200).send({users});
