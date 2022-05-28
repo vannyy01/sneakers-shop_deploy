@@ -22,6 +22,7 @@ import Draggable from 'react-draggable';
 import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles, sexes, shoeTypes} from "./BaseGood";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
+import _map from "lodash/map";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -166,7 +167,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     helperText={formErrors.type}
                                     error={formErrors.type.length > 0}
                                 >
-                                    {shoeTypes.map((option) => (
+                                    {_map(shoeTypes, option => (
                                         <MenuItem key={option.value} value={option.value}>
                                             {option.label}
                                         </MenuItem>
@@ -181,7 +182,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                            error={formErrors.sex.length > 0}
                                            onChange={this.handleOnChange}
                                 >
-                                    {sexes.map((option) => (
+                                    {_map(sexes, option => (
                                         <MenuItem key={option.value} value={option.value}>
                                             {option.label}
                                         </MenuItem>

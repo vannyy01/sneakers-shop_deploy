@@ -6,10 +6,11 @@ import {
     fetchGoods as fetchItems,
     searchGoods as searchItems
 } from "../../../actions";
-import GridView, {FilterListType} from '../../GridView';
+import GridView, {FilterListTypeArray} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
-import {ItemDataType} from "../../types";
+import {HeadCell} from "../../types";
 import {sexes, shoeTypes} from "./BaseGood";
+import {useEffect} from "react";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
@@ -20,14 +21,8 @@ interface PropsInterface {
     deleteManyGoods: (goods: string[], onSuccessCallback: () => void) => void
 }
 
-interface HeadCell {
-    disablePadding: boolean;
-    id: keyof ShoeInterface;
-    label: string;
-    numeric: boolean;
-}
 
-const headCells: HeadCell[] = [
+const headCells: Array<HeadCell<ShoeInterface>> = [
     {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
     {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
     {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
@@ -36,27 +31,32 @@ const headCells: HeadCell[] = [
     {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
 ];
 
-interface GoodsListType extends FilterListType {
-    filterName: HeadCell,
-    fields: ItemDataType[]
-}
-
-const filterList: GoodsListType[] = [
-    {
+const filterList: FilterListTypeArray<ShoeInterface> = {
+    [headCells[4].id]: {
         filterName: headCells[4],
         filterLabel: "Тип",
         fields: shoeTypes
     },
-    {
+    [headCells[5].id]: {
         filterName: headCells[5],
         filterLabel: "Стать",
         fields: sexes
     }
-];
+};
 
 const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods, clearGoodsState, deleteManyGoods}) => {
 
     const goodsCount = 10;
+
+    useEffect(() => {
+        const {searchParams} = new URL(window.location.href);
+        searchParams.forEach((value, key) => {
+            filterList[key].selectedOption = {
+                label: filterList[key].fields[value].label,
+                value
+            };
+        })
+    }, []);
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');

@@ -6,34 +6,34 @@ import Paper, {PaperProps} from "@material-ui/core/Paper";
 import Draggable from "react-draggable";
 import {createStyles, Theme} from "@material-ui/core";
 import {validateNumberInput} from "../../../actions/validation";
-import {ItemDataType} from "../../types";
+import {ItemsType} from "../../types";
 
 
-export const sexes: ItemDataType[] = [
-    {
+export const sexes: ItemsType = {
+    'чоловічі': {
         label: 'чоловічі',
         value: 'чоловічі',
     },
-    {
+    'жіночі': {
         label: 'жіночі',
         value: 'жіночі',
     }
-];
+};
 
-export const shoeTypes: ItemDataType[] = [
-    {
+export const shoeTypes: ItemsType = {
+    "Кросівки": {
         label: "Кросівки",
         value: "Кросівки"
     },
-    {
+    "В'єтнамки": {
         label: "В'єтнамки",
         value: "В'єтнамки",
     },
-    {
+    "Туфлі": {
         label: "Туфлі",
         value: "Туфлі",
     }
-];
+};
 
 export function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;

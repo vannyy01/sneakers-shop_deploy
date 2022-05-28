@@ -27,6 +27,7 @@ import {connect} from "react-redux";
 import {ShoeInterface} from "../../../actions/types";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
+import _map from "lodash/map";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -133,7 +134,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 helperText={formErrors.type}
                                 error={formErrors.type.length > 0}
                             >
-                                {shoeTypes.map((option) => (
+                                {_map(shoeTypes, (option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                         {option.label}
                                     </MenuItem>
@@ -148,7 +149,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                        error={formErrors.sex.length > 0}
                                        onChange={this.handleOnChange}
                             >
-                                {sexes.map((option) => (
+                                {_map(sexes, (option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                         {option.label}
                                     </MenuItem>

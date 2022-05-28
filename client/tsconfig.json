@@ -8,6 +8,7 @@
       "es6",
       "dom"
     ],
+    "esModuleInterop": true,
     "sourceMap": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

@@ -10,14 +10,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Add from '@material-ui/icons/Add';
 import {NavLink} from "react-router-dom";
-import {connect} from "react-redux";
-import {deleteManyGoods} from "../../actions";
 import {Search} from "@material-ui/icons";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {useState} from "react";
-import {FilterListType} from "./index";
+import {FilterListTypeArray} from "./index";
 import Select, {components, PlaceholderProps} from 'react-select';
+import _map from "lodash/map";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     actions: {
@@ -72,8 +71,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     }
 }));
 
-interface EnhancedTableToolbarPropsI {
-    filterList?: FilterListType[],
+interface EnhancedTableToolbarPropsI<T> {
+    filterList?: FilterListTypeArray<T>,
     handleChangeFilter: (newValue: any, actionMeta: any) => void,
     searchItems: (event: React.ChangeEvent<HTMLTextAreaElement>) => void,
     deleteItems: () => void,
@@ -86,15 +85,15 @@ const Placeholder: React.FC<PlaceholderProps<{ label: string, value: string | nu
     return <components.Placeholder {...props} children={props.children}/>;
 };
 
-const EnhancedTableToolbar: React.FC<EnhancedTableToolbarPropsI> = ({
-                                                                        selected,
-                                                                        title,
-                                                                        location,
-                                                                        deleteItems,
-                                                                        searchItems,
-                                                                        filterList,
-                                                                        handleChangeFilter
-                                                                    }) => {
+const EnhancedTableToolbar = <T, >({
+                                       selected,
+                                       title,
+                                       location,
+                                       deleteItems,
+                                       searchItems,
+                                       filterList,
+                                       handleChangeFilter
+                                   }: EnhancedTableToolbarPropsI<T>) => {
     const classes = useStyles();
     const [showFilters, setShowFilters] = useState<boolean>(false);
     const handleShowFilters = (): void => setShowFilters(!showFilters);
@@ -138,13 +137,18 @@ const EnhancedTableToolbar: React.FC<EnhancedTableToolbarPropsI> = ({
                 </div>
             )}
             <div className={classes.spacer}/>
-            {selected.length === 0 && showFilters && (filterList.map(({filterName, filterLabel, fields, selectedOption}) =>
+            {selected.length === 0 && showFilters && (_map(filterList, ({
+                                                                            filterName,
+                                                                            filterLabel,
+                                                                            fields,
+                                                                            selectedOption
+                                                                        }) =>
                 <Select
-                    key={filterName.id}
+                    key={filterName.id as string}
                     closeMenuOnSelect={true}
                     isClearable={true}
                     isSearchable={false}
-                    name={filterName.id}
+                    name={filterName.id as string}
                     components={{Placeholder}}
                     placeholder={filterLabel}
                     onChange={handleChangeFilter}
@@ -155,7 +159,7 @@ const EnhancedTableToolbar: React.FC<EnhancedTableToolbarPropsI> = ({
                             margin: '5px'
                         })
                     }}
-                    options={fields}
+                    options={_map(fields, ({label, value}) => ({label, value}))}
                     value={selectedOption}
                 />
             ))}
@@ -187,5 +191,5 @@ const EnhancedTableToolbar: React.FC<EnhancedTableToolbarPropsI> = ({
     );
 };
 
-
-export default connect(null, {deleteManyGoods})(EnhancedTableToolbar);
+export default EnhancedTableToolbar;
+// export default <T,>(props: EnhancedTableToolbarPropsI<T>) => connect(null, {deleteManyGoods})(() => EnhancedTableToolbar(props));

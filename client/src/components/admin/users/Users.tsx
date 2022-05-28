@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {connect} from "react-redux";
-import GridView, {FilterListType} from '../../GridView';
+import GridView, {FilterListTypeArray} from '../../GridView';
 import {
     fetchUsers as fetchItems,
     searchUsers as searchItems,
@@ -9,7 +9,7 @@ import {
 } from "../../../actions";
 import {UserInterface} from "../../../actions/types";
 import {roles} from "./BaseUser";
-import { ItemDataType } from 'src/components/types';
+import {useEffect} from "react";
 
 interface PropsInterface {
     users: UserInterface[],
@@ -35,22 +35,29 @@ const headCells: HeadCell[] = [
     {id: 'familyName', numeric: false, disablePadding: true, label: 'Прізвище'},
 ];
 
-interface UsersListType extends FilterListType{
-    filterName: HeadCell,
-    fields: ItemDataType[]
-}
-
-const filterList: UsersListType[] = [
-    {
+const filterList: FilterListTypeArray<UserInterface> = {
+    [headCells[0].id]: {
         filterName: headCells[0],
         filterLabel: "Роль",
         fields: roles
     }
-];
+};
 
-const Users: React.FC<PropsInterface> = ({fetchUsers, searchUsers, clearUsersState, deleteManyUsers, users, count}) => {
+const Users
+    :
+    React.FC<PropsInterface> = ({fetchUsers, searchUsers, clearUsersState, deleteManyUsers, users, count}) => {
 
     const usersCount = 10;
+
+    useEffect(() => {
+        const {searchParams} = new URL(window.location.href);
+        searchParams.forEach((value, key) => {
+            filterList[key].selectedOption = {
+                label: filterList[key].fields[value].label,
+                value
+            };
+        })
+    }, []);
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');

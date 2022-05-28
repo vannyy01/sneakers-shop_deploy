@@ -16,22 +16,24 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Snackbar from "@material-ui/core/Snackbar";
-import {ItemDataType} from "../../types";
+import {ItemsType} from "../../types";
+import _map from "lodash/map";
 
-export const roles:ItemDataType[] = [
-    {
+
+export const roles: ItemsType = {
+    0: {
         label: 'заблокований',
         value: 0,
     },
-    {
+    10: {
         label: 'клієнт',
         value: 10,
     },
-    {
+    20: {
         label: 'адміністратор',
         value: 20,
     }
-];
+};
 
 interface PathParams {
     userID: string
@@ -98,7 +100,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             fullWidth={true}
                             autoComplete="givenName-name"
                             value={givenName}
-                            onChange={event => this.handleChange(event)}
+                            onChange={this.handleChange}
                             helperText={this.state.formErrors.givenName}
                             error={this.state.formErrors.givenName.length > 0}
                         />
@@ -112,7 +114,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             fullWidth={true}
                             autoComplete="familyName-name"
                             value={familyName}
-                            onChange={event => this.handleChange(event)}
+                            onChange={this.handleChange}
                             helperText={this.state.formErrors.familyName}
                             error={this.state.formErrors.familyName.length > 0}
                         />
@@ -126,7 +128,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             fullWidth={true}
                             autoComplete="email-name"
                             value={email}
-                            onChange={event => this.handleChange(event)}
+                            onChange={this.handleChange}
                             helperText={this.state.formErrors.email}
                             error={this.state.formErrors.email.length > 0}
                         />
@@ -141,11 +143,11 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             autoComplete="role-name"
                             select={true}
                             value={role}
-                            onChange={event => this.handleChange(event)}
+                            onChange={this.handleChange}
                             helperText={this.state.formErrors.role}
                             error={this.state.formErrors.role.length > 0}
                         >
-                            {roles.map((option) => (
+                            {_map(roles, (option) => (
                                 <MenuItem key={option.value} value={option.value}>
                                     {option.label}
                                 </MenuItem>
@@ -162,7 +164,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             fullWidth={true}
                             autoComplete="photo-name"
                             value={photo}
-                            onChange={event => this.handleChange(event)}
+                            onChange={this.handleChange}
                             helperText={this.state.formErrors.photo}
                             error={this.state.formErrors.photo.length > 0}
                         />
@@ -174,7 +176,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             style={{backgroundColor: "#1fbd3a", color: "#fff"}}
                             startIcon={<ArrowBack/>}
                             className={this.props.classes.button}
-                            onClick={event => this.handleComeBack()}
+                            onClick={this.handleComeBack}
                         >
                             Повернутися назад
                         </Button>
@@ -193,7 +195,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                             startIcon={<DeleteIcon/>}
                             className={this.props.classes.button}
                             disabled={deleteButton.disabled}
-                            onClick={event => this.showDeleteDialog()}
+                            onClick={this.showDeleteDialog}
                         >
                             Видалити
                         </Button>
@@ -202,7 +204,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
             </form>
             {deleteButton.renderDialog && <Dialog
                 open={this.state.showDeleteDialog}
-                onClose={event => this.handleClose("cancel")}
+                onClose={() => this.handleClose("cancel")}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
             >
@@ -210,18 +212,18 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                     Видалити користувача
                 </DialogTitle>
                 <DialogActions>
-                    <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
+                    <Button autoFocus={true} name="cancel" onClick={() => this.handleClose("cancel")}
                             color="primary">
                         Відміна
                     </Button>
-                    <Button name="save" onClick={event => this.handleDelete()} color="primary">
+                    <Button name="save" onClick={this.handleDelete} color="primary">
                         Видалити користувача
                     </Button>
                 </DialogActions>
             </Dialog>}
             <Dialog
                 open={this.state.showDialog}
-                onClose={event => this.handleClose("cancel")}
+                onClose={() => this.handleClose("cancel")}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
             >
@@ -235,19 +237,19 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus={true} name="cancel" onClick={event => this.handleClose("cancel")}
+                    <Button autoFocus={true} name="cancel" onClick={() => this.handleClose("cancel")}
                             color="primary">
                         Відміна
                     </Button>
-                    <Button name="save" onClick={event => this.handleSave()} color="primary">
+                    <Button name="save" onClick={this.handleSave} color="primary">
                         {operation === 'Створення' ? 'Створити' : 'Оновити користувача'}
                     </Button>
                 </DialogActions>
             </Dialog>
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={this.state.showAlert}
                       autoHideDuration={6000} className={this.props.classes.alert}
-                      onClose={event => this.handleClose("alert")}>
-                <Alert onClose={event => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
+                      onClose={() => this.handleClose("alert")}>
+                <Alert onClose={() => this.handleClose("alert")} severity="error">Виправте помилки!</Alert>
             </Snackbar>
         </React.Fragment>
     };
