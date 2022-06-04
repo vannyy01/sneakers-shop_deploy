@@ -27,10 +27,11 @@ type AuthAction =
 interface StateType {
     users: UserInterface | UserInterface[],
     count?: number,
-    searchMode: boolean
+    searchMode: boolean,
+    filters: { [key: string]: string }
 }
 
-const initialState: StateType = {users: [], searchMode: false};
+const initialState: StateType = {users: [], searchMode: false, filters: {}};
 /**
  * @param {StateType} state
  * @param {AuthAction} action
@@ -40,19 +41,39 @@ export const usersReducer = (state: StateType = Object.assign({}, initialState),
     switch (action.type) {
         case FETCH_USERS:
             // If previously SEARCH_USERS was used
+            console.log('previous state', state);
+            console.log('next state', action.payload);
             if (state.searchMode) {
                 return {searchMode: false, ...action.payload};
             }
+
             // If loads the next part of the same query condition OR data from the new query condition
-            return Array.isArray(state.users) && state.users.length !== 0 ? {
-                ...state,
-                users: [...state.users, ...action.payload.users],
-                count: action.payload.count
-            } : {...state, ...action.payload};
+            if (Array.isArray(state.users)) {
+                if (JSON.stringify(action.payload.filters) !== JSON.stringify(state.filters)){
+                    return {
+                        ...state,
+                        ...action.payload
+                    };
+                }
+                if (state.users.length !== 0) {
+                    return {
+                        ...state,
+                        users: [...state.users, ...action.payload.users],
+                        count: action.payload.count
+                    };
+                }
+            }
+            return {...state, ...action.payload};
+        // return Array.isArray(state.users) && state.users.length !== 0 ? {
+        //     ...state,
+        //     users: [...state.users, ...action.payload.users],
+        //     count: action.payload.count
+        // } : {...state, ...action.payload};
         case SEARCH_USERS:
             // If previously FETCH_USERS was used
             if (!state.searchMode) {
                 return {
+                    ...state,
                     ...action.payload,
                     searchMode: true
                 }

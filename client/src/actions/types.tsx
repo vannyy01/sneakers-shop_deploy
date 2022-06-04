@@ -60,7 +60,7 @@ export const FETCH_USERS: FETCH_USERS = 'FETCH_USERS';
 
 export interface FetchUsersAction {
     type: FETCH_USERS,
-    payload: {users: UserInterface[], count?: number}
+    payload: {users: UserInterface[], count?: number, filters: { [key: string]: string }}
 }
 
 type SEARCH_USERS = 'SEARCH_USERS';

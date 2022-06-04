@@ -10,7 +10,6 @@ import GridView, {FilterListTypeArray} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
 import {HeadCell} from "../../types";
 import {sexes, shoeTypes} from "./BaseGood";
-import {useEffect} from "react";
 
 interface PropsInterface {
     goods: ShoeInterface[] | [],
@@ -47,16 +46,6 @@ const filterList: FilterListTypeArray<ShoeInterface> = {
 const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods, clearGoodsState, deleteManyGoods}) => {
 
     const goodsCount = 10;
-
-    useEffect(() => {
-        const {searchParams} = new URL(window.location.href);
-        searchParams.forEach((value, key) => {
-            filterList[key].selectedOption = {
-                label: filterList[key].fields[value].label,
-                value
-            };
-        })
-    }, []);
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');

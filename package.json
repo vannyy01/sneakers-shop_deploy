@@ -23,10 +23,10 @@
   },
   "dependencies": {
     "awesome-debounce-promise": "^2.1.0",
-    "axios": "^0.24.0",
+    "axios": "^0.27.2",
     "concurrently": "^7.0.0",
     "cookie-session": "^2.0.0-beta.3",
-    "express": "^4.17.3",
+    "express": "^4.18.1",
     "lodash": "^4.17.11",
     "mongoose": "^6.1.6",
     "nodemon": "^2.0.15",

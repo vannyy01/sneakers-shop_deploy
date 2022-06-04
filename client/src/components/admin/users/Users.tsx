@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {connect} from "react-redux";
-import GridView, {FilterListTypeArray} from '../../GridView';
+import GridView, {FilterListTypeArray, SearchItemParameters} from '../../GridView';
 import {
     fetchUsers as fetchItems,
     searchUsers as searchItems,
@@ -9,25 +9,27 @@ import {
 } from "../../../actions";
 import {UserInterface} from "../../../actions/types";
 import {roles} from "./BaseUser";
-import {useEffect} from "react";
+import {HeadCell} from "../../types";
 
 interface PropsInterface {
     users: UserInterface[],
     count: number,
-    fetchUsers: (skip: number, limit: number, count: boolean) => void,
-    searchUsers: (condition: string, skip: number, limit: number, count: boolean) => void,
+    fetchUsers: (skip: number,
+                 limit: number,
+                 count: boolean,
+                 fields?: string[],
+                 filters?: Array<[key: keyof UserInterface, value: string | number]>) => void,
+    searchUsers?: (condition: string,
+                   skip: number,
+                   limit: number,
+                   count: boolean,
+                   fields?: string[],
+                   filters?: Array<[key: keyof UserInterface, value: string | number]>) => void,
     clearUsersState: () => void,
     deleteManyUsers: (users: string[], onSuccessCallback: () => void) => void
 }
 
-interface HeadCell {
-    disablePadding: boolean;
-    id: keyof UserInterface;
-    label: string;
-    numeric: boolean;
-}
-
-const headCells: HeadCell[] = [
+const headCells: Array<HeadCell<UserInterface>> = [
     {id: 'role', numeric: true, disablePadding: false, label: 'Роль'},
     {id: 'googleID', numeric: false, disablePadding: true, label: 'GoogleID'},
     {id: 'email', numeric: false, disablePadding: true, label: 'Ел.Пошта'},
@@ -43,21 +45,16 @@ const filterList: FilterListTypeArray<UserInterface> = {
     }
 };
 
-const Users
-    :
-    React.FC<PropsInterface> = ({fetchUsers, searchUsers, clearUsersState, deleteManyUsers, users, count}) => {
+const Users: React.FC<PropsInterface> = ({
+                                             fetchUsers,
+                                             searchUsers,
+                                             clearUsersState,
+                                             deleteManyUsers,
+                                             users,
+                                             count
+                                         }) => {
 
     const usersCount = 10;
-
-    useEffect(() => {
-        const {searchParams} = new URL(window.location.href);
-        searchParams.forEach((value, key) => {
-            filterList[key].selectedOption = {
-                label: filterList[key].fields[value].label,
-                value
-            };
-        })
-    }, []);
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
@@ -86,9 +83,12 @@ const Users
 
 const mapStateToProps = ({users: {users, count}}: any) => ({users, count});
 
+// @ts-ignore
 export default connect(mapStateToProps, {
     fetchUsers: fetchItems,
     searchUsers: searchItems,
     clearUsersState: clearItemsState,
     deleteManyUsers: deleteManyItems
-})(Users);
+})
+    // @ts-ignore
+    (Users);

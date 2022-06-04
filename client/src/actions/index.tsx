@@ -11,6 +11,8 @@ import {
     ShoeInterface, UPDATE_GOOD, UPDATE_USER, UserInterface
 }
     from './types';
+import {SearchItemParameters} from "../components/GridView";
+import _ from "lodash";
 
 /**
  * @param user
@@ -71,10 +73,20 @@ export const fetchUserByID = (id: string, onErrorCallback: () => void) => async 
  * @param limit
  * @param count
  * @param fields
+ * @param filters
  */
-export const fetchUsers = (skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
+export const fetchUsers = (skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: { [key: string]: string }) => async (dispatch: any) => {
     try {
-        const user = await axios.get('/api/users', {params: {skip, limit, count, fields}});
+        let params = "";
+        if (filters) {
+            params += "?";
+            _.forEach(filters, (item, key) => {
+                params += `filters[${key}]=${item}`;
+                params += '&';
+            });
+            params = params.slice(0, -1);
+        }
+        const user = await axios.get(`/api/users/${params}`, {params: {skip, limit, count, fields}});
         dispatch({type: FETCH_USERS, payload: user.data});
     } catch (error) {
         console.log('Unable to fetch list of users', error);
@@ -89,14 +101,24 @@ export const fetchUsers = (skip: number, limit: number, count: boolean = false, 
  * @param fields
  * @param filters
  */
-export const searchUsers = (condition: string, skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], ...filters: string[]) => async (dispatch: any) => {
-    try {
-        const res = await axios.get(`/api/users_search`, {params: {condition, skip, limit, count, fields, filters}});
-        dispatch({type: SEARCH_USERS, payload: res.data});
-    } catch (error) {
-        console.log(error);
+export const searchUsers = (condition: string, skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: Array<[key: keyof UserInterface, value: string]>) => async (dispatch: any) => {
+        try {
+            const params = {
+                condition,
+                skip,
+                limit,
+                count,
+                fields: {toJSON: () => JSON.stringify(fields)},
+                filters: {toJSON: () => new URLSearchParams().set('filters', JSON.stringify(filters))}
+            };
+            const res = await axios.get(`/api/users_search`, {params});
+            dispatch({type: SEARCH_USERS, payload: res.data});
+        } catch
+            (error) {
+            console.log(error);
+        }
     }
-};
+;
 
 export const clearUsersState = () => (dispatch: any) => {
     dispatch({type: CLEAR_USERS});

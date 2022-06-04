@@ -1,3 +1,5 @@
+import {useEffect, useRef} from "react";
+
 export const inArray = <T>(item: T, label:string, items: T[]): boolean =>
     items.findIndex(value => value[label] === item[label]) >= 0;
 // export const modifyURLSearchParams = (key: string, value: string) => {
@@ -10,3 +12,10 @@ export const inArray = <T>(item: T, label:string, items: T[]): boolean =>
 //     window.history.pushState(null, null, params);
 //     console.log(params.toString());
 // }
+export const usePrevious = <T>(value: T): T | undefined => {
+    const ref = useRef<T>();
+    useEffect(() => {
+        ref.current = value
+    });
+    return  ref.current;
+};

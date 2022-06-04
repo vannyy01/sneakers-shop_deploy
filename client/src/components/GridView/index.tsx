@@ -24,6 +24,8 @@ import {HeadCell, ItemDataType, ItemsType} from "../types";
 import _forEach from "lodash/forEach";
 import _forIn from "lodash/forIn";
 import {ActionMeta} from "react-select";
+import _mapValues from "lodash/mapValues";
+import {usePrevious} from "../utils";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -80,6 +82,10 @@ export interface FilterListTypeArray<T> {
     [key: string | number]: FilterListType<T>
 }
 
+export interface SearchItemParameters {
+    [key: string]: string | number
+}
+
 // For @data and @headCells used any type due to delegation typechecking to a client class
 interface EnhancedTablePropsI<T> {
     filterList?: FilterListTypeArray<T>,
@@ -87,8 +93,13 @@ interface EnhancedTablePropsI<T> {
     rowsCount: number,
     count: number,
     data: any,
-    fetchItems: (skip: number, limit: number, count: boolean) => void,
-    searchItems?: (condition: string, skip: number, limit: number, count: boolean) => void,
+    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: Array<[key: keyof T, value: string | number]>) => void,
+    searchItems?: (condition: string,
+                   skip: number,
+                   limit: number,
+                   count: boolean,
+                   fields?: string[],
+                   filters?: Array<[key: keyof T, value: string | number]>) => void,
     clearItems: () => void,
     deleteItems?: [(items: string[], onSuccessCallback: () => void) => void, () => void],
     deleteMessage: string,
@@ -115,27 +126,82 @@ const EnhancedTable = <T, >({
                                 searchItems,
                                 clearItems
                             }: EnhancedTablePropsI<T>) => {
+    const url = new URL(window.location.href);
+    const replaceURL = (): void => {
+        url.searchParams.sort();
+        window.history.pushState(null, null, url);
+    }
+    let initialPage = 0;
+    let initialRowsPerPage = rowsCount;
+    let initialSkip = 0;
+    let initialLimit = rowsCount;
+    let initialOrder: Order = 'asc';
+    let initialOrderBy = '';
+    let initialSearchCondition;
+    let initialFilterList: FilterListTypeArray<T> = filterList;
 
+    if (url.searchParams.toString().length > 0) {
+        console.log(filterList);
+        url.searchParams.forEach((value, key) => {
+            switch (key) {
+                case 'page':
+                    initialPage = +value;
+                    break;
+                case 'rowsPerPage':
+                    initialRowsPerPage = +value;
+                    break;
+                case 'skip':
+                    initialSkip = +value;
+                    break;
+                case 'limit':
+                    initialLimit = +value;
+                    break;
+                case 'order':
+                    initialOrder = value as Order;
+                    break;
+                case 'orderBy':
+                    initialOrderBy = value;
+                    break;
+                case 'searchCondition':
+                    initialSearchCondition = value;
+                    break;
+                default:
+                    const newFilterList = Object.assign({}, initialFilterList);
+                    newFilterList[key].selectedOption = {
+                        label: initialFilterList[key].fields[value].label,
+                        value
+                    };
+                    initialFilterList = newFilterList;
+            }
+        });
+    } else {
+        url.searchParams.set('order', initialOrder as string);
+        url.searchParams.set('orderBy', initialOrderBy);
+        url.searchParams.set('page', initialPage.toString());
+        url.searchParams.set('rowsPerPage', initialRowsPerPage.toString());
+        url.searchParams.set('skip', initialSkip.toString());
+        url.searchParams.set('limit', initialLimit.toString());
+        replaceURL();
+    }
     const [rowsData, setRowsData] = useState<any[]>(data);
-    const [order, setOrder] = useState<Order>('asc');
-    const [orderBy, setOrderBy] = useState<string>('calories');
-    const [page, setPage] = useState<number>(0);
+    const [order, setOrder] = useState<Order>(initialOrder);
+    const [orderBy, setOrderBy] = useState<string>(initialOrderBy);
+    const [page, setPage] = useState<number>(initialPage);
     const [countItems, setCountItems] = useState<number>(count);
-    const [rowsPerPage, setRowsPerPage] = useState<number>(rowsCount);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(initialRowsPerPage);
     const [selected, setSelected] = useState<string[]>([]);
-    const [searchCondition, setSearchCondition] = useState<string>();
+    const [searchCondition, setSearchCondition] = useState<string>(initialSearchCondition);
     const [typingTimeout, setTypingTimeout] = useState<any>();
     const [showDialog, setShowDialog] = useState<boolean>(false);
-    // const filterList: FilterValuesType = filterList || [];
-    const [filterFieldValues, setFilterFieldValues] = useState<FilterListTypeArray<T>>(filterList);
-    const [skip, setSkip] = useState<number>(0);
-    const [limit, setLimit] = useState<number>(rowsCount);
-//    const [searchParams, setSearchParams] = useSearchParams();
+    const [filterFieldValues, setFilterFieldValues] = useState<FilterListTypeArray<T>>(initialFilterList);
+    const [skip, setSkip] = useState<number>(initialSkip);
+    const [limit, setLimit] = useState<number>(initialLimit);
 
     // Firstly, request must be sent.
     useEffect(() => {
+        console.log(filterFieldValues);
         if (data.length === 0) {
-            fetchItems(skip, limit, true);
+            fetchItemsWithFilters();
         }
     }, []);
 
@@ -150,7 +216,22 @@ const EnhancedTable = <T, >({
 
     useEffect(() => {
         //  console.log('componentDidUpdate');
-        if (rowsData.length < countItems && searchCondition) {
+        const selectedOptions = _.pickBy(filterFieldValues, (value) => {
+            return !!value.selectedOption;
+        });
+        if (!_.isEmpty(selectedOptions)) {
+            const filters = _mapValues(selectedOptions, (value) => {
+                    return value.selectedOption.value
+                }
+            );
+            if (rowsData.length < countItems && searchCondition) {
+                // @ts-ignore
+                searchItems(searchCondition, skip, limit, true, ["*"], filters);
+            } else if (rowsData.length < countItems && !searchCondition) {
+                // @ts-ignore
+                fetchItems(skip, limit, true, ["*"], filters);
+            }
+        } else if (rowsData.length < countItems && searchCondition) {
             searchItems(searchCondition, skip, limit, true);
         } else if (rowsData.length < countItems && !searchCondition) {
             fetchItems(skip, limit, true);
@@ -161,13 +242,21 @@ const EnhancedTable = <T, >({
         //  console.log('componentDidUpdate');
         if (rowsData.length < countItems) {
             setSkip(limit);
+            url.searchParams.set('skip', limit.toString());
             setLimit(rowsPerPage);
+            url.searchParams.set('limit', rowsPerPage.toString());
+            url.searchParams.set('rowsPerPage', rowsPerPage.toString());
+            window.history.pushState(null, null, url);
         }
     }, [rowsPerPage]);
 
-    // useEffect(() => {
-    //
-    // }, [JSON.stringify(filterFieldValues)]);
+    const prevFieldValues = usePrevious(filterFieldValues);
+
+    useEffect(() => {
+        if (prevFieldValues && JSON.stringify(filterFieldValues) !== JSON.stringify(prevFieldValues)) {
+            fetchItemsWithFilters();
+        }
+    }, [filterFieldValues]);
 
     // componentWillUnmount
     useEffect(() => {
@@ -176,8 +265,41 @@ const EnhancedTable = <T, >({
         }
     }, []);
 
+
     const handleSave = (): void => {
         setShowDialog(!showDialog);
+    };
+
+    const fetchItemsWithFilters = (): void => {
+        const selectedOptions = _.pickBy(filterFieldValues, (value) => {
+            return !!value.selectedOption;
+        });
+        if (!_.isEmpty(selectedOptions)) {
+            // const filters: Array<[key: keyof T, value: string | number]> = _.map(selectedOptions, (value) => {
+            //         return [value.filterName.id, value.selectedOption.value]
+            //     }
+            // );
+            const filters2 = _mapValues(selectedOptions, (value) => {
+                    return value.selectedOption.value
+                }
+            );
+            if (searchCondition) {
+                // @ts-ignore
+                searchItems(searchCondition, 0, rowsPerPage, true, ["*"], filters2);
+            } else {
+                // @ts-ignore
+                fetchItems(0, rowsPerPage, true, ["*"], filters2);
+            }
+            setPage(0);
+            url.searchParams.set('page', '0');
+            setSkip(0);
+            url.searchParams.set('skip', '0');
+            setLimit(rowsPerPage);
+            url.searchParams.set('limit', rowsPerPage.toString());
+            replaceURL();
+        } else {
+            fetchItems(skip, limit, true);
+        }
     };
 
     const handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
@@ -189,15 +311,18 @@ const EnhancedTable = <T, >({
         }
 
         setOrder(newOrder);
+        url.searchParams.set('order', newOrder);
         setOrderBy(newOrderBy);
+        url.searchParams.set('orderBy', newOrderBy);
+        replaceURL();
     };
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
         if (event.target.checked) {
             setSelected(rowsData.map(n => n._id));
-            return;
+        } else {
+            setSelected([]);
         }
-        setSelected([]);
     };
 
     const handleDeleteManyItems = (): void => {
@@ -227,15 +352,22 @@ const EnhancedTable = <T, >({
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, pageNumber: number) => {
         if (event.currentTarget.name === "last_page") {
             setSkip(limit);
+            url.searchParams.set('skip', limit.toString());
             setLimit(countItems - limit);
+            url.searchParams.set('limit', (countItems - limit).toString());
         } else if (pageNumber > page) {
             setSkip(rowsPerPage * pageNumber);
+            url.searchParams.set('skip', (rowsPerPage * pageNumber).toString());
         }
         setPage(pageNumber);
+        url.searchParams.set('page', pageNumber.toString());
+        replaceURL();
     };
 
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
         setRowsPerPage(+event.target.value);
+        url.searchParams.set('rowsPerPage', event.target.value);
+        replaceURL();
     };
 
     const handleSearchItems = ({target: {value}}: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -247,19 +379,28 @@ const EnhancedTable = <T, >({
             const searchValue = value.trim();
             const isNewSearch = searchValue !== searchCondition;
             setSearchCondition(searchValue);
+            url.searchParams.set('searchCondition', searchValue);
             if (searchValue.length === 0) {
+                url.searchParams.delete('searchCondition');
                 fetchItems(0, rowsPerPage, true);
                 setSkip(0);
+                url.searchParams.set('skip', '0');
                 setLimit(rowsPerPage);
+                url.searchParams.set('limit', rowsPerPage.toString());
                 setPage(0);
+                url.searchParams.set('page', '0');
             } else if (isNewSearch) {
                 searchItems(searchValue, 0, rowsPerPage, true);
                 setSkip(0);
+                url.searchParams.set('skip', '0');
                 setLimit(rowsPerPage);
+                url.searchParams.set('limit', rowsPerPage.toString());
                 setPage(0);
+                url.searchParams.set('page', '0');
             } else {
                 searchItems(searchValue, skip, limit, true);
             }
+            replaceURL();
         }, 300));
     };
 
@@ -272,15 +413,14 @@ const EnhancedTable = <T, >({
             } : value;
         });
         setFilterFieldValues(filterArr);
-        const params = new URL(window.location.href);
         _forEach(filterArr, (item, key) => {
             if (item.selectedOption) {
-                params.searchParams.set(key, item.selectedOption.value as string);
+                url.searchParams.set(key, item.selectedOption.value as string);
             } else {
-                params.searchParams.delete(key);
+                url.searchParams.delete(key);
             }
         });
-        window.history.pushState(null, null, params);
+        replaceURL();
     };
 
     const isSelected = (id: string): boolean => {

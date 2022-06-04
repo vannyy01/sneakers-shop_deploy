@@ -3,6 +3,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const _difference = require("lodash/difference");
 const User = mongoose.model('users');
+const _ = require('lodash');
 
 module.exports = (app) => {
 
@@ -95,14 +96,17 @@ module.exports = (app) => {
         try {
             const defaultFields = ['googleID', '__id', 'email', 'role', 'givenName', 'familyName'];
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            const conditions = req.query.filters ? {role: +req.query.filters.role} : {};
             let count;
-            const users = await User.find().skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            const filters = req.query.filters ? req.query.filters : {};
+            const users = await User.find(conditions).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
             if (users !== null) {
                 if (req.query.count) {
-                    count = await User.countDocuments();
-                    return res.status(200).send({users, count});
+                    count = _.isEmpty(filters) ? await User.countDocuments() :
+                        await User.find(conditions).countDocuments();
+                    return res.status(200).send({users, count, filters});
                 }
-                res.status(200).send({users});
+                res.status(200).send({users, filters});
             } else {
                 res.status(404).send(`Did not found ${{...fields}}`);
                 next(new Error(`Nothing is found using: ${{...fields}}`));
@@ -117,7 +121,7 @@ module.exports = (app) => {
         try {
             const defaultFields = ['googleID', '__id', 'email', 'role', 'givenName', 'familyName'];
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
-
+            //  console.log(req.query.filters);
             let count;
             const users = await User.find().or([{
                 email: {
