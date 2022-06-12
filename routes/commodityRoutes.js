@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const Commodity = mongoose.model('commodities');
+const Brand = mongoose.model('brands');
 const requireLogin = require('../middlewares/requireLogin');
 const {replaceTempDir, deleteFilesDir} = require("../services/handleFiles");
 const _difference = require("lodash/difference");
+const _ = require("lodash");
 
 function hasJsonStructure(str) {
     if (typeof str !== 'string') return false;
@@ -17,6 +19,7 @@ function hasJsonStructure(str) {
 }
 
 module.exports = app => {
+    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
 
     app.post('/api/commodity/create', async (req, res, next) => {
         try {
@@ -52,6 +55,7 @@ module.exports = app => {
                 }
             });
         } catch (error) {
+            res.status(500).send(error);
             next(error);
         }
     });
@@ -98,16 +102,17 @@ module.exports = app => {
 
     app.get('/api/commodity', async (req, res, next) => {
         try {
-            const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
-            const fields = req.query.fields ? req.query.fields : defaultFields;
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            const filters = req.query.filters ? req.query.filters : {};
             let count;
-            const goods = await Commodity.find().skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            const goods = await Commodity.find(filters).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
             if (goods !== null) {
                 if (req.query.count) {
-                    count = await Commodity.countDocuments();
-                    return res.status(200).send({goods, count});
+                    count = _.isEmpty(filters) ? await Commodity.countDocuments() :
+                        await Commodity.find(filters).countDocuments();
+                    return res.status(200).send({goods, count, filters});
                 }
-                res.status(200).send({goods});
+                res.status(200).send({goods, filters});
             } else {
                 res.status(404).send(`Did not found ${{...fields}}`);
                 next(new Error(`Nothing is found using: ${{...fields}}`));
@@ -119,10 +124,10 @@ module.exports = app => {
     });
     app.get('/api/commodity_search', async (req, res, next) => {
         try {
-            const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
-            const fields = req.query.fields ? req.query.fields : defaultFields;
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            const filters = req.query.filters ? req.query.filters : {};
             let count;
-            const goods = await Commodity.find().or([{
+            const goods = await Commodity.find(filters).or([{
                 brand: {
                     $regex: req.query.condition,
                     $options: "i"
@@ -145,7 +150,7 @@ module.exports = app => {
             }]).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
             if (goods !== null) {
                 if (req.query.count) {
-                    count = await Commodity.find().or([{
+                    count = await Commodity.find(filters).or([{
                         brand: {
                             $regex: req.query.condition,
                             $options: "i"
@@ -166,15 +171,63 @@ module.exports = app => {
                             $options: "i"
                         }
                     }]).countDocuments();
-                    return res.status(200).send({goods, count});
+                    return res.status(200).send({goods, count, filters});
                 }
-                res.status(200).send({goods});
+                res.status(200).send({goods, filters});
             } else {
                 res.status(404).send(`Did not found ${{...fields}}`);
                 next(new Error(`Nothing is found using: ${{...fields}}`));
             }
         } catch (error) {
             res.status(500).send(error);
+            next(error);
+        }
+    });
+
+    app.post('/api/commodity/brand/create', async (req, res, next) => {
+        try {
+            const existingBrand = await Brand.findOne({
+                label: req.body.label
+            });
+            if (existingBrand) {
+                return res.status(400).send({message: "Brand has already created."});
+            }
+            req.body._id = undefined;
+            let createdBrand = new Brand(req.body);
+            await createdBrand.save();
+            let brands = await Brand.find();
+            brands = _.keyBy(brands, 'label');
+            res.status(200).send(brands);
+        } catch (error) {
+            res.status(500).send({message: `Cannot create the brand. Error: !${error}`});
+            next(error);
+        }
+    });
+
+    app.get('/api/commodity/brands', async (req, res, next) => {
+        try {
+            let brands = await Brand.find();
+            if (brands !== null) {
+                brands = _.keyBy(brands, 'label');
+                res.status(200).send(brands);
+            } else {
+                res.status(404).send(`Brands did not found.`);
+                next(new Error(`Brands did not found.`));
+            }
+        } catch (error) {
+            res.status(500).send(error);
+            next(error);
+        }
+    });
+
+    app.delete('/api/commodity/brand/delete/:name', requireLogin, async (req, res, next) => {
+        try {
+            await Brand.deleteOne({label: req.params.name}).exec();
+            let brands = await Brand.find();
+            brands = _.keyBy(brands, 'label');
+            res.status(200).send(brands);
+        } catch (error) {
+            res.status(500).send(`Cannot delete the brand with label: ${req.params.label}. Error: !${error}`);
             next(error);
         }
     });

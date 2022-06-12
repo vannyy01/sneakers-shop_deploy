@@ -1,3 +1,6 @@
+import {ItemsType} from "../components/types";
+import {SearchItemParameters} from "../components/GridView";
+
 export interface UserInterface {
     googleID?: string,
     email: string,
@@ -84,7 +87,7 @@ export const FETCH_GOODS: FETCH_GOODS = 'FETCH_GOODS';
 
 export interface FetchGoodsAction {
     type: FETCH_GOODS,
-    payload: {goods: ShoeInterface[], count?: number}
+    payload: {goods: ShoeInterface[], count?: number, filters: SearchItemParameters}
 }
 
 type SEARCH_GOODS = 'SEARCH_GOODS';
@@ -142,6 +145,31 @@ export const DELETE_MANY_GOODS: DELETE_MANY_GOODS = 'DELETE_MANY_GOODS';
 
 export interface DeleteManyGoodsAction {
     type: DELETE_MANY_GOODS,
+}
+
+type FETCH_BRANDS = 'FETCH_BRANDS';
+export const FETCH_BRANDS: FETCH_BRANDS = 'FETCH_BRANDS';
+
+export interface FetchBrandsAction {
+    type: FETCH_BRANDS,
+    payload: ItemsType
+}
+
+type CREATE_BRAND = 'CREATE_BRAND';
+export const CREATE_BRAND: CREATE_BRAND = 'CREATE_BRAND';
+
+export interface CreateBrandAction {
+    type: CREATE_BRAND,
+    payload: ItemsType
+}
+
+
+type DELETE_BRAND = 'DELETE_BRAND';
+export const DELETE_BRAND: DELETE_BRAND = 'DELETE_BRAND';
+
+export interface DeleteBrandAction {
+    type: DELETE_BRAND,
+    payload: ItemsType
 }
 
 export interface SizeInterface {

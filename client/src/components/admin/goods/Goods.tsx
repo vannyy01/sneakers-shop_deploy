@@ -4,48 +4,68 @@ import {
     clearGoodsState as clearItemsState,
     deleteManyGoods as deleteManyItems,
     fetchGoods as fetchItems,
-    searchGoods as searchItems
+    searchGoods as searchItems,
+    fetchBrands as fetchBr
 } from "../../../actions";
 import GridView, {FilterListTypeArray} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
-import {HeadCell} from "../../types";
+import {HeadCell, ItemsType} from "../../types";
 import {sexes, shoeTypes} from "./BaseGood";
+import {useEffect} from "react";
+import _isEmpty from "lodash/isEmpty";
 
 interface PropsInterface {
-    goods: ShoeInterface[] | [],
+    goods: ShoeInterface[],
+    brands: ItemsType,
     count: number,
     fetchGoods: (skip: number, limit: number, count: boolean) => void,
+    fetchBrands: () => void,
     searchGoods: (condition: string, skip: number, limit: number, count: boolean) => void,
     clearGoodsState: () => void,
     deleteManyGoods: (goods: string[], onSuccessCallback: () => void) => void
 }
 
-
-const headCells: Array<HeadCell<ShoeInterface>> = [
-    {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
-    {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
-    {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
-    {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
-    {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
-    {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
-];
-
-const filterList: FilterListTypeArray<ShoeInterface> = {
-    [headCells[4].id]: {
-        filterName: headCells[4],
-        filterLabel: "Тип",
-        fields: shoeTypes
-    },
-    [headCells[5].id]: {
-        filterName: headCells[5],
-        filterLabel: "Стать",
-        fields: sexes
-    }
-};
-
-const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods, clearGoodsState, deleteManyGoods}) => {
+const Goods: React.FC<PropsInterface> = ({
+                                             goods,
+                                             brands= {},
+                                             count,
+                                             fetchGoods,
+                                             fetchBrands,
+                                             searchGoods,
+                                             clearGoodsState,
+                                             deleteManyGoods
+                                         }) => {
 
     const goodsCount = 10;
+    const headCells: Array<HeadCell<ShoeInterface>> = [
+        {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
+        {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
+        {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
+        {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
+        {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
+        {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
+    ];
+    const filterList: FilterListTypeArray<ShoeInterface> = {
+        [headCells[1].id]: {
+            filterName: headCells[1],
+            filterLabel: "Бренд",
+            fields: brands
+        },
+        [headCells[4].id]: {
+            filterName: headCells[4],
+            filterLabel: "Тип",
+            fields: shoeTypes
+        },
+        [headCells[5].id]: {
+            filterName: headCells[5],
+            filterLabel: "Стать",
+            fields: sexes
+        }
+    };
+
+    useEffect(() => {
+        fetchBrands();
+    }, []);
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
@@ -53,7 +73,7 @@ const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods,
     }
 
     return (
-        <GridView
+       !_isEmpty(brands) && <GridView
             idField="_id"
             filterList={filterList}
             createLocationPath='/admin/goods/create'
@@ -69,15 +89,17 @@ const Goods: React.FC<PropsInterface> = ({goods, count, fetchGoods, searchGoods,
             deleteButtons={["Скасувати", "Видалити"]}
             title="Товари"
             deleteItems={[deleteManyGoods, onDeleteCallback]}
+            searchFieldPlaceholder="Модель, бренд, стать..."
         />
     )
 };
 
-const mapStateToProps = ({goods: {goods, count}}: any) => ({goods, count});
+const mapStateToProps = ({goods: {goods, count}, brands}: any) => ({goods, count, brands});
 
 export default connect(mapStateToProps, {
     fetchGoods: fetchItems,
     searchGoods: searchItems,
     clearGoodsState: clearItemsState,
-    deleteManyGoods: deleteManyItems
+    deleteManyGoods: deleteManyItems,
+    fetchBrands: fetchBr
 })(Goods);

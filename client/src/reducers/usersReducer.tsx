@@ -1,3 +1,4 @@
+import { SearchItemParameters } from "src/components/GridView";
 import {
     CLEAR_USERS,
     ClearUsersAction,
@@ -28,7 +29,7 @@ interface StateType {
     users: UserInterface | UserInterface[],
     count?: number,
     searchMode: boolean,
-    filters: { [key: string]: string }
+    filters: SearchItemParameters
 }
 
 const initialState: StateType = {users: [], searchMode: false, filters: {}};
@@ -41,8 +42,8 @@ export const usersReducer = (state: StateType = Object.assign({}, initialState),
     switch (action.type) {
         case FETCH_USERS:
             // If previously SEARCH_USERS was used
-            console.log('previous state', state);
-            console.log('next state', action.payload);
+            // console.log('previous state', state);
+            // console.log('next state', action.payload);
             if (state.searchMode) {
                 return {searchMode: false, ...action.payload};
             }

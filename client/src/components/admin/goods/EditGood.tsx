@@ -9,7 +9,7 @@ import Button from "@material-ui/core/Button";
 import DeleteIcon from '@material-ui/icons/Delete';
 import ArrowBack from '@material-ui/icons/ArrowBackIos';
 import {connect} from 'react-redux';
-import {deleteGood, fetchGoodByID, updateGood} from "../../../actions";
+import {createBrand, deleteGood, fetchBrands, fetchGoodByID, updateGood, deleteBrand} from "../../../actions";
 import {ShoeInterface} from "../../../actions/types";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, {AlertProps} from '@material-ui/lab/Alert';
@@ -23,6 +23,8 @@ import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles, sexes, shoeT
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
+import {ItemsType} from "../../types";
+import CreatableSelect from "react-select/creatable";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -40,8 +42,9 @@ interface EditGoodPropsType extends BaseGoodPropsType {
     classes: { alert: string, button: string, paper: string },
     fetchGoodByID: (id: string, onErrorCallback: () => void) => void,
     good: ShoeInterface,
+    brands?: ItemsType,
     updateGood: (good: ShoeInterface | {}, callback: () => void) => void,
-    deleteGood: (id: string, callback: () => void) => void
+    deleteGood: (id: string, callback: () => void) => void,
 }
 
 interface EditGoodStateType extends BaseGoodStateType {
@@ -62,6 +65,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
         this.props.fetchGoodByID(this.props.match.params.commID,
             () => this.props.history.push('/admin/goods')
         );
+        this.props.fetchBrands();
         this.setState({good: this.props.good})
     }
 
@@ -72,10 +76,19 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
     }
 
     public render() {
-        if (this.state.good?._id) {
-            const {classes} = this.props;
+        const {classes, brands} = this.props;
+        const options = _map(brands, ({label, value}) => ({label, value}));
+        if (this.state.good?._id && brands) {
             const {title, brand, description, mainImage, type, sex, price, sizes} = this.state.good;
-            const {showAlert, showDialog, showDeleteDialog, formErrors} = this.state;
+            const {
+                showAlert,
+                showDialog,
+                showDeleteDialog,
+                showDeleteOptionDialog,
+                optionToDelete,
+                isLoading,
+                formErrors
+            } = this.state;
             return <Paper className={classes.paper}>
                 <Typography component="h1" variant="h4" align="center">
                     Товар
@@ -101,18 +114,47 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                 />
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
-                                <TextField
-                                    required={true}
-                                    id="brand"
+                                {/*<TextField*/}
+                                {/*    required={true}*/}
+                                {/*    id="brand"*/}
+                                {/*    name="brand"*/}
+                                {/*    label="Бренд"*/}
+                                {/*    fullWidth={true}*/}
+                                {/*    multiline={true}*/}
+                                {/*    autoComplete="brand-name"*/}
+                                {/*    value={brand}*/}
+                                {/*    onChange={this.handleOnChange}*/}
+                                {/*    helperText={formErrors.brand}*/}
+                                {/*    error={formErrors.brand.length > 0}*/}
+                                {/*/>*/}
+                                <CreatableSelect
+                                    key="brand"
+                                    aria-required={true}
+                                    closeMenuOnSelect={true}
+                                    isClearable={true}
+                                    isDisabled={isLoading}
+                                    isLoading={isLoading}
                                     name="brand"
-                                    label="Бренд"
-                                    fullWidth={true}
-                                    multiline={true}
-                                    autoComplete="brand-name"
-                                    value={brand}
-                                    onChange={this.handleOnChange}
-                                    helperText={formErrors.brand}
-                                    error={formErrors.brand.length > 0}
+                                    components={{Option: this.Option, Placeholder: this.Placeholder}}
+                                    placeholder="Бренд"
+                                    onChange={this.handleChangeList}
+                                    onCreateOption={this.handleCreateBrand}
+                                    formatCreateLabel={(inputValue) => `Додати "${inputValue}"`}
+                                    styles={{
+                                        container: (base) => ({
+                                            ...base,
+                                            width: '50%',
+                                            margin: '5px 5px 5px 50px',
+                                            minHeight: '45px'
+                                        }),
+                                        control: (base) => ({
+                                            ...base,
+                                            minHeight: '45px'
+                                        })
+                                    }}
+                                    options={options}
+                                    value={{label: brand, value: brand}}
+                                    aria-errormessage={formErrors.brand}
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>
@@ -250,6 +292,25 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                         </Grid>
                     </form>
                     <Dialog
+                        open={showDeleteOptionDialog}
+                        onClose={() => this.handleClose("option")}
+                        PaperComponent={PaperComponent}
+                        aria-labelledby="draggable-dialog-title"
+                    >
+                        <DialogTitle style={{cursor: 'move'}} id="draggable-dialog-title">
+                            Видалити {optionToDelete}?
+                        </DialogTitle>
+                        <DialogActions>
+                            <Button autoFocus={true} name="cancel" onClick={() => this.handleClose("option")}
+                                    color="primary">
+                                Відміна
+                            </Button>
+                            <Button name="save" onClick={this.handleDeleteOption} color="primary">
+                                Видалити
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                    <Dialog
                         open={showDeleteDialog}
                         onClose={() => this.handleClose("cancel")}
                         PaperComponent={PaperComponent}
@@ -303,13 +364,16 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
         return <div>Loading...</div>;
     }
 
-    protected handleClose = (name: "cancel" | "alert" | "save"): void => {
+    protected handleClose = (name: "cancel" | "alert" | "option" | "save"): void => {
         switch (name) {
             case "cancel":
                 this.setState({showDialog: false, showDeleteDialog: false});
                 break;
             case "alert":
                 this.setState({showAlert: false});
+                break;
+            case "option":
+                this.setState({showDeleteOptionDialog: false, optionToDelete: undefined})
                 break;
             default:
                 alert('Збережено');
@@ -336,6 +400,13 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
 
 }
 
-const mapStateToProps = ({goods}: { goods: ShoeInterface }) => ({good: goods});
+const mapStateToProps = ({goods, brands}: { goods: ShoeInterface, brands: ItemsType }) => ({good: goods, brands});
 
-export default connect(mapStateToProps, {fetchGoodByID, updateGood, deleteGood})(withStyles(GoodStyles)(EditGood));
+export default connect(mapStateToProps, {
+    fetchGoodByID,
+    updateGood,
+    deleteGood,
+    fetchBrands,
+    createBrand,
+    deleteBrand
+})(withStyles(GoodStyles)(EditGood));

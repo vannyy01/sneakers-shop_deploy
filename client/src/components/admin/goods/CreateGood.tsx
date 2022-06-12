@@ -22,12 +22,14 @@ import BaseGood, {
     BaseGoodPropsType, BaseGoodStateType
 } from "./BaseGood";
 import {withStyles} from "@material-ui/core";
-import {createGood} from "../../../actions";
+import {createBrand, createGood, deleteBrand, fetchBrands} from "../../../actions";
 import {connect} from "react-redux";
 import {ShoeInterface} from "../../../actions/types";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
+import CreatableSelect from "react-select/creatable";
+import {ItemsType} from "../../types";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -39,10 +41,15 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
         this.state = CreateGood.defaultState();
     }
 
+    public componentDidMount() {
+        this.props.fetchBrands();
+    }
+
     public render() {
-        const {classes} = this.props;
+        const {classes, brands} = this.props;
+        const options = _map(brands, ({label, value}) => ({label, value}));
         const {title, brand, description, mainImage, type, sex, price, sizes} = this.state.good;
-        const {showAlert, showDialog, formErrors} = this.state;
+        const {showAlert, showDialog, formErrors, isLoading} = this.state;
 
         return <Paper className={classes.paper}>
             <Typography component="h1" variant="h4" align="center">
@@ -69,18 +76,59 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                             />
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
-                            <TextField
-                                required={true}
-                                id="brand"
+                            {/*<TextField*/}
+                            {/*    required={true}*/}
+                            {/*    id="brand"*/}
+                            {/*    name="brand"*/}
+                            {/*    label="Бренд"*/}
+                            {/*    fullWidth={true}*/}
+                            {/*    autoComplete="brand-name"*/}
+                            {/*    value={brand}*/}
+                            {/*    onChange={this.handleOnChange}*/}
+                            {/*    helperText={formErrors.brand}*/}
+                            {/*    error={formErrors.brand.length > 0}*/}
+                            {/*/>*/}
+                            <CreatableSelect
+                                key="brand"
+                                aria-required={true}
+                                closeMenuOnSelect={true}
+                                isClearable={true}
+                                isDisabled={isLoading}
+                                isLoading={isLoading}
                                 name="brand"
-                                label="Бренд"
-                                fullWidth={true}
-                                autoComplete="brand-name"
-                                value={brand}
-                                onChange={this.handleOnChange}
-                                helperText={formErrors.brand}
-                                error={formErrors.brand.length > 0}
+                                components={{Option: this.Option, Placeholder: this.Placeholder}}
+                                placeholder="Бренд"
+                                onChange={this.handleChangeList}
+                                onCreateOption={this.handleCreateBrand}
+                                formatCreateLabel={(inputValue) => `Додати "${inputValue}"`}
+                                styles={{
+                                    container: (base) => ({
+                                        ...base,
+                                        width: '50%',
+                                        margin: '5px 5px 5px 50px',
+                                        minHeight: '45px'
+                                    }),
+                                    control: (base) => ({
+                                        ...base,
+                                        minHeight: '45px'
+                                    })
+                                }}
+                                options={options}
+                                value={{label: brand, value: brand}}
+                                aria-errormessage="brand-select-helper-text"
                             />
+                            {formErrors.brand.length > 0 &&
+                                <p style={{
+                                    color: '#f44336',
+                                    margin: '3px 5px 5px 50px',
+                                    fontSize: '0.75rem',
+                                    textAlign: 'left',
+                                    fontFamily: "Helvetica",
+                                    fontWeight: 400,
+                                    lineHeight: 1.66,
+                                    letterSpacing: '0.03333em'
+                                }}
+                                   id="brand-select-helper-text">{formErrors.brand}</p>}
                         </Grid>
                         <Grid item={true} xs={12}>
                             <TextField
@@ -268,4 +316,6 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
 
 }
 
-export default connect(null, {createGood})(withStyles(GoodStyles)(CreateGood));
+const mapStateToProps = ({brands}: { brands: ItemsType }) => ({brands});
+
+export default connect(mapStateToProps, {createGood, fetchBrands, createBrand, deleteBrand})(withStyles(GoodStyles)(CreateGood));

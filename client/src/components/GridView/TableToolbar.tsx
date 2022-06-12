@@ -77,6 +77,8 @@ interface EnhancedTableToolbarPropsI<T> {
     searchItems: (event: React.ChangeEvent<HTMLTextAreaElement>) => void,
     deleteItems: () => void,
     selected: any[],
+    searchFieldPlaceholder: string,
+    searchCondition?: string,
     title: string,
     location: string
 }
@@ -91,6 +93,8 @@ const EnhancedTableToolbar = <T, >({
                                        location,
                                        deleteItems,
                                        searchItems,
+                                       searchFieldPlaceholder,
+                                       searchCondition,
                                        filterList,
                                        handleChangeFilter
                                    }: EnhancedTableToolbarPropsI<T>) => {
@@ -114,7 +118,7 @@ const EnhancedTableToolbar = <T, >({
                 <div style={{width: '100%'}}>
                     {selected.length > 0 &&
                         <Typography color="inherit" variant="subtitle2">
-                            {selected.length} selected
+                            Обрано {selected.length} записів
                         </Typography>
                     }
                 </div>
@@ -129,8 +133,9 @@ const EnhancedTableToolbar = <T, >({
                             <TextField
                                 id="input-with-icon-grid"
                                 className={classes.inputProps}
-                                label="Модель, бренд, стать..."
+                                label={searchFieldPlaceholder}
                                 onChange={searchItems}
+                                defaultValue={searchCondition}
                             />
                         </Grid>
                     </Grid>
@@ -165,8 +170,8 @@ const EnhancedTableToolbar = <T, >({
             ))}
             <div className={classes.actions}>
                 {selected.length > 0 ? (
-                    <Tooltip title="Delete">
-                        <IconButton aria-label="Delete" onClick={deleteItems}>
+                    <Tooltip title="Видалити">
+                        <IconButton aria-label="Видалити запис" onClick={deleteItems}>
                             <DeleteIcon/>
                         </IconButton>
                     </Tooltip>

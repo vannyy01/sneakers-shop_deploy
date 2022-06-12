@@ -6,7 +6,11 @@ import Paper, {PaperProps} from "@material-ui/core/Paper";
 import Draggable from "react-draggable";
 import {createStyles, Theme} from "@material-ui/core";
 import {validateNumberInput} from "../../../actions/validation";
-import {ItemsType} from "../../types";
+import {ItemDataType, ItemsType} from "../../types";
+import {ActionMeta, components, OptionProps, PlaceholderProps} from "react-select";
+import IconButton from "@material-ui/core/IconButton";
+import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
+import {ReactElement} from "react";
 
 
 export const sexes: ItemsType = {
@@ -73,12 +77,19 @@ interface PathParams {
 
 export interface BaseGoodPropsType extends RouteComponentProps<PathParams> {
     classes: { alert: string, button: string, paper: string },
+    brands?: ItemsType,
+    fetchBrands: () => void,
+    createBrand: (brand: ItemDataType) => void,
+    deleteBrand: (brandName: string, onSuccessCallback: () => void) => void,
 }
 
 export interface BaseGoodStateType {
     showAlert: boolean,
     showDialog: boolean,
+    showDeleteOptionDialog: boolean,
+    optionToDelete?: string,
     typing: boolean,
+    isLoading: boolean,
     typingTimeout?: any,
     formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, sex: string, price: string },
     formValid: boolean
@@ -92,7 +103,9 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         return {
             showAlert: false,
             showDialog: false,
+            showDeleteOptionDialog: false,
             typing: false,
+            isLoading: false,
             good: {
                 _id: '',
                 title: '',
@@ -330,6 +343,63 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 }
                 , 200)
         });
+    };
+
+    protected handleChangeList = (newValue: ItemDataType, actionMeta: ActionMeta<ItemDataType>): void => {
+        const newState: ShoeInterface = this.state.good;
+        newState[actionMeta.name] = newValue?.label || "";
+        this.setState({
+            good: newState
+        }, () => {
+            this.validateField(actionMeta.name, newState[actionMeta.name]);
+        });
+    };
+
+    protected handleCreateBrand = (inputValue: string) => {
+        this.validateField('brand', inputValue);
+        if (this.state.isValid.brandValid) {
+            this.setState({isLoading: true});
+            setTimeout(() => {
+                this.props.createBrand({label: inputValue, value: inputValue});
+                const newState: ShoeInterface = this.state.good;
+                newState.brand = inputValue;
+                this.setState({
+                    isLoading: false,
+                    good: newState,
+                });
+            }, 1000);
+        }
+    };
+
+    protected showDeleteOptionDialog = (event: React.MouseEvent<HTMLButtonElement>, brandName: string): void => {
+        event.stopPropagation();
+        this.setState({showDeleteOptionDialog: true, optionToDelete: brandName});
+    };
+
+    protected handleDeleteOption = (): void => {
+        this.setState({isLoading: true});
+        setTimeout(() => {
+            this.props.deleteBrand(this.state.optionToDelete, () => {
+                this.setState({
+                    showDeleteOptionDialog: false, optionToDelete: undefined, isLoading: false,
+                })
+            });
+        }, 1000);
+    };
+
+    protected Option = (props: OptionProps<ItemDataType>): ReactElement => {
+        return <components.Option {...props} className="d-flex justify-content-between">
+            <span>{props.label}</span>
+            {!props.data.__isNew__ &&
+                <IconButton size="small" onClick={(event) => this.showDeleteOptionDialog(event, props.label)}>
+                    <CloseRoundedIcon fontSize="small"/>
+                </IconButton>
+            }
+        </components.Option>;
+    };
+
+    protected Placeholder: React.FC<PlaceholderProps<ItemDataType>> = (props): ReactElement => {
+        return <components.Placeholder {...props} children={props.children}/>;
     };
 
     protected abstract handleSave(): void;

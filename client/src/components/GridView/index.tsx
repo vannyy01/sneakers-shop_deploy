@@ -93,13 +93,13 @@ interface EnhancedTablePropsI<T> {
     rowsCount: number,
     count: number,
     data: any,
-    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: Array<[key: keyof T, value: string | number]>) => void,
+    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: { [key: string]: string | number }) => void,
     searchItems?: (condition: string,
                    skip: number,
                    limit: number,
                    count: boolean,
                    fields?: string[],
-                   filters?: Array<[key: keyof T, value: string | number]>) => void,
+                   filters?: { [key: string]: string | number }) => void,
     clearItems: () => void,
     deleteItems?: [(items: string[], onSuccessCallback: () => void) => void, () => void],
     deleteMessage: string,
@@ -107,7 +107,8 @@ interface EnhancedTablePropsI<T> {
     headCells: any[],
     idField: string,
     editRoute?: string | '/',
-    title: string
+    title: string,
+    searchFieldPlaceholder: string
 }
 
 const EnhancedTable = <T, >({
@@ -119,6 +120,7 @@ const EnhancedTable = <T, >({
                                 count,
                                 data = [],
                                 title,
+                                searchFieldPlaceholder,
                                 deleteMessage,
                                 deleteButtons,
                                 deleteItems,
@@ -126,11 +128,14 @@ const EnhancedTable = <T, >({
                                 searchItems,
                                 clearItems
                             }: EnhancedTablePropsI<T>) => {
+
     const url = new URL(window.location.href);
+
     const replaceURL = (): void => {
         url.searchParams.sort();
         window.history.pushState(null, null, url);
     }
+
     let initialPage = 0;
     let initialRowsPerPage = rowsCount;
     let initialSkip = 0;
@@ -138,10 +143,9 @@ const EnhancedTable = <T, >({
     let initialOrder: Order = 'asc';
     let initialOrderBy = '';
     let initialSearchCondition;
-    let initialFilterList: FilterListTypeArray<T> = filterList;
+    let initialFilterList: FilterListTypeArray<T> = Object.assign({}, filterList);
 
     if (url.searchParams.toString().length > 0) {
-        console.log(filterList);
         url.searchParams.forEach((value, key) => {
             switch (key) {
                 case 'page':
@@ -199,9 +203,13 @@ const EnhancedTable = <T, >({
 
     // Firstly, request must be sent.
     useEffect(() => {
-        console.log(filterFieldValues);
         if (data.length === 0) {
-            fetchItemsWithFilters();
+            const filters = getFilters();
+            if (searchCondition) {
+                searchItems(searchCondition, 0, rowsPerPage*(page+1), true, ["*"], filters);
+            } else {
+                fetchItems(0, rowsPerPage*(page+1), true, ["*"], filters);
+            }
         }
     }, []);
 
@@ -216,19 +224,15 @@ const EnhancedTable = <T, >({
 
     useEffect(() => {
         //  console.log('componentDidUpdate');
-        const selectedOptions = _.pickBy(filterFieldValues, (value) => {
-            return !!value.selectedOption;
-        });
-        if (!_.isEmpty(selectedOptions)) {
-            const filters = _mapValues(selectedOptions, (value) => {
+        const options = getSelectedOptions();
+        if (!_.isEmpty(options)) {
+            const filters: SearchItemParameters = _mapValues(options, (value) => {
                     return value.selectedOption.value
                 }
             );
             if (rowsData.length < countItems && searchCondition) {
-                // @ts-ignore
                 searchItems(searchCondition, skip, limit, true, ["*"], filters);
             } else if (rowsData.length < countItems && !searchCondition) {
-                // @ts-ignore
                 fetchItems(skip, limit, true, ["*"], filters);
             }
         } else if (rowsData.length < countItems && searchCondition) {
@@ -270,25 +274,22 @@ const EnhancedTable = <T, >({
         setShowDialog(!showDialog);
     };
 
+    const getSelectedOptions = (): { [key: string]: FilterListType<T> } => _.pickBy(filterFieldValues, (value) => {
+        return !!value.selectedOption;
+    });
+
+    const getFilters = (): SearchItemParameters => _mapValues(getSelectedOptions(), (value) => {
+            return value.selectedOption.value
+        }
+    );
+
     const fetchItemsWithFilters = (): void => {
-        const selectedOptions = _.pickBy(filterFieldValues, (value) => {
-            return !!value.selectedOption;
-        });
-        if (!_.isEmpty(selectedOptions)) {
-            // const filters: Array<[key: keyof T, value: string | number]> = _.map(selectedOptions, (value) => {
-            //         return [value.filterName.id, value.selectedOption.value]
-            //     }
-            // );
-            const filters2 = _mapValues(selectedOptions, (value) => {
-                    return value.selectedOption.value
-                }
-            );
+        if (!_.isEmpty(getSelectedOptions())) {
+            const filters = getFilters();
             if (searchCondition) {
-                // @ts-ignore
-                searchItems(searchCondition, 0, rowsPerPage, true, ["*"], filters2);
+                searchItems(searchCondition, 0, rowsPerPage, true, ["*"], filters);
             } else {
-                // @ts-ignore
-                fetchItems(0, rowsPerPage, true, ["*"], filters2);
+                fetchItems(0, rowsPerPage, true, ["*"], filters);
             }
             setPage(0);
             url.searchParams.set('page', '0');
@@ -298,13 +299,22 @@ const EnhancedTable = <T, >({
             url.searchParams.set('limit', rowsPerPage.toString());
             replaceURL();
         } else {
-            fetchItems(skip, limit, true);
+            if (searchCondition) {
+                searchItems(searchCondition, 0, rowsPerPage, true);
+            } else {
+                fetchItems(0, limit, true);
+            }
+            setPage(0);
+            url.searchParams.set('page', '0');
+            setSkip(0);
+            url.searchParams.set('skip', '0');
+            replaceURL();
         }
     };
 
     const handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
         const newOrderBy = property;
-        let newOrder: 'asc' | 'desc' = 'desc';
+        let newOrder: Order = 'desc';
 
         if (orderBy === property && order === 'desc') {
             newOrder = 'asc';
@@ -349,7 +359,7 @@ const EnhancedTable = <T, >({
         setSelected(newSelected);
     };
 
-    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, pageNumber: number) => {
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, pageNumber: number): void => {
         if (event.currentTarget.name === "last_page") {
             setSkip(limit);
             url.searchParams.set('skip', limit.toString());
@@ -382,7 +392,11 @@ const EnhancedTable = <T, >({
             url.searchParams.set('searchCondition', searchValue);
             if (searchValue.length === 0) {
                 url.searchParams.delete('searchCondition');
-                fetchItems(0, rowsPerPage, true);
+                if (!_.isEmpty(getSelectedOptions())) {
+                    fetchItems(0, rowsPerPage, true, ["*"], getFilters());
+                } else {
+                    fetchItems(0, rowsPerPage, true);
+                }
                 setSkip(0);
                 url.searchParams.set('skip', '0');
                 setLimit(rowsPerPage);
@@ -390,7 +404,11 @@ const EnhancedTable = <T, >({
                 setPage(0);
                 url.searchParams.set('page', '0');
             } else if (isNewSearch) {
-                searchItems(searchValue, 0, rowsPerPage, true);
+                if (!_.isEmpty(getSelectedOptions())) {
+                    searchItems(searchValue, 0, rowsPerPage, true, ["*"], getFilters());
+                } else {
+                    searchItems(searchValue, 0, rowsPerPage, true);
+                }
                 setSkip(0);
                 url.searchParams.set('skip', '0');
                 setLimit(rowsPerPage);
@@ -438,6 +456,8 @@ const EnhancedTable = <T, >({
                 handleChangeFilter={handleChangeFilterOption}
                 location={createLocationPath}
                 title={title}
+                searchFieldPlaceholder={searchFieldPlaceholder}
+                searchCondition={searchCondition}
                 selected={selected}
                 deleteItems={handleSave}
             />
@@ -519,11 +539,12 @@ const EnhancedTable = <T, >({
                 rowsPerPageOptions={[5, 10, 25]}
                 rowsPerPage={rowsPerPage}
                 page={page}
+                labelRowsPerPage="Виводити по:"
                 backIconButtonProps={{
-                    'aria-label': 'Previous Page',
+                    'aria-label': 'Попередня сторінка',
                 }}
                 nextIconButtonProps={{
-                    'aria-label': 'Next Page',
+                    'aria-label': 'Наступна сторінка',
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}

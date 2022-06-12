@@ -27,7 +27,6 @@ export const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({
                                                                                   page,
                                                                                   rowsPerPage,
                                                                                   onPageChange,
-
                                                                               }) => {
     const classes = useStyles();
     const theme = useTheme();
@@ -53,17 +52,17 @@ export const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({
             <IconButton
                 onClick={handleFirstPageButtonClick}
                 disabled={page === 0}
-                aria-label="first page"
+                aria-label="Початкова сторінка"
             >
                 {theme.direction === 'rtl' ? <LastPageIcon/> : <FirstPageIcon/>}
             </IconButton>
-            <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
+            <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="Попередня сторінка">
                 {theme.direction === 'rtl' ? <KeyboardArrowRight/> : <KeyboardArrowLeft/>}
             </IconButton>
             <IconButton
                 onClick={handleNextButtonClick}
                 disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-                aria-label="next page"
+                aria-label="Наступна сторінка"
             >
                 {theme.direction === 'rtl' ? <KeyboardArrowLeft/> : <KeyboardArrowRight/>}
             </IconButton>
@@ -71,7 +70,7 @@ export const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({
                 name="last_page"
                 onClick={handleLastPageButtonClick}
                 disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-                aria-label="last page"
+                aria-label="Остання сторінка"
             >
                 {theme.direction === 'rtl' ? <FirstPageIcon/> : <LastPageIcon/>}
             </IconButton>

@@ -5,6 +5,7 @@ const passport = require('passport');
 const keys = require('./config/keys');
 require('./models/User');
 require('./models/Order');
+require('./models/Brand');
 require('./services/passport');
 
 mongoose.connect(keys.mongoDBConnect);

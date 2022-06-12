@@ -1,4 +1,5 @@
 export interface ItemDataType {
+    __isNew__?: boolean;
     label: string,
     value: string | number
 }

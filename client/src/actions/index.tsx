@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {
-    ANSWER_POLL, CALC_POLL, CLEAR_GOODS, CLEAR_USERS, CREATE_GOOD, CREATE_USER,
-    DELETE_CART_ITEM, DELETE_GOOD, DELETE_MANY_GOODS, DELETE_MANY_USERS, DELETE_USER,
+    ANSWER_POLL, CALC_POLL, CLEAR_GOODS, CLEAR_USERS, CREATE_BRAND, CREATE_GOOD, CREATE_USER, DELETE_BRAND,
+    DELETE_CART_ITEM, DELETE_GOOD, DELETE_MANY_GOODS, DELETE_MANY_USERS, DELETE_USER, FETCH_BRANDS,
     FETCH_GOOD,
     FETCH_GOODS,
     FETCH_USER, FETCH_USER_BY_ID,
@@ -11,8 +11,9 @@ import {
     ShoeInterface, UPDATE_GOOD, UPDATE_USER, UserInterface
 }
     from './types';
+import {addFilters} from "../components/utils";
 import {SearchItemParameters} from "../components/GridView";
-import _ from "lodash";
+import {ItemDataType} from "../components/types";
 
 /**
  * @param user
@@ -75,17 +76,9 @@ export const fetchUserByID = (id: string, onErrorCallback: () => void) => async 
  * @param fields
  * @param filters
  */
-export const fetchUsers = (skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: { [key: string]: string }) => async (dispatch: any) => {
+export const fetchUsers = (skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
-        let params = "";
-        if (filters) {
-            params += "?";
-            _.forEach(filters, (item, key) => {
-                params += `filters[${key}]=${item}`;
-                params += '&';
-            });
-            params = params.slice(0, -1);
-        }
+        const params = addFilters(filters);
         const user = await axios.get(`/api/users/${params}`, {params: {skip, limit, count, fields}});
         dispatch({type: FETCH_USERS, payload: user.data});
     } catch (error) {
@@ -101,20 +94,12 @@ export const fetchUsers = (skip: number, limit: number, count: boolean = false, 
  * @param fields
  * @param filters
  */
-export const searchUsers = (condition: string, skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: Array<[key: keyof UserInterface, value: string]>) => async (dispatch: any) => {
+export const searchUsers = (condition: string, skip: number, limit: number, count: boolean = false, fields: string[] = ["*"], filters?: SearchItemParameters) => async (dispatch: any) => {
         try {
-            const params = {
-                condition,
-                skip,
-                limit,
-                count,
-                fields: {toJSON: () => JSON.stringify(fields)},
-                filters: {toJSON: () => new URLSearchParams().set('filters', JSON.stringify(filters))}
-            };
-            const res = await axios.get(`/api/users_search`, {params});
+            const params = addFilters(filters);
+            const res = await axios.get(`/api/users_search/${params}`, {params: {condition, skip, limit, count, fields}});
             dispatch({type: SEARCH_USERS, payload: res.data});
-        } catch
-            (error) {
+        } catch (error) {
             console.log(error);
         }
     }
@@ -171,10 +156,12 @@ export const deleteManyUsers = (users: string[], onSuccessCallback: () => void) 
  * @param limit
  * @param count
  * @param fields
+ * @param filters
  */
-export const fetchGoods = (skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
+export const fetchGoods = (skip: number, limit: number, count: boolean = false, fields?: string[], filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
-        const res = await axios.get(`/api/commodity`, {params: {skip, limit, count, fields}});
+        const params = addFilters(filters);
+        const res = await axios.get(`/api/commodity/${params}`, {params: {skip, limit, count, fields}});
         dispatch({type: FETCH_GOODS, payload: res.data});
     } catch (error) {
         console.log(error);
@@ -187,10 +174,12 @@ export const fetchGoods = (skip: number, limit: number, count: boolean = false, 
  * @param limit
  * @param count
  * @param fields
+ * @param filters
  */
-export const searchGoods = (condition: string, skip: number, limit: number, count: boolean = false, fields?: string[]) => async (dispatch: any) => {
+export const searchGoods = (condition: string, skip: number, limit: number, count: boolean = false, fields?: string[], filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
-        const res = await axios.get(`/api/commodity_search`, {params: {condition, skip, limit, count, fields}});
+        const params = addFilters(filters);
+        const res = await axios.get(`/api/commodity_search/${params}`, {params: {condition, skip, limit, count, fields}});
         dispatch({type: SEARCH_GOODS, payload: res.data});
     } catch (error) {
         console.log(error);
@@ -275,6 +264,10 @@ export const deleteGood = (id: string, onSuccessCallback?: () => void) => async 
     }
 };
 
+/**
+ * @param goods
+ * @param onSuccessCallback
+ */
 export const deleteManyGoods = (goods: string[], onSuccessCallback?: () => void) => async (dispatch: any) => {
     try {
         await axios.delete(`/api/commodity/delete_many`, {params: {items: goods}});
@@ -282,6 +275,34 @@ export const deleteManyGoods = (goods: string[], onSuccessCallback?: () => void)
         onSuccessCallback();
     } catch (error) {
         alert(`Failed to delete goods. ${error}`);
+    }
+};
+
+export const fetchBrands = () => async (dispatch: any) => {
+    try {
+        const res = await axios.get('/api/commodity/brands');
+        dispatch({type: FETCH_BRANDS, payload: res.data});
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const createBrand = (brand: ItemDataType) =>  async (dispatch: any) => {
+    try {
+        const res = await axios.post('/api/commodity/brand/create', brand);
+        dispatch({type: CREATE_BRAND, payload: res.data});
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const deleteBrand = (brand: string, onSuccessCallback?: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.delete(`/api/commodity/brand/delete/${brand}`);
+        dispatch({type: DELETE_BRAND, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        console.log(error);
     }
 };
 

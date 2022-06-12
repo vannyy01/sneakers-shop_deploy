@@ -18,32 +18,16 @@ interface PropsInterface {
                  limit: number,
                  count: boolean,
                  fields?: string[],
-                 filters?: Array<[key: keyof UserInterface, value: string | number]>) => void,
+                 filters?: SearchItemParameters) => void,
     searchUsers?: (condition: string,
                    skip: number,
                    limit: number,
                    count: boolean,
                    fields?: string[],
-                   filters?: Array<[key: keyof UserInterface, value: string | number]>) => void,
+                   filters?: SearchItemParameters) => void,
     clearUsersState: () => void,
     deleteManyUsers: (users: string[], onSuccessCallback: () => void) => void
 }
-
-const headCells: Array<HeadCell<UserInterface>> = [
-    {id: 'role', numeric: true, disablePadding: false, label: 'Роль'},
-    {id: 'googleID', numeric: false, disablePadding: true, label: 'GoogleID'},
-    {id: 'email', numeric: false, disablePadding: true, label: 'Ел.Пошта'},
-    {id: 'givenName', numeric: false, disablePadding: true, label: "Ім'я"},
-    {id: 'familyName', numeric: false, disablePadding: true, label: 'Прізвище'},
-];
-
-const filterList: FilterListTypeArray<UserInterface> = {
-    [headCells[0].id]: {
-        filterName: headCells[0],
-        filterLabel: "Роль",
-        fields: roles
-    }
-};
 
 const Users: React.FC<PropsInterface> = ({
                                              fetchUsers,
@@ -55,6 +39,20 @@ const Users: React.FC<PropsInterface> = ({
                                          }) => {
 
     const usersCount = 10;
+    const headCells: Array<HeadCell<UserInterface>> = [
+        {id: 'role', numeric: true, disablePadding: false, label: 'Роль'},
+        {id: 'googleID', numeric: false, disablePadding: true, label: 'GoogleID'},
+        {id: 'email', numeric: false, disablePadding: true, label: 'Ел.Пошта'},
+        {id: 'givenName', numeric: false, disablePadding: true, label: "Ім'я"},
+        {id: 'familyName', numeric: false, disablePadding: true, label: 'Прізвище'},
+    ];
+    const filterList: FilterListTypeArray<UserInterface> = {
+        [headCells[0].id]: {
+            filterName: headCells[0],
+            filterLabel: "Роль",
+            fields: roles
+        }
+    };
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
@@ -77,18 +75,19 @@ const Users: React.FC<PropsInterface> = ({
             deleteMessage="Ви справді хочете видалити виділених користувачів?"
             deleteButtons={["Скасувати", "Видалити"]}
             headCells={headCells} title="Користувачі"
+            searchFieldPlaceholder="Email, ім'я, прізвище"
         />
     )
 };
 
-const mapStateToProps = ({users: {users, count}}: any) => ({users, count});
+const mapStateToProps = ({users: {users, count}}: { users: { users: UserInterface[], count: number } }) => ({
+    users,
+    count
+});
 
-// @ts-ignore
 export default connect(mapStateToProps, {
     fetchUsers: fetchItems,
     searchUsers: searchItems,
     clearUsersState: clearItemsState,
     deleteManyUsers: deleteManyItems
-})
-    // @ts-ignore
-    (Users);
+})(Users);
