@@ -14,6 +14,15 @@ import {sexes, shoeTypes} from "./BaseGood";
 import {useEffect} from "react";
 import _isEmpty from "lodash/isEmpty";
 
+export const headCells: Array<HeadCell<ShoeInterface>> = [
+    {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
+    {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
+    {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
+    {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
+    {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
+    {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
+];
+
 interface PropsInterface {
     goods: ShoeInterface[],
     brands: ItemsType,
@@ -27,7 +36,7 @@ interface PropsInterface {
 
 const Goods: React.FC<PropsInterface> = ({
                                              goods,
-                                             brands= {},
+                                             brands = {},
                                              count,
                                              fetchGoods,
                                              fetchBrands,
@@ -37,14 +46,7 @@ const Goods: React.FC<PropsInterface> = ({
                                          }) => {
 
     const goodsCount = 10;
-    const headCells: Array<HeadCell<ShoeInterface>> = [
-        {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
-        {id: 'brand', numeric: false, disablePadding: true, label: 'Бренд'},
-        {id: 'description', numeric: false, disablePadding: true, label: 'Опис'},
-        {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
-        {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
-        {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
-    ];
+
     const filterList: FilterListTypeArray<ShoeInterface> = {
         [headCells[1].id]: {
             filterName: headCells[1],
@@ -73,7 +75,8 @@ const Goods: React.FC<PropsInterface> = ({
     }
 
     return (
-       !_isEmpty(brands) && <GridView
+        !_isEmpty(brands) && <GridView
+            <ShoeInterface>
             idField="_id"
             filterList={filterList}
             createLocationPath='/admin/goods/create'
@@ -94,7 +97,14 @@ const Goods: React.FC<PropsInterface> = ({
     )
 };
 
-const mapStateToProps = ({goods: {goods, count}, brands}: any) => ({goods, count, brands});
+const mapStateToProps = ({
+                             goods: {goods, count},
+                             brands
+                         }: { goods: { goods: ShoeInterface[], count: number }, brands: ItemsType }) => ({
+    goods,
+    count,
+    brands
+});
 
 export default connect(mapStateToProps, {
     fetchGoods: fetchItems,

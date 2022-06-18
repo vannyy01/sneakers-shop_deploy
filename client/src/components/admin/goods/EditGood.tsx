@@ -25,6 +25,7 @@ import ChipManager from "./ChipManager";
 import _map from "lodash/map";
 import {ItemsType} from "../../types";
 import CreatableSelect from "react-select/creatable";
+import EditableSelect from "../../select/EditableSelect";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -114,47 +115,16 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                 />
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
-                                {/*<TextField*/}
-                                {/*    required={true}*/}
-                                {/*    id="brand"*/}
-                                {/*    name="brand"*/}
-                                {/*    label="Бренд"*/}
-                                {/*    fullWidth={true}*/}
-                                {/*    multiline={true}*/}
-                                {/*    autoComplete="brand-name"*/}
-                                {/*    value={brand}*/}
-                                {/*    onChange={this.handleOnChange}*/}
-                                {/*    helperText={formErrors.brand}*/}
-                                {/*    error={formErrors.brand.length > 0}*/}
-                                {/*/>*/}
-                                <CreatableSelect
-                                    key="brand"
-                                    aria-required={true}
-                                    closeMenuOnSelect={true}
-                                    isClearable={true}
-                                    isDisabled={isLoading}
+                                <EditableSelect
+                                    required={true}
                                     isLoading={isLoading}
                                     name="brand"
-                                    components={{Option: this.Option, Placeholder: this.Placeholder}}
-                                    placeholder="Бренд"
-                                    onChange={this.handleChangeList}
-                                    onCreateOption={this.handleCreateBrand}
-                                    formatCreateLabel={(inputValue) => `Додати "${inputValue}"`}
-                                    styles={{
-                                        container: (base) => ({
-                                            ...base,
-                                            width: '50%',
-                                            margin: '5px 5px 5px 50px',
-                                            minHeight: '45px'
-                                        }),
-                                        control: (base) => ({
-                                            ...base,
-                                            minHeight: '45px'
-                                        })
-                                    }}
+                                    optionValue={brand}
                                     options={options}
-                                    value={{label: brand, value: brand}}
-                                    aria-errormessage={formErrors.brand}
+                                    errorMessage={formErrors.brand}
+                                    showDeleteOptionDialog={this.showDeleteOptionDialog}
+                                    changeList={this.handleChangeList}
+                                    createOption={this.handleCreateBrand}
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>

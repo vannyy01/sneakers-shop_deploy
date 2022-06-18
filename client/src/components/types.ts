@@ -14,3 +14,5 @@ export interface HeadCell<T> {
     label: string;
     numeric: boolean;
 }
+
+export type Order = 'asc' | 'desc';

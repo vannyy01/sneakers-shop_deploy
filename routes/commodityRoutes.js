@@ -122,6 +122,7 @@ module.exports = app => {
             next(error);
         }
     });
+
     app.get('/api/commodity_search', async (req, res, next) => {
         try {
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;

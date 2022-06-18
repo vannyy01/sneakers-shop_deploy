@@ -30,6 +30,7 @@ import ChipManager from "./ChipManager";
 import _map from "lodash/map";
 import CreatableSelect from "react-select/creatable";
 import {ItemsType} from "../../types";
+import EditableSelect from "../../select/EditableSelect";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -76,59 +77,17 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                             />
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
-                            {/*<TextField*/}
-                            {/*    required={true}*/}
-                            {/*    id="brand"*/}
-                            {/*    name="brand"*/}
-                            {/*    label="Бренд"*/}
-                            {/*    fullWidth={true}*/}
-                            {/*    autoComplete="brand-name"*/}
-                            {/*    value={brand}*/}
-                            {/*    onChange={this.handleOnChange}*/}
-                            {/*    helperText={formErrors.brand}*/}
-                            {/*    error={formErrors.brand.length > 0}*/}
-                            {/*/>*/}
-                            <CreatableSelect
-                                key="brand"
-                                aria-required={true}
-                                closeMenuOnSelect={true}
-                                isClearable={true}
-                                isDisabled={isLoading}
+                            <EditableSelect
+                                required={true}
                                 isLoading={isLoading}
                                 name="brand"
-                                components={{Option: this.Option, Placeholder: this.Placeholder}}
-                                placeholder="Бренд"
-                                onChange={this.handleChangeList}
-                                onCreateOption={this.handleCreateBrand}
-                                formatCreateLabel={(inputValue) => `Додати "${inputValue}"`}
-                                styles={{
-                                    container: (base) => ({
-                                        ...base,
-                                        width: '50%',
-                                        margin: '5px 5px 5px 50px',
-                                        minHeight: '45px'
-                                    }),
-                                    control: (base) => ({
-                                        ...base,
-                                        minHeight: '45px'
-                                    })
-                                }}
+                                optionValue={brand}
                                 options={options}
-                                value={{label: brand, value: brand}}
-                                aria-errormessage="brand-select-helper-text"
+                                errorMessage={formErrors.brand}
+                                showDeleteOptionDialog={this.showDeleteOptionDialog}
+                                changeList={this.handleChangeList}
+                                createOption={this.handleCreateBrand}
                             />
-                            {formErrors.brand.length > 0 &&
-                                <p style={{
-                                    color: '#f44336',
-                                    margin: '3px 5px 5px 50px',
-                                    fontSize: '0.75rem',
-                                    textAlign: 'left',
-                                    fontFamily: "Helvetica",
-                                    fontWeight: 400,
-                                    lineHeight: 1.66,
-                                    letterSpacing: '0.03333em'
-                                }}
-                                   id="brand-select-helper-text">{formErrors.brand}</p>}
                         </Grid>
                         <Grid item={true} xs={12}>
                             <TextField
@@ -318,4 +277,9 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
 
 const mapStateToProps = ({brands}: { brands: ItemsType }) => ({brands});
 
-export default connect(mapStateToProps, {createGood, fetchBrands, createBrand, deleteBrand})(withStyles(GoodStyles)(CreateGood));
+export default connect(mapStateToProps, {
+    createGood,
+    fetchBrands,
+    createBrand,
+    deleteBrand
+})(withStyles(GoodStyles)(CreateGood));

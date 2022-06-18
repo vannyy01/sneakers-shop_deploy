@@ -355,7 +355,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         });
     };
 
-    protected handleCreateBrand = (inputValue: string) => {
+    protected handleCreateBrand = (inputValue: string): void => {
         this.validateField('brand', inputValue);
         if (this.state.isValid.brandValid) {
             this.setState({isLoading: true});

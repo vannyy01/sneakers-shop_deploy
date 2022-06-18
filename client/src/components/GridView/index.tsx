@@ -20,33 +20,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import {useEffect, useState} from "react";
 import {TablePaginationActions} from "./TablePaginationActions";
-import {HeadCell, ItemDataType, ItemsType} from "../types";
+import {HeadCell, ItemDataType, ItemsType, Order} from "../types";
 import _forEach from "lodash/forEach";
 import _forIn from "lodash/forIn";
 import {ActionMeta} from "react-select";
 import _mapValues from "lodash/mapValues";
-import {usePrevious} from "../utils";
-
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-    if (b[orderBy] < a[orderBy]) {
-        return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-        return 1;
-    }
-    return 0;
-}
-
-type Order = 'asc' | 'desc';
-
-function getComparator<Key extends keyof any>(
-    order: Order,
-    orderBy: Key,
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-    return order === 'desc'
-        ? (a, b) => descendingComparator(a, b, orderBy)
-        : (a, b) => -descendingComparator(a, b, orderBy);
-}
+import {getComparator, getFilters, usePrevious} from "../utils";
 
 function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
     const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
@@ -86,25 +65,27 @@ export interface SearchItemParameters {
     [key: string]: string | number
 }
 
+type DataType<T> = T & { _id: string };
+
 // For @data and @headCells used any type due to delegation typechecking to a client class
 interface EnhancedTablePropsI<T> {
     filterList?: FilterListTypeArray<T>,
     createLocationPath?: string | '/',
     rowsCount: number,
     count: number,
-    data: any,
-    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: { [key: string]: string | number }) => void,
+    data: Array<DataType<T>>,
+    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: SearchItemParameters) => void,
     searchItems?: (condition: string,
                    skip: number,
                    limit: number,
                    count: boolean,
                    fields?: string[],
-                   filters?: { [key: string]: string | number }) => void,
+                   filters?: SearchItemParameters) => void,
     clearItems: () => void,
     deleteItems?: [(items: string[], onSuccessCallback: () => void) => void, () => void],
     deleteMessage: string,
     deleteButtons: [cancelButton: string, actionButton: string],
-    headCells: any[],
+    headCells: Array<HeadCell<T>>,
     idField: string,
     editRoute?: string | '/',
     title: string,
@@ -187,7 +168,7 @@ const EnhancedTable = <T, >({
         url.searchParams.set('limit', initialLimit.toString());
         replaceURL();
     }
-    const [rowsData, setRowsData] = useState<any[]>(data);
+    const [rowsData, setRowsData] = useState<Array<DataType<T>>>(data);
     const [order, setOrder] = useState<Order>(initialOrder);
     const [orderBy, setOrderBy] = useState<string>(initialOrderBy);
     const [page, setPage] = useState<number>(initialPage);
@@ -195,7 +176,7 @@ const EnhancedTable = <T, >({
     const [rowsPerPage, setRowsPerPage] = useState<number>(initialRowsPerPage);
     const [selected, setSelected] = useState<string[]>([]);
     const [searchCondition, setSearchCondition] = useState<string>(initialSearchCondition);
-    const [typingTimeout, setTypingTimeout] = useState<any>();
+    const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [filterFieldValues, setFilterFieldValues] = useState<FilterListTypeArray<T>>(initialFilterList);
     const [skip, setSkip] = useState<number>(initialSkip);
@@ -204,11 +185,11 @@ const EnhancedTable = <T, >({
     // Firstly, request must be sent.
     useEffect(() => {
         if (data.length === 0) {
-            const filters = getFilters();
+            const filters = getFilters(getSelectedOptions());
             if (searchCondition) {
-                searchItems(searchCondition, 0, rowsPerPage*(page+1), true, ["*"], filters);
+                searchItems(searchCondition, 0, rowsPerPage * (page + 1), true, ["*"], filters);
             } else {
-                fetchItems(0, rowsPerPage*(page+1), true, ["*"], filters);
+                fetchItems(0, rowsPerPage * (page + 1), true, ["*"], filters);
             }
         }
     }, []);
@@ -274,18 +255,15 @@ const EnhancedTable = <T, >({
         setShowDialog(!showDialog);
     };
 
-    const getSelectedOptions = (): { [key: string]: FilterListType<T> } => _.pickBy(filterFieldValues, (value) => {
+    const getSelectedOptions = (): FilterListTypeArray<T> => _.pickBy(filterFieldValues, (value) => {
         return !!value.selectedOption;
     });
 
-    const getFilters = (): SearchItemParameters => _mapValues(getSelectedOptions(), (value) => {
-            return value.selectedOption.value
-        }
-    );
 
     const fetchItemsWithFilters = (): void => {
-        if (!_.isEmpty(getSelectedOptions())) {
-            const filters = getFilters();
+        const selectedOptions = getSelectedOptions();
+        if (!_.isEmpty(selectedOptions)) {
+            const filters = getFilters(selectedOptions);
             if (searchCondition) {
                 searchItems(searchCondition, 0, rowsPerPage, true, ["*"], filters);
             } else {
@@ -297,7 +275,6 @@ const EnhancedTable = <T, >({
             url.searchParams.set('skip', '0');
             setLimit(rowsPerPage);
             url.searchParams.set('limit', rowsPerPage.toString());
-            replaceURL();
         } else {
             if (searchCondition) {
                 searchItems(searchCondition, 0, rowsPerPage, true);
@@ -308,8 +285,8 @@ const EnhancedTable = <T, >({
             url.searchParams.set('page', '0');
             setSkip(0);
             url.searchParams.set('skip', '0');
-            replaceURL();
         }
+        replaceURL();
     };
 
     const handleRequestSort = (event: React.MouseEvent<HTMLElement>, property: string): void => {
@@ -342,7 +319,7 @@ const EnhancedTable = <T, >({
 
     const handleClick = (id: string): void => {
         const selectedIndex = selected.indexOf(id);
-        let newSelected: any = [];
+        let newSelected: string[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, id);
@@ -380,7 +357,7 @@ const EnhancedTable = <T, >({
         replaceURL();
     };
 
-    const handleSearchItems = ({target: {value}}: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleSearchItems = ({target: {value}}: React.ChangeEvent<HTMLTextAreaElement>): void => {
         if (typingTimeout) {
             clearTimeout(typingTimeout);
         }
@@ -393,7 +370,7 @@ const EnhancedTable = <T, >({
             if (searchValue.length === 0) {
                 url.searchParams.delete('searchCondition');
                 if (!_.isEmpty(getSelectedOptions())) {
-                    fetchItems(0, rowsPerPage, true, ["*"], getFilters());
+                    fetchItems(0, rowsPerPage, true, ["*"], getFilters(getSelectedOptions()));
                 } else {
                     fetchItems(0, rowsPerPage, true);
                 }
@@ -405,7 +382,7 @@ const EnhancedTable = <T, >({
                 url.searchParams.set('page', '0');
             } else if (isNewSearch) {
                 if (!_.isEmpty(getSelectedOptions())) {
-                    searchItems(searchValue, 0, rowsPerPage, true, ["*"], getFilters());
+                    searchItems(searchValue, 0, rowsPerPage, true, ["*"], getFilters(getSelectedOptions()));
                 } else {
                     searchItems(searchValue, 0, rowsPerPage, true);
                 }
@@ -466,6 +443,7 @@ const EnhancedTable = <T, >({
                         (rowsData.length > 0 && countItems) ?
                             <Table className={classes.table} aria-labelledby="tableTitle">
                                 <EnhancedTableHead
+                                    <T>
                                     numSelected={selected.length}
                                     order={order}
                                     orderBy={orderBy}

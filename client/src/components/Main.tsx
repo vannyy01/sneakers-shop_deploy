@@ -1,19 +1,12 @@
 import * as React from 'react';
 import {RefObject} from "react";
-
 import {connect} from "react-redux";
-
 import Header from './Header';
-import {Card, Goods, LoadCommodities, ParagraphHeader} from './landing';
-
+import {Card, Goods, ParagraphHeader} from './landing';
 import {fetchGoods, clearGoodsState} from '../actions';
-import {ShoeInterface} from "../actions/types";
-
 import Shopping from '@material-ui/icons/ShoppingBasket';
-
-import './landing/landing.css';
 import {TransitionGroup, CSSTransition} from 'react-transition-group';
-
+import './landing/landing.css';
 
 const shoppingStyle = {
     color: 'hotpink',
@@ -62,18 +55,12 @@ const cardsContent: CardContent[] = [
 ];
 
 interface LandingStateI {
-    expanded: boolean,
-    goodsCount: number,
     justifyCards: string,
     showCard: boolean,
-    fields: string[]
 }
 
-interface LandingPropsI {
-    goods?: ShoeInterface[],
-    fetchGoods: (skip: number, limit: number, count?: boolean, fields?: string[]) => void,
-    clearGoodsState: () => void
-}
+// tslint:disable-next-line:no-empty-interface
+interface LandingPropsI {}
 
 class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     private readonly ScrollRef: RefObject<any>;
@@ -81,27 +68,21 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     constructor(props: LandingPropsI) {
         super(props);
         this.state = {
-            expanded: false,
-            goodsCount: 3,
             justifyCards: innerWidth < 767 ? "justify-content-around" : "justify-content-between",
             showCard: false,
-            fields: ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'mainImage']
         };
         this.ScrollRef = React.createRef();
     }
 
     public componentDidMount() {
-        this.props.fetchGoods(0, 3, false, this.state.fields);
         window.addEventListener('scroll', this.handleScroll);
     }
 
     public componentWillUnmount() {
-        this.props.clearGoodsState();
         window.removeEventListener('scroll', this.handleScroll);
     };
 
     public render() {
-        console.log(this.props.goods)
         return (
             <div ref={this.ScrollRef} onScroll={this.handleScroll}>
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
@@ -125,9 +106,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
                 </section>
                 <section className="special-area section_padding_100">
                     <ParagraphHeader title="Оберіть взуття"/>
-                    <Goods justifyCards={this.state.justifyCards} goods={this.props.goods}/>
-                    <LoadCommodities onTransitionEnd={this.onSpin} expanded={this.state.expanded}
-                                     handleLoadClick={this.handleLoadClick}/>
+                    <Goods justifyCards={this.state.justifyCards}/>
                 </section>
             </div>
         )
@@ -139,14 +118,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
         }
     };
 
-    protected onSpin = (): void => {
-        this.setState(() => ({expanded: false}))
-    };
 
-    protected handleLoadClick = (): void => {
-        this.props.fetchGoods(this.state.goodsCount, 3, false, this.state.fields);
-        this.setState((state) => ({expanded: true, goodsCount: state.goodsCount + 3}));
-    }
 }
 
 /**

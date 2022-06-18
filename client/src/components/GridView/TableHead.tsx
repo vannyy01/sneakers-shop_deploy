@@ -1,28 +1,23 @@
 import * as React from "react";
-
 import Checkbox from '@material-ui/core/Checkbox';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Tooltip from '@material-ui/core/Tooltip';
+import {HeadCell, Order} from "../types";
 
-interface EnhancedTableHeadPropsI {
-    order: 'asc' | 'desc',
+interface EnhancedTableHeadPropsI<T> {
+    order: Order,
     orderBy: string,
     numSelected: number,
     rowCount: number,
-    rows: Array<{
-        id: string,
-        numeric: boolean,
-        disablePadding: boolean,
-        label: string
-    }>,
+    rows: Array<HeadCell<T>>,
     onRequestSort: (event: React.MouseEvent<HTMLElement>, property: string) => void,
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
 }
 
-class EnhancedTableHead extends React.Component<EnhancedTableHeadPropsI, any> {
+class EnhancedTableHead<T> extends React.Component<EnhancedTableHeadPropsI<T>> {
     public render() {
         const {onSelectAllClick, order, orderBy, numSelected, rowCount} = this.props;
         return (
@@ -38,7 +33,7 @@ class EnhancedTableHead extends React.Component<EnhancedTableHeadPropsI, any> {
                     {this.props.rows.map(row => {
                         return (
                             <TableCell
-                                key={row.id}
+                                key={row.id as string}
                                 padding={row.disablePadding ? 'none' : 'normal'}
                                 sortDirection={orderBy === row.id ? order : false}
                             >
@@ -50,7 +45,7 @@ class EnhancedTableHead extends React.Component<EnhancedTableHeadPropsI, any> {
                                     <TableSortLabel
                                         active={orderBy === row.id}
                                         direction={order}
-                                        onClick={this.createSortHandler(row.id)}
+                                        onClick={this.createSortHandler(row.id as string)}
                                     >
                                         {row.label}
                                     </TableSortLabel>
@@ -62,6 +57,7 @@ class EnhancedTableHead extends React.Component<EnhancedTableHeadPropsI, any> {
             </TableHead>
         );
     }
+
     protected createSortHandler = (property: string) => (event: React.MouseEvent<HTMLElement>) => {
         this.props.onRequestSort(event, property);
     };

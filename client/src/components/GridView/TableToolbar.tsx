@@ -15,8 +15,9 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {useState} from "react";
 import {FilterListTypeArray} from "./index";
-import Select, {components, PlaceholderProps} from 'react-select';
+import Select, {ActionMeta, components, PlaceholderProps} from 'react-select';
 import _map from "lodash/map";
+import {ItemDataType} from "../types";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     actions: {
@@ -73,17 +74,17 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 interface EnhancedTableToolbarPropsI<T> {
     filterList?: FilterListTypeArray<T>,
-    handleChangeFilter: (newValue: any, actionMeta: any) => void,
+    handleChangeFilter: (newValue: ItemDataType, actionMeta: ActionMeta<ItemDataType>) => void,
     searchItems: (event: React.ChangeEvent<HTMLTextAreaElement>) => void,
     deleteItems: () => void,
-    selected: any[],
+    selected: string[],
     searchFieldPlaceholder: string,
     searchCondition?: string,
     title: string,
     location: string
 }
 
-const Placeholder: React.FC<PlaceholderProps<{ label: string, value: string | number }>> = (props) => {
+const Placeholder: React.FC<PlaceholderProps<ItemDataType>> = (props) => {
     return <components.Placeholder {...props} children={props.children}/>;
 };
 

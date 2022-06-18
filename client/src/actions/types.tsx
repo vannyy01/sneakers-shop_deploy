@@ -185,8 +185,8 @@ export interface ShoeInterface {
     mainImage: string,
     price: number,
     sizes?: SizeInterface[],
-    type?: string,
-    sex?: string
+    type: string,
+    sex: string
 }
 
 type GET_CART_ITEMS = 'GET_CART_ITEMS';
