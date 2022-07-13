@@ -86,6 +86,10 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
         return (
             <div ref={this.ScrollRef} onScroll={this.handleScroll}>
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
+                <section className="special-area section_padding_100">
+                    <ParagraphHeader title="Оберіть взуття"/>
+                    <Goods justifyCards={this.state.justifyCards}/>
+                </section>
                 <section style={{marginBottom: !this.state.showCard ? '300px' : '0px'}}
                          className="special-area bg-white section_padding_100" id="about">
                     <div className="container">
@@ -103,10 +107,6 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
                             </TransitionGroup>
                         </div>
                     </div>
-                </section>
-                <section className="special-area section_padding_100">
-                    <ParagraphHeader title="Оберіть взуття"/>
-                    <Goods justifyCards={this.state.justifyCards}/>
                 </section>
             </div>
         )

@@ -14,10 +14,12 @@ import {HeadCell} from "../../types";
 interface PropsInterface {
     users: UserInterface[],
     count: number,
-    fetchUsers: (skip: number,
-                 limit: number,
-                 count: boolean,
-                 fields?: string[],
+    fetchUsers: ({skip, limit, count, fields}: {
+                     skip: number,
+                     limit: number,
+                     count: boolean,
+                     fields?: string[]
+                 },
                  filters?: SearchItemParameters) => void,
     searchUsers?: (condition: string,
                    skip: number,
@@ -56,7 +58,7 @@ const Users: React.FC<PropsInterface> = ({
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
-        fetchUsers(0, usersCount, true);
+        fetchUsers({skip: 0, limit: usersCount, count: true});
     }
 
     return (

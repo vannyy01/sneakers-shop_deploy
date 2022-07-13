@@ -17,6 +17,7 @@ const commoditySchema = new Schema({
     sizes: [Size],
     type: String,
     sex: String,
+    color: String,
 });
 
 mongoose.model('commodities', commoditySchema);

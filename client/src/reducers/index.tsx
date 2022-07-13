@@ -6,10 +6,12 @@ import {pollReducer} from "./pollReducer";
 import {usersReducer} from "./usersReducer";
 import {CLEAR_GOODS, CLEAR_USERS} from "../actions/types";
 import {brandsReducer} from "./brandsReducer";
+import {filtersReducer} from "./filtersReducer";
 
 const appReducer = combineReducers({
     auth: authReducer,
     goods: goodsReducer,
+    filters: filtersReducer,
     users: usersReducer,
     brands: brandsReducer,
     cartItems: cartReducer,

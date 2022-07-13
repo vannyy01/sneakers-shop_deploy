@@ -1,4 +1,5 @@
 import * as React from "react";
+import {ReactElement} from "react";
 import {ShoeInterface, SizeInterface} from "../../../actions/types";
 import {RouteComponentProps} from "react-router-dom";
 import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
@@ -10,34 +11,6 @@ import {ItemDataType, ItemsType} from "../../types";
 import {ActionMeta, components, OptionProps, PlaceholderProps} from "react-select";
 import IconButton from "@material-ui/core/IconButton";
 import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
-import {ReactElement} from "react";
-
-
-export const sexes: ItemsType = {
-    'чоловічі': {
-        label: 'чоловічі',
-        value: 'чоловічі',
-    },
-    'жіночі': {
-        label: 'жіночі',
-        value: 'жіночі',
-    }
-};
-
-export const shoeTypes: ItemsType = {
-    "Кросівки": {
-        label: "Кросівки",
-        value: "Кросівки"
-    },
-    "В'єтнамки": {
-        label: "В'єтнамки",
-        value: "В'єтнамки",
-    },
-    "Туфлі": {
-        label: "Туфлі",
-        value: "Туфлі",
-    }
-};
 
 export function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -68,7 +41,8 @@ export const GoodStyles = (theme: Theme) => createStyles({
             padding: theme.spacing(3),
         },
         width: "60em"
-    }
+    },
+    root: {height: 27},
 });
 
 interface PathParams {
@@ -90,11 +64,11 @@ export interface BaseGoodStateType {
     optionToDelete?: string,
     typing: boolean,
     isLoading: boolean,
-    typingTimeout?: any,
-    formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, sex: string, price: string },
+    typingTimeout?: NodeJS.Timeout,
+    formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, color: string, sex: string, price: string },
     formValid: boolean
     good: ShoeInterface,
-    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, sexValid: boolean, priceValid: boolean },
+    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, colorValid: boolean, sexValid: boolean, priceValid: boolean },
 }
 
 abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType> extends React.Component<P, S> {
@@ -115,7 +89,8 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 type: '',
                 sex: '',
                 price: 0,
-                brand: ''
+                brand: '',
+                color: ''
             },
             isValid: {
                 titleValid: true,
@@ -124,6 +99,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 mainImageValid: true,
                 imagesValid: true,
                 typeValid: true,
+                colorValid: true,
                 sexValid: true,
                 priceValid: true
             },
@@ -134,6 +110,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 mainImage: '',
                 images: '',
                 type: '',
+                color: '',
                 sex: '',
                 price: ''
             },
@@ -157,7 +134,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             this.setState({showAlert: true});
             return;
         }
-        const {_id, title, description, mainImage, type, sex, price, brand, sizes} = this.state.good;
+        const {_id, title, description, mainImage, type, sex, price, brand, color, sizes} = this.state.good;
         const good: ShoeInterface = {
             _id,
             title: title.trim(),
@@ -168,6 +145,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             sizes,
             type: type.trim(),
             sex: sex.trim(),
+            color: color.trim()
         };
         this.setState({showDialog: true, good});
     };
@@ -208,6 +186,12 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             case 'type':
                 if (typeof value !== 'string') {
                     fieldValidationErrors.type = 'некоректний тип';
+                    isValid.typeValid = false;
+                }
+                break;
+            case 'color':
+                if (typeof value !== 'string') {
+                    fieldValidationErrors.color = 'некоректний тип';
                     isValid.typeValid = false;
                 }
                 break;
@@ -282,6 +266,11 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                     isValid.priceValid = false;
                     break;
                 }
+                if (+value > 99999) {
+                    fieldValidationErrors.price = 'товари за такою ціною відсутні';
+                    isValid.priceValid = false;
+                    break;
+                }
                 if (isNaN(Number.parseInt(value))) {
                     fieldValidationErrors.price = 'некоректний тип даних';
                     isValid.priceValid = false;
@@ -329,8 +318,6 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         } else if (name !== "sizes") {
             newState[name] = value;
         }
-
-        console.log(name, name, name === name);
 
         self.setState({
             typing: false,

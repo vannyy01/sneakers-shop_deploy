@@ -32,7 +32,7 @@ export const FETCH_USER_BY_ID: FETCH_USER_BY_ID = 'FETCH_USER_BY_ID';
 
 export interface FetchUserByIdAction {
     type: FETCH_USER_BY_ID,
-    payload: {users: UserInterface}
+    payload: { users: UserInterface }
 }
 
 type UPDATE_USER = 'UPDATE_USER';
@@ -63,7 +63,7 @@ export const FETCH_USERS: FETCH_USERS = 'FETCH_USERS';
 
 export interface FetchUsersAction {
     type: FETCH_USERS,
-    payload: {users: UserInterface[], count?: number, filters: { [key: string]: string }}
+    payload: { users: UserInterface[], count?: number, filters: { [key: string]: string[] } }
 }
 
 type SEARCH_USERS = 'SEARCH_USERS';
@@ -71,7 +71,7 @@ export const SEARCH_USERS: SEARCH_USERS = 'SEARCH_USERS';
 
 export interface SearchUsersAction {
     type: SEARCH_USERS,
-    payload: {users: UserInterface[], count: number}
+    payload: { users: UserInterface[], count: number }
 }
 
 
@@ -87,7 +87,7 @@ export const FETCH_GOODS: FETCH_GOODS = 'FETCH_GOODS';
 
 export interface FetchGoodsAction {
     type: FETCH_GOODS,
-    payload: {goods: ShoeInterface[], count?: number, filters: SearchItemParameters}
+    payload: { goods: ShoeInterface[], count?: number, filters: SearchItemParameters }
 }
 
 type SEARCH_GOODS = 'SEARCH_GOODS';
@@ -95,7 +95,7 @@ export const SEARCH_GOODS: SEARCH_GOODS = 'SEARCH_GOODS';
 
 export interface SearchGoodsAction {
     type: SEARCH_GOODS,
-    payload: {goods: ShoeInterface[], count?: number}
+    payload: { goods: ShoeInterface[], count?: number }
 }
 
 
@@ -120,7 +120,7 @@ export const FETCH_GOOD: FETCH_GOOD = 'FETCH_GOOD';
 
 export interface FetchGoodAction {
     type: FETCH_GOOD,
-    payload: {goods: ShoeInterface}
+    payload: { goods: ShoeInterface }
 }
 
 type UPDATE_GOOD = 'UPDATE_GOOD';
@@ -172,21 +172,66 @@ export interface DeleteBrandAction {
     payload: ItemsType
 }
 
+type FETCH_SEXES_COUNT = 'FETCH_SEXES_COUNT';
+export const FETCH_SEXES_COUNT: FETCH_SEXES_COUNT = 'FETCH_SEXES_COUNT';
+
+export interface FetchSexesCountAction {
+    type: FETCH_SEXES_COUNT,
+    payload: { "чоловічі": number, "жіночі": number }
+}
+
+type FETCH_TYPES_COUNT = 'FETCH_TYPES_COUNT';
+export const FETCH_TYPES_COUNT: FETCH_TYPES_COUNT = 'FETCH_TYPES_COUNT';
+
+export interface FetchTypesCountAction {
+    type: FETCH_TYPES_COUNT,
+    payload: { "чоловічі": number, "жіночі": number }
+}
+
+type FETCH_COLORS_COUNT = 'FETCH_COLORS_COUNT';
+export const FETCH_COLORS_COUNT: FETCH_COLORS_COUNT = 'FETCH_COLORS_COUNT';
+
+export interface FetchColorsCountAction {
+    type: FETCH_COLORS_COUNT,
+    payload: { [key: string]: number }
+}
+
+
+type FETCH_SIZES_COUNT = 'FETCH_SIZES_COUNT';
+export const FETCH_SIZES_COUNT: FETCH_SIZES_COUNT = 'FETCH_SIZES_COUNT';
+
+export interface FetchSizesCountAction {
+    type: FETCH_SIZES_COUNT,
+    payload: { [key: string]: number }
+}
+
+type FETCH_AVAILABILITY_COUNT = 'FETCH_AVAILABILITY_COUNT';
+export const FETCH_AVAILABILITY_COUNT: FETCH_AVAILABILITY_COUNT = 'FETCH_AVAILABILITY_COUNT';
+
+export interface FetchAvailabilityCountAction {
+    type: FETCH_AVAILABILITY_COUNT,
+    payload: Array<CommodityInterface & { totalShoes: number, availability: boolean }>
+}
+
 export interface SizeInterface {
     sizeValue: number,
     count: number,
 }
 
-export interface ShoeInterface {
+export interface CommodityInterface {
     _id: string,
     title: string,
     brand: string,
-    description?: string,
+    type: string,
+    sex: string,
     mainImage: string,
     price: number,
+    description?: string,
+}
+
+export interface ShoeInterface extends CommodityInterface {
+    color: string
     sizes?: SizeInterface[],
-    type: string,
-    sex: string
 }
 
 type GET_CART_ITEMS = 'GET_CART_ITEMS';

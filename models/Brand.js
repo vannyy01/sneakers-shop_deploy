@@ -8,7 +8,8 @@ const {Schema} = mongoose;
  */
 const brandSchema = new Schema({
     label: String,
-    value: String
+    value: String,
+    count: Number
 });
 
 mongoose.model('brands', brandSchema);

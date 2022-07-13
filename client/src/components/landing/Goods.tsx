@@ -2,29 +2,34 @@ import * as _ from "lodash";
 import * as React from "react";
 import {ShoeInterface} from "../../actions/types";
 import CommodityCard from "./CommodityCard";
-import {Accordion, AccordionDetails, AccordionSummary, FormGroup, Theme} from "@material-ui/core";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    FormGroup,
+    InputAdornment,
+    OutlinedInput,
+    Theme
+} from "@material-ui/core";
 import FormControl from '@material-ui/core/FormControl';
-import IconButton from "@material-ui/core/IconButton/IconButton";
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import SortSelect from '@material-ui/core/Select';
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import FilterList from "@material-ui/icons/FilterList";
 import createStyles from "@material-ui/core/styles/createStyles";
 import {useEffect, useState} from "react";
 import {ItemDataType, ItemsType, Order} from "../types";
-import {getComparator, getFilters, usePrevious} from "../utils";
+import {getComparator, getFilters, replaceURL, updateURL, usePrevious} from "../utils";
 import _map from "lodash/map";
-import {FilterListTypeArray} from "../GridView";
-import {sexes, shoeTypes} from "../admin/goods/BaseGood";
-import {clearGoodsState, fetchBrands, fetchGoods} from "../../actions";
+import {FilterListTypeArray, SearchItemParameters} from "../GridView";
+import {
+    clearGoodsState,
+    fetchAvailabilityCount,
+    fetchBrands, fetchColorsCount,
+    fetchGoods,
+    fetchSexesCount, fetchSizesCount,
+    fetchTypesCount
+} from "../../actions";
 import {headCells} from "../admin/goods/Goods";
-import FilterSelect, {ActionMeta} from 'react-select';
-import _forIn from "lodash/forIn";
-import _forEach from "lodash/forEach";
-import Placeholder from "../select/Placeholder";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
-import {isEmpty, mapValues} from "lodash";
+import {forIn, isEmpty, mapValues} from "lodash";
 import {makeStyles} from "@material-ui/core/styles";
 import {LoadCommodities} from "./index";
 import Drawer from "@material-ui/core/Drawer";
@@ -32,6 +37,13 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
 import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import Button from "../button";
+import {url} from "../../index";
+import {FiltersReducerStateType} from "../../reducers/filtersReducer";
+import CloseIcon from '@material-ui/icons/Close';
+import {validateNumberInput} from "../../actions/validation";
+import GoodsToolbar from "./GoodsToolbar";
+
 
 const useStyles = makeStyles((theme: Theme) => createStyles(
     {
@@ -39,8 +51,35 @@ const useStyles = makeStyles((theme: Theme) => createStyles(
             margin: theme.spacing(1),
             minWidth: 120,
         },
+        margin: {
+            margin: theme.spacing(1),
+        },
         accordionExpanded: {
             margin: "0 !important",
+        },
+        colorDirection: {
+            justifyContent: "space-evenly"
+        },
+        filterHeader: {
+            padding: "0.7rem 0.8rem",
+            textAlign: "center",
+            display: "flex",
+            position: "sticky",
+            top: 0,
+        },
+        filterHeaderInner: {
+            flexGrow: 1,
+            position: "relative",
+        },
+        filterHeading: {
+            fontSize: 18,
+            margin: 0,
+        },
+        filterCount: {
+            color: "#777777",
+            fontSize: 14,
+            margin: 0,
+            flexGrow: 1,
         },
         drawerPaper: {
             width: '20%',
@@ -58,64 +97,127 @@ const useStyles = makeStyles((theme: Theme) => createStyles(
     })
 );
 
-
 interface GoodsPropsI {
     justifyCards: string,
     brands: ItemsType,
+    sexes: ItemsType,
+    types: ItemsType,
+    availability: ItemsType,
+    colors: ItemsType,
+    sizes: ItemsType
 }
 
 type CompareGoods = Omit<ShoeInterface, "description">;
 
-const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
+export interface FilterStateType {
+    [key: keyof ItemsType]: boolean
+}
 
-    const rows: Array<{ row: string, label: string }> =
-        [{row: 'priceAsc', label: 'За зростанням ціни'},
-            {row: 'priceDesc', label: 'За зменшенням ціни'},
-            {row: 'title', label: 'За назвою'}];
+export interface PriceType {
+    priceFrom: number | undefined,
+    priceTo: number | undefined
+}
 
-    let initialFilterList: FilterListTypeArray<ShoeInterface & {availability: boolean}> = {
-        availability: {
-            filterName: {id: 'availability', numeric: false, disablePadding: true, label: 'Наявність'},
-            filterLabel: "Наявність",
-            fields: {
-                "Доступно": {
-                    label: "Доступно",
-                    value: "Доступно"
-                },
-                "Немає в наявності": {
-                    label: "Немає в наявності",
-                    value: "Немає в наявності"
-                }
-            }
-        },
-        brand: {
-            filterName: headCells[1],
-            filterLabel: "Бренд",
-            fields: brands
-        },
-        type: {
-            filterName: headCells[4],
-            filterLabel: "Тип",
-            fields: shoeTypes
-        },
-        sex: {
-            filterName: headCells[5],
-            filterLabel: "Стать",
-            fields: sexes
-        }
-    };
-    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'mainImage'];
-    let initialSkip = 0;
-    let initialLimit = 6;
+export const availabilityFields: ItemsType = {
+    1: {
+        label: "Доступно",
+        value: 1
+    },
+    0: {
+        label: "Немає в наявності",
+        value: 0
+    }
+};
+
+interface BaseFilterListType {
+    brands: ItemsType,
+    sexes: ItemsType,
+    types: ItemsType,
+    availability: ItemsType,
+    colors: ItemsType,
+    sizes: ItemsType
+}
+
+export type GoodsFilterList = FilterListTypeArray<ShoeInterface & { availability: boolean, size: number } & PriceType>;
+
+const baseFilterList = ({
+                            brands,
+                            sexes,
+                            types,
+                            availability,
+                            colors,
+                            sizes
+                        }: BaseFilterListType = {
+                            brands: {},
+                            sexes: {},
+                            types: {},
+                            availability: {},
+                            colors: {},
+                            sizes: {}
+                        }
+): GoodsFilterList => ({
+    availability: {
+        filterName: {id: 'availability', numeric: false, disablePadding: true, label: 'Наявність'},
+        filterLabel: "Наявність",
+        fields: availability,
+        selectedOption: []
+    },
+    brand: {
+        filterName: headCells[1],
+        filterLabel: "Бренд",
+        fields: brands,
+        selectedOption: []
+    },
+    type: {
+        filterName: headCells[4],
+        filterLabel: "Тип",
+        fields: types,
+        selectedOption: []
+    },
+    sex: {
+        filterName: headCells[5],
+        filterLabel: "Стать",
+        fields: sexes,
+        selectedOption: []
+    },
+    color: {
+        filterName: {id: 'color', numeric: false, disablePadding: true, label: 'Колір'},
+        filterLabel: "Колір",
+        fields: colors,
+        selectedOption: []
+    },
+    sizes: {
+        filterName: {id: 'sizes', numeric: false, disablePadding: true, label: 'Розмір'},
+        filterLabel: "Розмір",
+        fields: sizes,
+        selectedOption: []
+    }
+});
+
+const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, availability, colors, sizes}) => {
+
+    const initialFilterList = structuredClone(baseFilterList({brands, sexes, types, availability, colors, sizes}));
+    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'mainImage'];
+    const BASE_SKIP = 0;
+    let initialSkip = BASE_SKIP;
+    const BASE_LIMIT = 6;
+    let initialLimit = BASE_LIMIT;
     let initialOrder: Order = 'asc';
     let initialOrderBy = 'priceAsc';
-
-    const url = new URL(window.location.href);
-
-    const replaceURL = (): void => {
-        url.searchParams.sort();
-        window.history.pushState(null, null, url);
-    }
+    const initialBrands = mapValues(brands, () => false);
+    const initialBrandFilterState: FilterStateType = structuredClone(initialBrands);
+    const initialSexes = mapValues(sexes, () => false);
+    const initialSexFilterState: FilterStateType = structuredClone(initialSexes);
+    const initialTypes = mapValues(types, () => false);
+    const initialTypeFilterState: FilterStateType = structuredClone(initialTypes);
+    const initialAvailability = mapValues(availability, () => false);
+    const initialAvailabilityFilterState: FilterStateType = structuredClone(initialAvailability);
+    const initialColors = mapValues(colors, () => false);
+    const initialColorFilterState: FilterStateType = structuredClone(initialColors);
+    const initialSizes = mapValues(sizes, () => false);
+    const initialSizeFilterState: FilterStateType = structuredClone(initialSizes);
+    const initialPrice: PriceType = {priceFrom: undefined, priceTo: undefined};
+    const initialPriceFilterState: PriceType = structuredClone(initialPrice);
 
     if (url.searchParams.toString().length > 0) {
         url.searchParams.forEach((value, key) => {
@@ -132,16 +234,47 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                 case 'orderBy':
                     initialOrderBy = value;
                     break;
+                case 'priceFrom':
+                    initialPriceFilterState.priceFrom = +value;
+                    break;
+                case 'priceTo':
+                    initialPriceFilterState.priceTo = +value;
+                    break;
                 default:
-                    const newFilterList = Object.assign({}, initialFilterList);
-                    newFilterList[key].selectedOption = {
-                        label: initialFilterList[key].fields[value].label,
-                        value
-                    };
-                    initialFilterList = newFilterList;
+                    const val: string[] = JSON.parse(value);
+                    val.forEach(item => {
+                            switch (key) {
+                                case 'brand':
+                                    initialBrandFilterState[item] = true;
+                                    break;
+                                case 'sex':
+                                    initialSexFilterState[item] = true;
+                                    break;
+                                case 'type':
+                                    initialTypeFilterState[item] = true;
+                                    break;
+                                case 'color':
+                                    initialColorFilterState[item] = true;
+                                    break;
+                                case 'sizes':
+                                    initialSizeFilterState[item] = true;
+                                    break;
+                                case 'availability':
+                                    initialAvailabilityFilterState[item] = true;
+                            }
+                        }
+                    );
+                    val.forEach(thing =>
+                        initialFilterList[key].selectedOption.push({
+                            label: initialFilterList[key].fields[thing].label,
+                            value: initialFilterList[key].fields[thing].value
+                        })
+                    );
             }
         });
     } else {
+        url.searchParams.set('skip', initialSkip.toString());
+        url.searchParams.set('limit', initialLimit.toString());
         url.searchParams.set('order', initialOrder as string);
         url.searchParams.set('orderBy', initialOrderBy);
         replaceURL();
@@ -151,14 +284,13 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                              goods: {
                                  goods: goodsList,
                                  count: goodsCount
-                             }
+                             },
                          }: { goods: { goods: ShoeInterface[], count: number } }): { goods: ShoeInterface[], count: number } => {
         return {goods: goodsList, count: goodsCount};
     };
 
-    const {goods, count}: { goods: ShoeInterface[], count: number } = useSelector(getSelector, shallowEqual);
+    const {goods, count} = useSelector(getSelector, shallowEqual);
 
-    const [open, setOpen] = useState<boolean>(false);
     const [openDrawer, setOpenDrawer] = useState<boolean>(false);
     const [expanded, setExpanded] = useState<boolean>(false);
     const [expandedFilterItem, setExpandedFilterItem] = React.useState<string | false>(false);
@@ -166,37 +298,92 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
     const [orderBy, setOrderBy] = useState<string>(initialOrderBy);
     const [skip, setSkip] = useState<number>(initialSkip);
     const [limit, setLimit] = useState<number>(initialLimit);
-    const [filterList, setFilterList] = useState<FilterListTypeArray<ShoeInterface & {availability: boolean}>>(initialFilterList);
-    const initialBrands = mapValues(brands, () => false);
-    const [brandFilterState, setBrandFilterState] = React.useState<{ [key: string]: boolean }>(initialBrands);
-    const initialSexes = mapValues(sexes, () => false);
-    const [sexFilterState, setSexFilterState] = React.useState<{ [key: string]: boolean }>(initialSexes);
-    const initialTypes = mapValues(shoeTypes, () => false);
-    const [typeFilterState, setTypeFilterState] = React.useState<{ [key: string]: boolean }>(initialTypes);
-    const initialAvailability = mapValues(initialFilterList.availability.fields, () => false);
-    const [availabilityFilterState, setAvailabilityFilterState] = React.useState<{ [key: string]: boolean }>(initialAvailability);
+    const [filterList, setFilterList] = useState<GoodsFilterList>(initialFilterList);
+    const [brandFilterState, setBrandFilterState] = React.useState<FilterStateType>(initialBrandFilterState);
+    const [sexFilterState, setSexFilterState] = React.useState<FilterStateType>(initialSexFilterState);
+    const [typeFilterState, setTypeFilterState] = React.useState<FilterStateType>(initialTypeFilterState);
+    const [availabilityFilterState, setAvailabilityFilterState] = React.useState<FilterStateType>(initialAvailabilityFilterState);
+    const [colorFilterState, setColorFilterState] = React.useState<FilterStateType>(initialColorFilterState);
+    const [sizeFilterState, setSizeFilterState] = React.useState<FilterStateType>(initialSizeFilterState);
+    const [priceFieldState, setPriceFieldState] = React.useState<PriceType>(initialPriceFilterState);
+    const [priceFilterState, setPriceFilterState] = React.useState<PriceType>(initialPriceFilterState);
+    const [priceOnBlur, setPriceOnBlur] = React.useState<boolean>(false);
     const classes = useStyles();
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchGoods(0, limit, true, fieldsList, getFilters(getSelectedOptions())));
+        dispatch(fetchGoods({
+                skip: 0,
+                limit,
+                count: true,
+                fields: fieldsList,
+            }, {
+                ...getFilters(getSelectedOptions()),
+                priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+            }
+        ));
     }, [dispatch]);
+
+    const prevBrands = usePrevious(brands);
+    const prevSexes = usePrevious(sexes);
+    const prevTypes = usePrevious(types);
+    const prevColors = usePrevious(colors);
+    const prevSizes = usePrevious(sizes);
+    const prevAvailability = usePrevious(availability);
 
     useEffect(() => {
         const newFilterList = filterList;
-        if (!isEmpty(newFilterList.brands)) {
-            newFilterList.brands.fields = brands;
+        if (JSON.stringify(brands) !== JSON.stringify(prevBrands)) {
+            newFilterList.brand.fields = brands;
             setFilterList(newFilterList);
-            _forEach(newFilterList, (item, key) => {
-                if (item.selectedOption) {
-                    url.searchParams.set(key, item.selectedOption.value as string);
-                } else {
-                    url.searchParams.delete(key);
-                }
-            });
-            replaceURL();
+            updateURL(newFilterList);
         }
-    }, [brands]);
+        if (JSON.stringify(sexes) !== JSON.stringify(prevSexes)) {
+            newFilterList.sex.fields = sexes;
+            setFilterList(newFilterList);
+            updateURL(newFilterList);
+        }
+        if (JSON.stringify(types) !== JSON.stringify(prevTypes)) {
+            newFilterList.type.fields = types;
+            setFilterList(newFilterList);
+            updateURL(newFilterList);
+        }
+        if (JSON.stringify(colors) !== JSON.stringify(prevColors)) {
+            newFilterList.color.fields = colors;
+            setFilterList(newFilterList);
+            updateURL(newFilterList);
+        }
+        if (JSON.stringify(sizes) !== JSON.stringify(prevSizes)) {
+            console.log(sizes);
+            newFilterList.sizes.fields = sizes;
+            setFilterList(newFilterList);
+            updateURL(newFilterList);
+        }
+        if (JSON.stringify(availability) !== JSON.stringify(prevAvailability)) {
+            newFilterList.availability.fields = availability;
+            setFilterList(newFilterList);
+            updateURL(newFilterList);
+        }
+    }, [brands, sexes, types, colors, sizes, availability]);
+
+    const prevPriceState = usePrevious(priceFilterState);
+
+    useEffect(() => {
+        if (prevPriceState && JSON.stringify(prevPriceState) !== JSON.stringify(priceFilterState) && priceOnBlur) {
+            dispatch(fetchGoods({
+                skip,
+                limit,
+                count: true,
+                fields: fieldsList,
+            }, {
+                ...getFilters(getSelectedOptions()),
+                priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+            }));
+            setPriceOnBlur(false);
+        }
+    }, [priceFilterState, priceOnBlur]);
 
     const prevFilterList = usePrevious(filterList);
 
@@ -212,34 +399,58 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
         }
     }, []);
 
-    const handleOpenFilters = (): void => {
-        // setOpen(!open);
-        setOpenDrawer(!openDrawer);
-    };
-
-    const getSelectedOptions = (): FilterListTypeArray<ShoeInterface & {availability: boolean}> => _.pickBy(filterList, (value) => {
+    const getSelectedOptions = (): GoodsFilterList => _.pickBy(filterList, (value) => {
         return !!value.selectedOption;
     });
 
     const fetchItemsWithFilters = (): void => {
         const selectedOptions = getSelectedOptions();
         if (!_.isEmpty(selectedOptions)) {
-            const filters = getFilters(selectedOptions);
-            dispatch(fetchGoods(0, limit, true, fieldsList, filters));
+            const selectedFilters = getFilters(selectedOptions);
+            dispatch(fetchGoods({
+                skip: 0,
+                limit,
+                count: true,
+                fields: fieldsList,
+            }, {
+                ...selectedFilters,
+                priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+            }));
+            dispatch(fetchBrands(selectedFilters));
+            dispatch(fetchSexesCount(selectedFilters));
+            dispatch(fetchTypesCount(selectedFilters));
+            dispatch(fetchColorsCount(selectedFilters));
+            dispatch(fetchSizesCount(selectedFilters));
+            dispatch(fetchAvailabilityCount(selectedFilters));
             setSkip(0);
             url.searchParams.set('skip', '0');
             setLimit(limit);
             url.searchParams.set('limit', limit.toString());
         } else {
-            dispatch(fetchGoods(0, limit, true));
+            dispatch(fetchGoods({
+                    skip: 0,
+                    limit,
+                    count: true,
+                }, {
+                    priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                    priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+                }
+            ));
+            dispatch(fetchBrands());
+            dispatch(fetchSexesCount());
+            dispatch(fetchTypesCount());
+            dispatch(fetchColorsCount());
+            dispatch(fetchSizesCount());
+            dispatch(fetchAvailabilityCount());
             setSkip(0);
             url.searchParams.set('skip', '0');
         }
         replaceURL();
     };
 
-    const handleChange = ({target: {value}}: React.ChangeEvent<HTMLSelectElement>): void => {
-        switch (value) {
+    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+        switch (event.target.value) {
             case "priceAsc":
                 setOrderBy("priceAsc");
                 url.searchParams.set('orderBy', "priceAsc");
@@ -253,35 +464,58 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                 url.searchParams.set('order', "asc");
                 break;
             default:
-                setOrderBy(value);
-                url.searchParams.set('orderBy', value);
+                setOrderBy(event.target.value);
+                url.searchParams.set('orderBy', event.target.value);
         }
         replaceURL();
     };
 
-    const handleChangeFilterOption = (newValue: ItemDataType, actionMeta: ActionMeta<ItemDataType>): void => {
-        const filterArr: FilterListTypeArray<ShoeInterface & {availability: boolean}> = {};
-        _forIn(filterList, (value, key) => {
-            return filterArr[key] = value.filterName.id === actionMeta.name ? {
-                ...value,
-                selectedOption: newValue
-            } : value;
+    const handleChangeFilterOption = (newValue: ItemDataType, filterName: keyof GoodsFilterList): void => {
+        const filterArr: GoodsFilterList = {};
+        forIn(filterList, (value, key) => {
+            if (filterList[key].selectedOption.find(item => item.value === newValue.value)) {
+                return filterArr[key] = {
+                    ...value,
+                    selectedOption: filterList[key].selectedOption.filter(item => item.value !== newValue.value)
+                }
+            } else if (newValue === null && value.filterName.id === filterName) {
+                if (filterName === "sex" || filterName === "availability") {
+                    return filterArr[key] = {
+                        ...value,
+                        selectedOption: []
+                    }
+                }
+            } else if (value.filterName.id === filterName) {
+                if (filterName === "sex") {
+                    return filterArr[key] = {
+                        ...value,
+                        selectedOption: [newValue]
+                    }
+                }
+                return filterArr[key] = {
+                    ...value,
+                    selectedOption: [...filterList[key].selectedOption, newValue]
+                }
+            }
+            return filterArr[key] = value;
         });
         setFilterList(filterArr);
-        _forEach(filterArr, (item, key) => {
-            if (item.selectedOption) {
-                url.searchParams.set(key, item.selectedOption.value as string);
-            } else {
-                url.searchParams.delete(key);
-            }
-        });
-        replaceURL();
+        updateURL(filterArr);
     };
 
     const handleLoadClick = (): void => {
         const newLimit = limit + 6;
         if (goods.length < count) {
-            dispatch(fetchGoods(limit, newLimit, true, fieldsList, getFilters(getSelectedOptions())));
+            dispatch(fetchGoods({
+                skip: limit,
+                limit: newLimit,
+                count: true,
+                fields: fieldsList,
+            }, {
+                ...getFilters(getSelectedOptions()),
+                priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+            }));
             setSkip(limit);
             url.searchParams.set('skip', limit.toString());
             setLimit(newLimit);
@@ -290,10 +524,6 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
             setExpanded(true);
         }
     }
-
-    const onSpin = (): void => {
-        setExpanded(false);
-    };
 
     const toggleDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
         if (
@@ -306,81 +536,106 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
         setOpenDrawer(!openDrawer);
     };
 
-    const handleChangeFilter = (panel: string) => (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
+    const handleChangeFilter = (panel: string | false) => (event: React.ChangeEvent<{}>, isExpanded: boolean): void => {
         setExpandedFilterItem(isExpanded ? panel : false);
     };
 
-    const handleChangeFilterBrand = (event: React.ChangeEvent<HTMLInputElement>):void => {
+    const handleChangeFilterBrand = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setBrandFilterState({...brandFilterState, [event.target.name]: event.target.checked});
+        handleChangeFilterOption({label: event.target.name, value: event.target.name}, "brand");
     };
 
-    const handleChangeFilterSex = (event: React.ChangeEvent<HTMLInputElement>):void => {
+    const handleChangeFilterSex = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setSexFilterState({...initialSexes, [event.target.name]: event.target.checked});
+        handleChangeFilterOption({label: event.target.name, value: event.target.name}, "sex");
     };
 
-    const handleChangeFilterType = (event: React.ChangeEvent<HTMLInputElement>):void => {
+    const handleChangeFilterType = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setTypeFilterState({...typeFilterState, [event.target.name]: event.target.checked});
+        handleChangeFilterOption({label: event.target.name, value: event.target.name}, "type");
     };
 
-    const handleChangeFilterAvailability = (event: React.ChangeEvent<HTMLInputElement>):void => {
-        setAvailabilityFilterState({...typeFilterState, [event.target.name]: event.target.checked});
+    const handleChangeFilterColor = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        setColorFilterState({...colorFilterState, [event.target.value]: event.target.checked});
+        handleChangeFilterOption({label: event.target.name, value: event.target.value}, "color");
     };
+
+    const handleChangeFilterSize = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        setSizeFilterState({...sizeFilterState, [event.target.name]: event.target.checked});
+        handleChangeFilterOption({label: event.target.name, value: event.target.name}, "sizes");
+    };
+
+    const handleChangeFilterPrice = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        const value = validateNumberInput(event.target.value);
+        if (value <= 99999) {
+            setPriceFieldState({...priceFieldState, [event.target.name]: value});
+        }
+    };
+
+    const handleChangeFilterPriceBlur = (event: React.FocusEvent<HTMLInputElement>): void => {
+        setPriceFilterState({...priceFilterState, [event.target.name]: priceFieldState[event.target.name]});
+        setPriceOnBlur(true);
+        if (event.target.name === 'priceFrom') {
+            if (priceFieldState.priceFrom) {
+                url.searchParams.set('priceFrom', priceFieldState.priceFrom ? priceFieldState.priceFrom.toString() : '');
+            } else {
+                url.searchParams.delete('priceFrom');
+            }
+        } else {
+            if (priceFieldState.priceTo) {
+                url.searchParams.set('priceTo', priceFieldState.priceTo ? priceFieldState.priceTo.toString() : '');
+            } else {
+                url.searchParams.delete('priceTo');
+            }
+        }
+        replaceURL();
+    };
+
+    const handleChangeFilterAvailability = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        setAvailabilityFilterState({
+            ...availabilityFilterState,
+            [event.target.name === "Доступно" ? 1 : 0]: event.target.checked
+        });
+        handleChangeFilterOption({
+            label: event.target.name,
+            value: event.target.name === "Доступно" ? 1 : 0
+        }, "availability");
+    };
+
+    const handleClearFilters = (): void => {
+        setFilterList(baseFilterList({brands, sexes, types, availability, colors, sizes}));
+        setSkip(BASE_SKIP);
+        setLimit(BASE_LIMIT);
+        setBrandFilterState(initialBrands);
+        setSexFilterState(initialSexes);
+        setTypeFilterState(initialTypes);
+        setColorFilterState(initialColors);
+        setSizeFilterState(initialSizes);
+        setAvailabilityFilterState(initialAvailability);
+        setPriceFieldState({priceFrom: undefined, priceTo: undefined});
+        setPriceFilterState({priceFrom: undefined, priceTo: undefined});
+        handleChangeFilter(false);
+        url.searchParams.set('skip', BASE_SKIP.toString());
+        url.searchParams.set('limit', BASE_LIMIT.toString());
+        updateURL({
+            ...baseFilterList({brands, sexes, types, availability, colors, sizes}),
+            priceFrom: undefined,
+            priceTo: undefined
+        });
+        setOpenDrawer(false);
+    }
 
     return (
         <>
             <div className="container">
-                <div className="d-flex justify-content-sm-between">
-                    <FormControl className={classes.formControl}>
-                        <InputLabel htmlFor="orderBy-simple">Сортування</InputLabel>
-                        <SortSelect
-                            value={orderBy}
-                            onChange={handleChange}
-                            inputProps={{
-                                id: 'orderBy-simple',
-                                name: 'orderBy',
-                            }}
-                        >
-                            {rows.map(item =>
-                                <MenuItem key={item.row} value={item.row}>{item.label}</MenuItem>
-                            )}
-                        </SortSelect>
-                    </FormControl>
-                    <div className="d-flex justify-content-end align-items-center">
-                        {/*{open && (_map(filterList, ({*/}
-                        {/*                                filterName,*/}
-                        {/*                                filterLabel,*/}
-                        {/*                                fields,*/}
-                        {/*                                selectedOption*/}
-                        {/*                            }) =>*/}
-                        {/*    <FilterSelect*/}
-                        {/*        key={filterName.id as string}*/}
-                        {/*        closeMenuOnSelect={true}*/}
-                        {/*        isClearable={true}*/}
-                        {/*        isSearchable={false}*/}
-                        {/*        name={filterName.id as string}*/}
-                        {/*        components={{Placeholder}}*/}
-                        {/*        placeholder={filterLabel}*/}
-                        {/*        onChange={handleChangeFilterOption}*/}
-                        {/*        styles={{*/}
-                        {/*            container: (base) => ({*/}
-                        {/*                ...base,*/}
-                        {/*                minWidth: '160px',*/}
-                        {/*                margin: '5px'*/}
-                        {/*            })*/}
-                        {/*        }}*/}
-                        {/*        options={_map(fields, ({label, value}) => ({label, value}))}*/}
-                        {/*        value={selectedOption}*/}
-                        {/*    />*/}
-                        {/*))}*/}
-                        <Tooltip title="Фільтри" placement="top">
-                            <IconButton onClick={handleOpenFilters} style={{width: "50px"}}>
-                                <FilterList/>
-                            </IconButton>
-                        </Tooltip>
-                    </div>
-                </div>
+                <GoodsToolbar
+                    orderBy={orderBy}
+                    formControlClass={classes.formControl}
+                    handleChange={handleChange}
+                    setOpenDrawer={setOpenDrawer}
+                />
                 <div className={`row ${justifyCards}`}>
-                    {goods ?
+                    {goods.length > 0 ?
                         _.map(goods.sort(getComparator<CompareGoods>(order, orderBy.includes("price") ? "price" : orderBy)),
                             (good, index) =>
                                 <CommodityCard key={index} good={good}/>
@@ -394,7 +649,17 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                 onClose={toggleDrawer}
                 classes={{paper: classes.drawerPaper}}
             >
-                <Accordion expanded={expandedFilterItem === 'availability'} onChange={handleChangeFilter('availability')}
+                <div className={classes.filterHeader}>
+                    <div>
+                        <CloseIcon fontSize="medium" style={{cursor: "pointer"}} onClick={toggleDrawer}/>
+                    </div>
+                    <div className={classes.filterHeaderInner}>
+                        <h2 className={classes.filterHeading}>Фільтри</h2>
+                        <p className={classes.filterCount}>{count} товарів</p>
+                    </div>
+                </div>
+                <Accordion expanded={expandedFilterItem === 'availability'}
+                           onChange={handleChangeFilter('availability')}
                            classes={{expanded: classes.accordionExpanded}}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon/>}
@@ -411,17 +676,55 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                     className={classes.drawerFormGroup}
                                     control={
                                         <Checkbox
-                                            checked={brandFilterState[item.label]}
+                                            disabled={item.count === 0}
+                                            checked={availabilityFilterState[item.value]}
                                             onChange={handleChangeFilterAvailability}
                                             name={item.label}
                                             color="primary"
                                         />
                                     }
                                     classes={{label: classes.drawerFormControl}}
-                                    label={item.label}
+                                    label={`${item.label} (${item.count})`}
                                 />
                             )}
                         </FormGroup>
+                    </AccordionDetails>
+                </Accordion>
+                <Accordion expanded={expandedFilterItem === 'price'} onChange={handleChangeFilter('price')}
+                           classes={{expanded: classes.accordionExpanded}}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon/>}
+                        aria-controls="price-content"
+                        id="price-header"
+                    >
+                        <Typography className={classes.heading}>Ціна</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <FormControl fullWidth={true} className={classes.margin} variant="outlined">
+                            <InputLabel htmlFor="outlined-adornment-price-from">Від</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-price-from"
+                                name="priceFrom"
+                                value={priceFieldState.priceFrom ? priceFieldState.priceFrom.toString() : ''}
+                                onChange={handleChangeFilterPrice}
+                                onBlur={handleChangeFilterPriceBlur}
+                                startAdornment={<InputAdornment position="start">грн</InputAdornment>}
+                                labelWidth={30}
+                            />
+                        </FormControl>
+                        <FormControl fullWidth={true} className={classes.margin} variant="outlined">
+                            <InputLabel htmlFor="outlined-adornment-price-to">До</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-price-to"
+                                name="priceTo"
+                                type="number"
+                                value={priceFieldState.priceTo ? priceFieldState.priceTo.toString() : ''}
+                                onChange={handleChangeFilterPrice}
+                                onBlur={handleChangeFilterPriceBlur}
+                                startAdornment={<InputAdornment position="start">грн</InputAdornment>}
+                                labelWidth={30}
+                            />
+                        </FormControl>
                     </AccordionDetails>
                 </Accordion>
                 <Accordion expanded={expandedFilterItem === 'brand'} onChange={handleChangeFilter('brand')}
@@ -441,6 +744,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                     className={classes.drawerFormGroup}
                                     control={
                                         <Checkbox
+                                            disabled={brand.count === 0}
                                             checked={brandFilterState[brand.label]}
                                             onChange={handleChangeFilterBrand}
                                             name={brand.label}
@@ -448,7 +752,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                         />
                                     }
                                     classes={{label: classes.drawerFormControl}}
-                                    label={brand.label}
+                                    label={`${brand.label} (${brand.count})`}
                                 />
                             )}
                         </FormGroup>
@@ -471,6 +775,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                     className={classes.drawerFormGroup}
                                     control={
                                         <Checkbox
+                                            disabled={sex.count === 0}
                                             checked={sexFilterState[sex.label]}
                                             onChange={handleChangeFilterSex}
                                             name={sex.label}
@@ -478,7 +783,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                         />
                                     }
                                     classes={{label: classes.drawerFormControl}}
-                                    label={sex.label}
+                                    label={`${sex.label} (${sex.count})`}
                                 />
                             )}
                         </FormGroup>
@@ -501,6 +806,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                     className={classes.drawerFormGroup}
                                     control={
                                         <Checkbox
+                                            disabled={type.count === 0}
                                             checked={typeFilterState[type.label]}
                                             onChange={handleChangeFilterType}
                                             name={type.label}
@@ -508,32 +814,134 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands}) => {
                                         />
                                     }
                                     classes={{label: classes.drawerFormControl}}
-                                    label={type.label}
+                                    label={`${type.label} (${type.count})`}
                                 />
                             )}
                         </FormGroup>
                     </AccordionDetails>
                 </Accordion>
+                <Accordion expanded={expandedFilterItem === 'color'} onChange={handleChangeFilter('color')}
+                           classes={{expanded: classes.accordionExpanded}}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon/>}
+                        aria-controls="color-content"
+                        id="color-header"
+                    >
+                        <Typography className={classes.heading}>Колір</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <FormGroup classes={{root: classes.colorDirection}}>
+                            {_map(filterList.color.fields, color =>
+                                <FormControlLabel
+                                    key={color.label}
+                                    className={classes.drawerFormGroup}
+                                    control={
+                                        <Checkbox
+                                            disabled={color.count === 0}
+                                            checked={colorFilterState[color.value]}
+                                            onChange={handleChangeFilterColor}
+                                            name={color.label}
+                                            value={color.value}
+                                            color="primary"
+                                        />
+                                    }
+                                    classes={{label: classes.drawerFormControl}}
+                                    label={`${color.label} (${color.count})`}
+                                />
+                            )}
+                        </FormGroup>
+                    </AccordionDetails>
+                </Accordion>
+                <Accordion expanded={expandedFilterItem === 'sizes'} onChange={handleChangeFilter('sizes')}
+                           classes={{expanded: classes.accordionExpanded}}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon/>}
+                        aria-controls="size-content"
+                        id="size-header"
+                    >
+                        <Typography className={classes.heading}>Розмір</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <FormGroup row={true}>
+                            {_map(filterList.sizes.fields, size => {
+                                return   <FormControlLabel
+                                        key={size.label}
+                                        className={classes.drawerFormGroup}
+                                        control={
+                                            <Checkbox
+                                                disabled={size.count === 0}
+                                                checked={sizeFilterState[size.label]}
+                                                onChange={handleChangeFilterSize}
+                                                name={size.label}
+                                                color="primary"
+                                            />
+                                        }
+                                        classes={{label: classes.drawerFormControl}}
+                                        label={`${size.label} (${size.count})`}
+                                    />
+                                }
+                            )}
+                        </FormGroup>
+                    </AccordionDetails>
+                </Accordion>
+                <div className="d-flex">
+                    <Button text="Застосувати" onClick={() => setOpenDrawer(false)}/>
+                    <Button text="Очистити" onClick={handleClearFilters}/>
+                </div>
             </Drawer>
-            <LoadCommodities onTransitionEnd={onSpin} expanded={expanded}
+            <LoadCommodities onTransitionEnd={() => setExpanded(false)} expanded={expanded}
                              handleLoadClick={handleLoadClick}/>
         </>
     )
 };
 
-const BrandsWrapper: React.FC<Omit<GoodsPropsI, "brands">> = (props) => {
-    const getBrands = ({brands}: { brands: ItemsType }): ItemsType => {
-        return brands;
+const BrandsWrapper: React.FC<{ justifyCards: string }> = (props) => {
+    const filters: SearchItemParameters = {};
+    if (url.searchParams.toString().length > 0) {
+        url.searchParams.forEach((value, key) => {
+            if (['brand', 'sex', 'type', 'availability', 'color', 'sizes', 'priceFrom', 'priceTo'].includes(key)) {
+                const item = JSON.parse(value);
+                filters[key] = Array.isArray(item) ? item : [item];
+            }
+        })
+    }
+
+    const getBrands = ({
+                           brands,
+                           filters: {sexes, types, availability, colors, sizes}
+                       }: { brands: ItemsType, filters: FiltersReducerStateType }):
+        { brands: ItemsType, sexes: ItemsType, types: ItemsType, availability: ItemsType, colors: ItemsType, sizes: ItemsType } => {
+        return {brands, sexes, types, availability, colors, sizes};
     };
 
-    const brandsList: ItemsType = useSelector(getBrands, shallowEqual);
+    const {
+        brands: brandsList,
+        sexes: sexesList,
+        types: typesList,
+        availability: availabilityList,
+        colors: colorsList,
+        sizes: sizesList
+    }: { brands: ItemsType, sexes: ItemsType, types: ItemsType, availability: ItemsType, colors: ItemsType, sizes: ItemsType } = useSelector(getBrands, shallowEqual);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchBrands());
+        dispatch(fetchBrands(filters));
+        dispatch(fetchSexesCount(filters));
+        dispatch(fetchTypesCount(filters));
+        dispatch(fetchColorsCount(filters));
+        dispatch(fetchSizesCount(filters));
+        dispatch(fetchAvailabilityCount(filters));
     }, [dispatch]);
-    return !isEmpty(brandsList) && <Goods {...props} brands={brandsList}/>
+
+    return !isEmpty(brandsList)
+        && !isEmpty(sexesList)
+        && !isEmpty(typesList)
+        && !isEmpty(colorsList)
+        && !isEmpty(sizesList)
+        && !isEmpty(availabilityList) &&
+        <Goods {...props} brands={brandsList} sexes={sexesList} types={typesList} availability={availabilityList}
+               colors={colorsList} sizes={sizesList}/>
 };
 
 export default BrandsWrapper;

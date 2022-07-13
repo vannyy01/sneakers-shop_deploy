@@ -1,3 +1,7 @@
+:root {
+    --primary-color: #03A9F4;
+    --secondary-color: #fff
+}
 button:focus {
     outline: 1px !important;
 }

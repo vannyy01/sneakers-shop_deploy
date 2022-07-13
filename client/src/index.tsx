@@ -8,6 +8,7 @@ import reducers from './reducers';
 
 import {Provider} from 'react-redux';
 
+export const url = new URL(window.location.href);
 const store = createStore(reducers, applyMiddleware(reduxThunk));
 
 ReactDOM.render(<Provider store={store}><App/></Provider>,

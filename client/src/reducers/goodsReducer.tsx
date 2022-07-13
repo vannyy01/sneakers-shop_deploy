@@ -1,4 +1,5 @@
 import {
+    CLEAR_GOODS, ClearGoodsAction,
     CREATE_GOOD, CreateGoodAction, DELETE_GOOD, DELETE_MANY_GOODS, DeleteGoodAction, DeleteManyGoodsAction,
     FETCH_GOOD,
     FETCH_GOODS,
@@ -14,6 +15,7 @@ type AuthAction =
     FetchGoodAction
     | SearchGoodsAction
     | FetchGoodsAction
+    | ClearGoodsAction
     | UpdateGoodAction
     | CreateGoodAction
     | DeleteGoodAction
@@ -78,6 +80,8 @@ export const goodsReducer = (state: StateType = Object.assign({}, initialState),
                 }
             }
             return state;
+        case CLEAR_GOODS:
+            return initialState;
         case FETCH_GOOD:
             return {...state, ...action.payload};
         case UPDATE_GOOD:

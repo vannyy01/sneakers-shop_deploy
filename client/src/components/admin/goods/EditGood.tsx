@@ -19,13 +19,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Draggable from 'react-draggable';
-import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles, sexes, shoeTypes} from "./BaseGood";
+import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles} from "./BaseGood";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
 import {ItemsType} from "../../types";
-import CreatableSelect from "react-select/creatable";
 import EditableSelect from "../../select/EditableSelect";
+import {colors, sexes, shoeTypes} from "./goodTypes";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -40,7 +40,7 @@ function PaperComponent(props: PaperProps) {
 }
 
 interface EditGoodPropsType extends BaseGoodPropsType {
-    classes: { alert: string, button: string, paper: string },
+    classes: { alert: string, button: string, paper: string, root: string},
     fetchGoodByID: (id: string, onErrorCallback: () => void) => void,
     good: ShoeInterface,
     brands?: ItemsType,
@@ -80,7 +80,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
         if (this.state.good?._id && brands) {
-            const {title, brand, description, mainImage, type, sex, price, sizes} = this.state.good;
+            const {title, brand, description, mainImage, type, sex, color, price, sizes} = this.state.good;
             const {
                 showAlert,
                 showDialog,
@@ -162,8 +162,34 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                 <UploadImages commID={this.props.match.params.commID} mainImage={mainImage}
                                               setMainImage={this.setMainImage}/>
                             </Grid>
-                            <Grid item={true} xs={12}>
+                            <Grid item={true} xs={12} sm={6}>
                                 <ChipManager label="Вкажіть розміри" sizes={sizes} setChips={this.handleAddChips}/>
+                            </Grid>
+                            <Grid item={true} xs={12} sm={6}>
+                                    <TextField
+                                        required={true}
+                                        id="color"
+                                        name="color"
+                                        label="Колір"
+                                        SelectProps={{classes: {root: classes.root}}}
+                                        fullWidth={true}
+                                        autoComplete="color-name"
+                                        select={true}
+                                        value={color}
+                                        onChange={this.handleOnChange}
+                                        helperText={formErrors.color}
+                                        error={formErrors.color.length > 0}
+                                    >
+                                        {_map(colors, option => (
+                                            <MenuItem key={option.value} value={option.value}
+                                                      style={{
+                                                          backgroundColor: option.value.toString(),
+                                                          color: option.value.toString() === "black" ? "#ffffff" : "inherit"
+                                                      }}>
+                                               {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
                                 <TextField

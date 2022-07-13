@@ -10,9 +10,9 @@ import {
 import GridView, {FilterListTypeArray} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
 import {HeadCell, ItemsType} from "../../types";
-import {sexes, shoeTypes} from "./BaseGood";
 import {useEffect} from "react";
 import _isEmpty from "lodash/isEmpty";
+import {sexes, shoeTypes} from "./goodTypes";
 
 export const headCells: Array<HeadCell<ShoeInterface>> = [
     {id: 'title', numeric: false, disablePadding: true, label: 'Модель'},
@@ -27,7 +27,7 @@ interface PropsInterface {
     goods: ShoeInterface[],
     brands: ItemsType,
     count: number,
-    fetchGoods: (skip: number, limit: number, count: boolean) => void,
+    fetchGoods: ({skip, limit, count}: {skip: number, limit: number, count: boolean}) => void,
     fetchBrands: () => void,
     searchGoods: (condition: string, skip: number, limit: number, count: boolean) => void,
     clearGoodsState: () => void,
@@ -71,7 +71,7 @@ const Goods: React.FC<PropsInterface> = ({
 
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
-        fetchGoods(0, goodsCount, true);
+        fetchGoods({skip: 0, limit: goodsCount, count: true});
     }
 
     return (

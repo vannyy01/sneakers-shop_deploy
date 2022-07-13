@@ -21,11 +21,10 @@ import Button from "@material-ui/core/Button";
 import {useEffect, useState} from "react";
 import {TablePaginationActions} from "./TablePaginationActions";
 import {HeadCell, ItemDataType, ItemsType, Order} from "../types";
-import _forEach from "lodash/forEach";
 import _forIn from "lodash/forIn";
 import {ActionMeta} from "react-select";
-import _mapValues from "lodash/mapValues";
 import {getComparator, getFilters, usePrevious} from "../utils";
+import {forEach, isEmpty} from "lodash";
 
 function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
     const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
@@ -54,7 +53,7 @@ export interface FilterListType<T> {
     filterName: HeadCell<T>,
     filterLabel: string,
     fields: ItemsType,
-    selectedOption?: ItemDataType
+    selectedOption?: ItemDataType[]
 }
 
 export interface FilterListTypeArray<T> {
@@ -62,7 +61,7 @@ export interface FilterListTypeArray<T> {
 }
 
 export interface SearchItemParameters {
-    [key: string]: string | number
+    [key: string]: string[]
 }
 
 type DataType<T> = T & { _id: string };
@@ -74,7 +73,13 @@ interface EnhancedTablePropsI<T> {
     rowsCount: number,
     count: number,
     data: Array<DataType<T>>,
-    fetchItems: (skip: number, limit: number, count: boolean, fields?: string[], filters?: SearchItemParameters) => void,
+    fetchItems: ({
+                     skip,
+                     limit,
+                     count,
+                     fields
+                 }: { skip: number, limit: number, count: boolean, fields?: string[] },
+                 filters?: SearchItemParameters) => void,
     searchItems?: (condition: string,
                    skip: number,
                    limit: number,
@@ -152,10 +157,19 @@ const EnhancedTable = <T, >({
                     break;
                 default:
                     const newFilterList = Object.assign({}, initialFilterList);
-                    newFilterList[key].selectedOption = {
-                        label: initialFilterList[key].fields[value].label,
-                        value
-                    };
+                    const val: string[] = JSON.parse(value);
+                    if (!isEmpty(newFilterList[key].selectedOption)) {
+                        val.forEach(thing => newFilterList[key].selectedOption.push({
+                                label: initialFilterList[key].fields[thing].label,
+                                value: initialFilterList[key].fields[thing].value
+                            })
+                        );
+                    } else {
+                        newFilterList[key].selectedOption = [{
+                            label: initialFilterList[key].fields[val[0]].label,
+                            value: initialFilterList[key].fields[val[0]].value
+                        }];
+                    }
                     initialFilterList = newFilterList;
             }
         });
@@ -189,7 +203,7 @@ const EnhancedTable = <T, >({
             if (searchCondition) {
                 searchItems(searchCondition, 0, rowsPerPage * (page + 1), true, ["*"], filters);
             } else {
-                fetchItems(0, rowsPerPage * (page + 1), true, ["*"], filters);
+                fetchItems({skip: 0, limit: rowsPerPage * (page + 1), count: true, fields: ["*"]}, filters);
             }
         }
     }, []);
@@ -203,25 +217,38 @@ const EnhancedTable = <T, >({
         setCountItems(count);
     }, [count]);
 
+
     useEffect(() => {
-        //  console.log('componentDidUpdate');
-        const options = getSelectedOptions();
-        if (!_.isEmpty(options)) {
-            const filters: SearchItemParameters = _mapValues(options, (value) => {
-                    return value.selectedOption.value
+            //  console.log('componentDidUpdate');
+            const options = getSelectedOptions();
+            if (!_.isEmpty(options)) {
+                // const filters: SearchItemParameters = _mapValues(options, value => {
+                //         if (value.selectedOption?.value) {
+                //             return value.selectedOption.value;
+                //         }
+                //         let temp: string | number;
+                //         _mapValues(value.selectedOption, (item: ItemDataType) => {
+                //             temp = item.value;
+                //         });
+                //         return temp;
+                //     }
+                // );
+                const filters: SearchItemParameters = {};
+                forEach(options, (value, key) =>
+                    filters[key] = value.selectedOption.map(item => item.value as string)
+                );
+                if (rowsData.length < countItems && searchCondition) {
+                    searchItems(searchCondition, skip, limit, true, ["*"], filters);
+                } else if (rowsData.length < countItems && !searchCondition) {
+                    fetchItems({skip, limit, count: true, fields:["*"]}, filters);
                 }
-            );
-            if (rowsData.length < countItems && searchCondition) {
-                searchItems(searchCondition, skip, limit, true, ["*"], filters);
+            } else if (rowsData.length < countItems && searchCondition) {
+                searchItems(searchCondition, skip, limit, true);
             } else if (rowsData.length < countItems && !searchCondition) {
-                fetchItems(skip, limit, true, ["*"], filters);
+                fetchItems({skip, limit, count: true});
             }
-        } else if (rowsData.length < countItems && searchCondition) {
-            searchItems(searchCondition, skip, limit, true);
-        } else if (rowsData.length < countItems && !searchCondition) {
-            fetchItems(skip, limit, true);
-        }
-    }, [skip, limit]);
+        }, [skip, limit]
+    );
 
     useEffect(() => {
         //  console.log('componentDidUpdate');
@@ -243,7 +270,7 @@ const EnhancedTable = <T, >({
         }
     }, [filterFieldValues]);
 
-    // componentWillUnmount
+// componentWillUnmount
     useEffect(() => {
         return () => {
             clearItems();
@@ -256,7 +283,7 @@ const EnhancedTable = <T, >({
     };
 
     const getSelectedOptions = (): FilterListTypeArray<T> => _.pickBy(filterFieldValues, (value) => {
-        return !!value.selectedOption;
+        return !isEmpty(value.selectedOption);
     });
 
 
@@ -267,7 +294,7 @@ const EnhancedTable = <T, >({
             if (searchCondition) {
                 searchItems(searchCondition, 0, rowsPerPage, true, ["*"], filters);
             } else {
-                fetchItems(0, rowsPerPage, true, ["*"], filters);
+                fetchItems({skip: 0, limit: rowsPerPage, count: true, fields: ["*"]}, filters);
             }
             setPage(0);
             url.searchParams.set('page', '0');
@@ -279,7 +306,7 @@ const EnhancedTable = <T, >({
             if (searchCondition) {
                 searchItems(searchCondition, 0, rowsPerPage, true);
             } else {
-                fetchItems(0, limit, true);
+                fetchItems({skip: 0, limit, count: true});
             }
             setPage(0);
             url.searchParams.set('page', '0');
@@ -370,9 +397,9 @@ const EnhancedTable = <T, >({
             if (searchValue.length === 0) {
                 url.searchParams.delete('searchCondition');
                 if (!_.isEmpty(getSelectedOptions())) {
-                    fetchItems(0, rowsPerPage, true, ["*"], getFilters(getSelectedOptions()));
+                    fetchItems({skip: 0, limit: rowsPerPage, count: true, fields: ["*"]}, getFilters(getSelectedOptions()));
                 } else {
-                    fetchItems(0, rowsPerPage, true);
+                    fetchItems({skip: 0, limit: rowsPerPage, count: true});
                 }
                 setSkip(0);
                 url.searchParams.set('skip', '0');
@@ -402,15 +429,20 @@ const EnhancedTable = <T, >({
     const handleChangeFilterOption = (newValue: ItemDataType, actionMeta: ActionMeta<ItemDataType>): void => {
         const filterArr: FilterListTypeArray<T> = {};
         _forIn(filterFieldValues, (value, key) => {
-            return filterArr[key] = value.filterName.id === actionMeta.name ? {
-                ...value,
-                selectedOption: newValue
-            } : value;
+            if (newValue === null && value.filterName.id === actionMeta.name) {
+                return filterArr[key] = {...value, selectedOption: []};
+            } else if (value.filterName.id === actionMeta.name) {
+                return filterArr[key] = {
+                    ...value,
+                    selectedOption: [newValue]
+                };
+            }
+            return filterArr[key] = value;
         });
         setFilterFieldValues(filterArr);
-        _forEach(filterArr, (item, key) => {
-            if (item.selectedOption) {
-                url.searchParams.set(key, item.selectedOption.value as string);
+        forEach(filterArr, (item, key) => {
+            if (!isEmpty(item.selectedOption)) {
+                url.searchParams.set(key, JSON.stringify(item.selectedOption.map(thing => thing.value)));
             } else {
                 url.searchParams.delete(key);
             }

@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
+const boolParser = require('express-query-boolean');
 const passport = require('passport');
 const keys = require('./config/keys');
 require('./models/User');
@@ -18,11 +19,11 @@ app.use(
         keys: [keys.cookieKey]
     })
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(boolParser());
 
 require('./routes/userRoutes')(app);
 require('./routes/orderRoutes')(app);

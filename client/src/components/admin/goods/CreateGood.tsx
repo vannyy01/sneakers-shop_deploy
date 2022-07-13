@@ -17,8 +17,6 @@ import BaseGood, {
     Alert,
     GoodStyles,
     PaperComponent,
-    sexes,
-    shoeTypes,
     BaseGoodPropsType, BaseGoodStateType
 } from "./BaseGood";
 import {withStyles} from "@material-ui/core";
@@ -28,9 +26,9 @@ import {ShoeInterface} from "../../../actions/types";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
-import CreatableSelect from "react-select/creatable";
 import {ItemsType} from "../../types";
 import EditableSelect from "../../select/EditableSelect";
+import {colors, sexes, shoeTypes} from "./goodTypes";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -49,7 +47,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
     public render() {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
-        const {title, brand, description, mainImage, type, sex, price, sizes} = this.state.good;
+        const {title, brand, description, mainImage, type, sex, price, color, sizes} = this.state.good;
         const {showAlert, showDialog, formErrors, isLoading} = this.state;
 
         return <Paper className={classes.paper}>
@@ -124,8 +122,29 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                             <UploadImages mainImage={mainImage}
                                           setMainImage={this.setMainImage}/>
                         </Grid>
-                        <Grid item={true} xs={12}>
+                        <Grid item={true} xs={12} sm={6}>
                             <ChipManager label="Вкажіть розміри" sizes={sizes} setChips={this.handleAddChips}/>
+                        </Grid>
+                        <Grid item={true} xs={12} sm={6}>
+                            <TextField
+                                required={true}
+                                id="color"
+                                name="color"
+                                label="Колір"
+                                fullWidth={true}
+                                autoComplete="color-name"
+                                select={true}
+                                value={color}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.color}
+                                error={formErrors.color.length > 0}
+                            >
+                                {_map(colors, (option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                        {option.label}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
                             <TextField
