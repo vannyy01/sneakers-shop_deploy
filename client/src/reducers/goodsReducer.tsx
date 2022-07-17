@@ -1,10 +1,19 @@
 import {
-    CLEAR_GOODS, ClearGoodsAction,
-    CREATE_GOOD, CreateGoodAction, DELETE_GOOD, DELETE_MANY_GOODS, DeleteGoodAction, DeleteManyGoodsAction,
+    CLEAR_GOODS,
+    ClearGoodsAction,
+    CREATE_GOOD,
+    CreateGoodAction,
+    DELETE_GOOD,
+    DELETE_MANY_GOODS,
+    DeleteGoodAction,
+    DeleteManyGoodsAction,
+    FETCH_FAVOURITE_GOODS,
     FETCH_GOOD,
-    FETCH_GOODS,
+    FETCH_GOODS, FetchFavouriteGoodsAction,
     FetchGoodAction,
-    FetchGoodsAction, SEARCH_GOODS, SearchGoodsAction,
+    FetchGoodsAction,
+    SEARCH_GOODS,
+    SearchGoodsAction,
     ShoeInterface,
     UPDATE_GOOD,
     UpdateGoodAction,
@@ -13,6 +22,7 @@ import {SearchItemParameters} from "../components/GridView";
 
 type AuthAction =
     FetchGoodAction
+    | FetchFavouriteGoodsAction
     | SearchGoodsAction
     | FetchGoodsAction
     | ClearGoodsAction
@@ -38,7 +48,7 @@ export const goodsReducer = (state: StateType = Object.assign({}, initialState),
             }
             // If loads the next part of the same query condition OR data from the new query condition
             if (Array.isArray(state.goods)) {
-                if (JSON.stringify(action.payload.filters) !== JSON.stringify(state.filters)){
+                if (JSON.stringify(action.payload.filters) !== JSON.stringify(state.filters)) {
                     return {
                         ...state,
                         ...action.payload
@@ -53,6 +63,8 @@ export const goodsReducer = (state: StateType = Object.assign({}, initialState),
                 }
             }
             return {...state, ...action.payload};
+        case FETCH_FAVOURITE_GOODS:
+            return {...initialState, ...action.payload};
         case SEARCH_GOODS:
             // If previously FETCH_GOODS was used
             if (!state.searchMode) {

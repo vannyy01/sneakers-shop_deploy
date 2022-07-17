@@ -17,3 +17,4 @@ export interface HeadCell<T> {
 }
 
 export type Order = 'asc' | 'desc';
+export type OrderBy = 'priceAsc' | 'priceDesc' | 'title';

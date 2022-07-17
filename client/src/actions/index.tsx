@@ -14,14 +14,14 @@ import {
     DELETE_MANY_USERS,
     DELETE_USER,
     FETCH_AVAILABILITY_COUNT,
-    FETCH_BRANDS, FETCH_COLORS_COUNT,
+    FETCH_BRANDS, FETCH_COLORS_COUNT, FETCH_FAVOURITE_GOODS,
     FETCH_GOOD,
     FETCH_GOODS,
     FETCH_SEXES_COUNT, FETCH_SIZES_COUNT,
     FETCH_TYPES_COUNT,
     FETCH_USER,
     FETCH_USER_BY_ID,
-    FETCH_USERS, FetchColorsCountAction, FetchSizesCountAction, FetchTypesCountAction,
+    FETCH_USERS, FetchColorsCountAction, FetchFavouriteGoodsAction, FetchSizesCountAction, FetchTypesCountAction,
     GET_CART_ITEMS,
     SEARCH_GOODS,
     SEARCH_USERS,
@@ -34,8 +34,9 @@ import {
     from './types';
 import {addFilters} from "../components/utils";
 import {SearchItemParameters} from "../components/GridView";
-import {ItemDataType} from "../components/types";
+import {ItemDataType, OrderBy} from "../components/types";
 import {Dispatch} from "redux";
+import {getStorage} from "./validation";
 
 /**
  * @param user
@@ -180,9 +181,20 @@ export const deleteManyUsers = (users: string[], onSuccessCallback: () => void) 
     }
 };
 
+interface FetchGoodsParams {
+    skip: number,
+    limit: number,
+    orderBy: OrderBy,
+    count: boolean,
+    priceFrom?: number | '',
+    priceTo?: number | '',
+    fields?: string[]
+}
+
 /**
  * @param skip
  * @param limit
+ * @param orderBy
  * @param count
  * @param fields
  * @param priceFrom
@@ -192,24 +204,46 @@ export const deleteManyUsers = (users: string[], onSuccessCallback: () => void) 
 export const fetchGoods = ({
                                skip,
                                limit,
+                               orderBy,
                                count,
                                fields,
                                priceFrom,
                                priceTo
-                           }: { skip: number, limit: number, count: boolean, priceFrom?: number | '', priceTo?: number | '', fields?: string[] }, filters?: SearchItemParameters) => async (dispatch: any) => {
+                           }: FetchGoodsParams, filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
+        console.log(orderBy);
         count = count ? count : false;
         fields = fields ? fields : ["*"];
         const options = addFilters(filters);
-        const params = priceFrom && priceTo ? {skip, limit, count, fields, priceFrom, priceTo} : priceFrom ? {
+        const params = priceFrom && priceTo ? {skip, limit, orderBy, count, fields, priceFrom, priceTo} : priceFrom ? {
             skip,
             limit,
+            orderBy,
             count,
             fields,
             priceFrom
-        } : priceTo ? {skip, limit, count, fields, priceTo} : {skip, limit, count, fields};
+        } : priceTo ? {skip, limit, orderBy, count, fields, priceTo} : {skip, limit, orderBy, count, fields};
         const res = await axios.get(`/api/commodity/${options}`, {params});
         dispatch({type: FETCH_GOODS, payload: res.data});
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+/**
+ * @param orderBy
+ * @param fields
+ */
+export const fetchFavouritesGoods = ({
+                                         orderBy,
+                                         fields,
+                                     }: { orderBy: OrderBy, fields?: string[] }) => async (dispatch: Dispatch<FetchFavouriteGoodsAction>) => {
+    try {
+        fields = fields ? fields : ["*"];
+        const favourites = addFilters({favourites: getStorage("FavouritesGoods")});
+        const params = {orderBy, fields};
+        const res = await axios.get(`/api/commodity_favourites/${favourites}`, {params});
+        dispatch({type: FETCH_FAVOURITE_GOODS, payload: res.data});
     } catch (error) {
         console.log(error);
     }
@@ -279,9 +313,6 @@ export const fetchGoodByID = (id: string, onErrorCallback: () => void) => async 
 export const createGood = (good: ShoeInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.post(`/api/commodity/create`, good);
-        if (res.data.error) {
-            throw new Error(res.data.message);
-        }
         dispatch({type: CREATE_GOOD, payload: res.data});
         onSuccessCallback();
     } catch (error) {

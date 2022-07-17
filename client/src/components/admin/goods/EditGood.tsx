@@ -119,6 +119,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     required={true}
                                     isLoading={isLoading}
                                     name="brand"
+                                    label="Бренд"
                                     optionValue={brand}
                                     options={options}
                                     errorMessage={formErrors.brand}

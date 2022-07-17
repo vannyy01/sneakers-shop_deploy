@@ -9,7 +9,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import {withStyles} from '@material-ui/core/styles';
-import {Link} from "react-router-dom";
 import PollButton from './poll/PollButton';
 import PollModal from './poll/PollModal';
 import CartButton from './ShoppingCart/CartButton';

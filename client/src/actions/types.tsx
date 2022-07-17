@@ -90,6 +90,14 @@ export interface FetchGoodsAction {
     payload: { goods: ShoeInterface[], count?: number, filters: SearchItemParameters }
 }
 
+type FETCH_FAVOURITE_GOODS = 'FETCH_FAVOURITE_GOODS';
+export const FETCH_FAVOURITE_GOODS: FETCH_FAVOURITE_GOODS = 'FETCH_FAVOURITE_GOODS';
+
+export interface FetchFavouriteGoodsAction {
+    type: FETCH_FAVOURITE_GOODS,
+    payload: { goods: ShoeInterface[] }
+}
+
 type SEARCH_GOODS = 'SEARCH_GOODS';
 export const SEARCH_GOODS: SEARCH_GOODS = 'SEARCH_GOODS';
 

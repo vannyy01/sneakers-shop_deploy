@@ -1,5 +1,4 @@
 import * as React from "react";
-import {ReactElement} from "react";
 import {ShoeInterface, SizeInterface} from "../../../actions/types";
 import {RouteComponentProps} from "react-router-dom";
 import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
@@ -8,9 +7,7 @@ import Draggable from "react-draggable";
 import {createStyles, Theme} from "@material-ui/core";
 import {validateNumberInput} from "../../../actions/validation";
 import {ItemDataType, ItemsType} from "../../types";
-import {ActionMeta, components, OptionProps, PlaceholderProps} from "react-select";
-import IconButton from "@material-ui/core/IconButton";
-import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
+import {ActionMeta} from "react-select";
 
 export function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -124,7 +121,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
 
     protected handleAddChips = (chipArray: SizeInterface[]): void => {
         const newState: ShoeInterface = this.state.good;
-        newState.sizes = chipArray;
+        newState.sizes = chipArray.sort((a,b) => a.sizeValue - b.sizeValue);
         this.setState({good: newState});
     };
 
@@ -372,21 +369,6 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 })
             });
         }, 1000);
-    };
-
-    protected Option = (props: OptionProps<ItemDataType>): ReactElement => {
-        return <components.Option {...props} className="d-flex justify-content-between">
-            <span>{props.label}</span>
-            {!props.data.__isNew__ &&
-                <IconButton size="small" onClick={(event) => this.showDeleteOptionDialog(event, props.label)}>
-                    <CloseRoundedIcon fontSize="small"/>
-                </IconButton>
-            }
-        </components.Option>;
-    };
-
-    protected Placeholder: React.FC<PlaceholderProps<ItemDataType>> = (props): ReactElement => {
-        return <components.Placeholder {...props} children={props.children}/>;
     };
 
     protected abstract handleSave(): void;

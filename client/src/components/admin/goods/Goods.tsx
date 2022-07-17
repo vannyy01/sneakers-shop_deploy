@@ -27,7 +27,12 @@ interface PropsInterface {
     goods: ShoeInterface[],
     brands: ItemsType,
     count: number,
-    fetchGoods: ({skip, limit, count}: {skip: number, limit: number, count: boolean}) => void,
+    fetchGoods: ({
+                     skip,
+                     limit,
+                     count,
+                     fields
+                 }: { skip: number, limit: number, count: boolean, fields?: string[] }) => void,
     fetchBrands: () => void,
     searchGoods: (condition: string, skip: number, limit: number, count: boolean) => void,
     clearGoodsState: () => void,

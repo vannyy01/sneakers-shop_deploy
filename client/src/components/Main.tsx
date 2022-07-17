@@ -55,12 +55,12 @@ const cardsContent: CardContent[] = [
 ];
 
 interface LandingStateI {
-    justifyCards: string,
     showCard: boolean,
 }
 
 // tslint:disable-next-line:no-empty-interface
-interface LandingPropsI {}
+interface LandingPropsI {
+}
 
 class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     private readonly ScrollRef: RefObject<any>;
@@ -68,7 +68,6 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
     constructor(props: LandingPropsI) {
         super(props);
         this.state = {
-            justifyCards: innerWidth < 767 ? "justify-content-around" : "justify-content-between",
             showCard: false,
         };
         this.ScrollRef = React.createRef();
@@ -88,7 +87,7 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
                 <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
                 <section className="special-area section_padding_100">
                     <ParagraphHeader title="Оберіть взуття"/>
-                    <Goods justifyCards={this.state.justifyCards}/>
+                    <Goods/>
                 </section>
                 <section style={{marginBottom: !this.state.showCard ? '300px' : '0px'}}
                          className="special-area bg-white section_padding_100" id="about">
@@ -125,6 +124,6 @@ class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
  * @param {any} goods
  * @returns {{goods}}
  */
-const mapStateToProps = ({goods:{goods}}: any) => ({goods});
+const mapStateToProps = ({goods: {goods}}: any) => ({goods});
 
 export default connect(mapStateToProps, {fetchGoods, clearGoodsState})(Main);

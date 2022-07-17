@@ -47,7 +47,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
     public render() {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
-        const {title, brand, description, mainImage, type, sex, price, color, sizes} = this.state.good;
+        const {title, description, mainImage, type, sex, price, color, sizes} = this.state.good;
         const {showAlert, showDialog, formErrors, isLoading} = this.state;
 
         return <Paper className={classes.paper}>
@@ -79,7 +79,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 required={true}
                                 isLoading={isLoading}
                                 name="brand"
-                                optionValue={brand}
+                                label="Бренд"
                                 options={options}
                                 errorMessage={formErrors.brand}
                                 showDeleteOptionDialog={this.showDeleteOptionDialog}

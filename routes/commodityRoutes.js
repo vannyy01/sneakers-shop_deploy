@@ -60,12 +60,11 @@ const setConditions = (req, action = "") => {
     }
     delete conditions.priceFrom;
     delete conditions.priceTo;
-    console.log(conditions);
     return conditions;
 };
 
 module.exports = app => {
-    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'color', 'sex'];
+    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
     const colors = ['white', 'yellow', 'red', 'green', 'black', 'blue', 'grey', 'pink', 'brown'];
     const sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'];
 
@@ -75,7 +74,7 @@ module.exports = app => {
                 brand: req.body.brand, title: req.body.title, sex: req.body.sex
             });
             if (existingCommodity) {
-                return res.status(200).send({message: "Commodity has already created.", error: true});
+                return res.status(400).send({message: "Commodity has already created."});
             }
             req.body._id = undefined;
             let createdCommodity = new Commodity(req.body);
@@ -149,13 +148,44 @@ module.exports = app => {
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
             const filters = req.query.filters ? req.query.filters : {};
             const conditions = setConditions(req);
+            let orderBy = {price: 1};
+            if(req.query.orderBy === "title"){
+                orderBy = {title: 1};
+            } else if (req.query.orderBy === "priceDesc") {
+                orderBy = {price: -1};
+            }
+            filters.orderBy = orderBy;
             let count;
-            const goods = await Commodity.find(conditions).skip(+req.query.skip).limit(+req.query.limit).select(fields).exec();
+            const goods = await Commodity.find(conditions).skip(+req.query.skip).limit(+req.query.limit).select(fields).sort(orderBy).exec();
             if (goods !== null) {
                 if (req.query.count) {
                     count = _.isEmpty(conditions) ? await Commodity.countDocuments() : await Commodity.find(conditions).countDocuments();
                     return res.status(200).send({goods, count, filters});
                 }
+                res.status(200).send({goods, filters});
+            } else {
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
+            }
+        } catch (error) {
+            res.status(500).send(error);
+            next(error);
+        }
+    });
+
+    app.get('/api/commodity_favourites', async (req, res, next) => {
+        try {
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            const filters = req.query.filters ? req.query.filters : {};
+            let orderBy = {price: 1};
+            if(req.query.orderBy === "title"){
+                orderBy = {title: 1};
+            } else if (req.query.orderBy === "priceDesc") {
+                orderBy = {price: -1};
+            }
+            filters.orderBy = orderBy;
+            const goods = await Commodity.find({_id: {$in: filters.favourites}}).limit(50).select(fields).sort(orderBy).exec();
+            if (goods !== null) {
                 res.status(200).send({goods, filters});
             } else {
                 res.status(404).send(`Did not found ${{...fields}}`);

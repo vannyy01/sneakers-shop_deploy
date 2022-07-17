@@ -11,7 +11,8 @@ interface SelectProps {
     required: boolean,
     isLoading: boolean,
     name: string,
-    optionValue: string,
+    label: string,
+    optionValue?: string,
     options: ItemDataType[],
     errorMessage: string,
     showDeleteOptionDialog: (event: React.MouseEvent<HTMLButtonElement>, optionName: string) => void,
@@ -23,7 +24,7 @@ const EditableSelect: React.FC<SelectProps> = ({
                                                    required,
                                                    isLoading,
                                                    name,
-                                                   optionValue,
+                                                   label,
                                                    options,
                                                    errorMessage,
                                                    showDeleteOptionDialog,
@@ -53,7 +54,7 @@ const EditableSelect: React.FC<SelectProps> = ({
                 isLoading={isLoading}
                 name={name}
                 components={{Option, Placeholder}}
-                placeholder="Бренд"
+                placeholder={label}
                 onChange={changeList}
                 onCreateOption={createOption}
                 formatCreateLabel={(inputValue) => `Додати "${inputValue}"`}
@@ -70,7 +71,6 @@ const EditableSelect: React.FC<SelectProps> = ({
                     })
                 }}
                 options={options}
-                value={{label: optionValue, value: optionValue}}
                 aria-errormessage={errorMessage}
             />
             {errorMessage.length > 0 &&

@@ -1,12 +1,10 @@
 import * as _ from "lodash";
 import * as React from "react";
 import {ShoeInterface} from "../../actions/types";
-import CommodityCard from "./CommodityCard";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    FormGroup,
     InputAdornment,
     OutlinedInput,
     Theme
@@ -15,14 +13,13 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {useEffect, useState} from "react";
-import {ItemDataType, ItemsType, Order} from "../types";
-import {getComparator, getFilters, replaceURL, updateURL, usePrevious} from "../utils";
-import _map from "lodash/map";
+import {ItemDataType, ItemsType, Order, OrderBy} from "../types";
+import {getFilters, replaceURL, updateURL, usePrevious} from "../utils";
 import {FilterListTypeArray, SearchItemParameters} from "../GridView";
 import {
     clearGoodsState,
     fetchAvailabilityCount,
-    fetchBrands, fetchColorsCount,
+    fetchBrands, fetchColorsCount, fetchFavouritesGoods,
     fetchGoods,
     fetchSexesCount, fetchSizesCount,
     fetchTypesCount
@@ -31,24 +28,24 @@ import {headCells} from "../admin/goods/Goods";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
 import {forIn, isEmpty, mapValues} from "lodash";
 import {makeStyles} from "@material-ui/core/styles";
-import {LoadCommodities} from "./index";
 import Drawer from "@material-ui/core/Drawer";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
-import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Button from "../button";
 import {url} from "../../index";
 import {FiltersReducerStateType} from "../../reducers/filtersReducer";
 import CloseIcon from '@material-ui/icons/Close';
 import {validateNumberInput} from "../../actions/validation";
 import GoodsToolbar from "./GoodsToolbar";
+import GoodsList from "./GoodsList";
+import AccordionFilterMenu from "./AccordionFilterMenu";
 
 
 const useStyles = makeStyles((theme: Theme) => createStyles(
     {
         formControl: {
             margin: theme.spacing(1),
+            marginRight: "auto",
             minWidth: 120,
         },
         margin: {
@@ -98,7 +95,6 @@ const useStyles = makeStyles((theme: Theme) => createStyles(
 );
 
 interface GoodsPropsI {
-    justifyCards: string,
     brands: ItemsType,
     sexes: ItemsType,
     types: ItemsType,
@@ -106,8 +102,6 @@ interface GoodsPropsI {
     colors: ItemsType,
     sizes: ItemsType
 }
-
-type CompareGoods = Omit<ShoeInterface, "description">;
 
 export interface FilterStateType {
     [key: keyof ItemsType]: boolean
@@ -194,16 +188,16 @@ const baseFilterList = ({
     }
 });
 
-const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, availability, colors, sizes}) => {
+const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, colors, sizes}) => {
 
     const initialFilterList = structuredClone(baseFilterList({brands, sexes, types, availability, colors, sizes}));
     const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'mainImage'];
     const BASE_SKIP = 0;
-    let initialSkip = BASE_SKIP;
+    const initialSkip = BASE_SKIP;
     const BASE_LIMIT = 6;
     let initialLimit = BASE_LIMIT;
     let initialOrder: Order = 'asc';
-    let initialOrderBy = 'priceAsc';
+    let initialOrderBy: OrderBy = 'priceAsc';
     const initialBrands = mapValues(brands, () => false);
     const initialBrandFilterState: FilterStateType = structuredClone(initialBrands);
     const initialSexes = mapValues(sexes, () => false);
@@ -218,21 +212,25 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
     const initialSizeFilterState: FilterStateType = structuredClone(initialSizes);
     const initialPrice: PriceType = {priceFrom: undefined, priceTo: undefined};
     const initialPriceFilterState: PriceType = structuredClone(initialPrice);
+    let initialOpenFavourites = false;
 
     if (url.searchParams.toString().length > 0) {
         url.searchParams.forEach((value, key) => {
             switch (key) {
                 case 'skip':
-                    initialSkip = +value;
+                    url.searchParams.set('skip', initialSkip.toString());
                     break;
                 case 'limit':
                     initialLimit = +value;
+                    break;
+                case 'favourites':
+                    initialOpenFavourites = value as unknown as boolean;
                     break;
                 case 'order':
                     initialOrder = value as Order;
                     break;
                 case 'orderBy':
-                    initialOrderBy = value;
+                    initialOrderBy = value as OrderBy;
                     break;
                 case 'priceFrom':
                     initialPriceFilterState.priceFrom = +value;
@@ -264,11 +262,12 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
                             }
                         }
                     );
-                    val.forEach(thing =>
-                        initialFilterList[key].selectedOption.push({
-                            label: initialFilterList[key].fields[thing].label,
-                            value: initialFilterList[key].fields[thing].value
-                        })
+                    val.forEach(thing => {
+                            initialFilterList[key].selectedOption.push({
+                                label: initialFilterList[key].fields[thing].label,
+                                value: initialFilterList[key].fields[thing].value
+                            })
+                        }
                     );
             }
         });
@@ -292,10 +291,9 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
     const {goods, count} = useSelector(getSelector, shallowEqual);
 
     const [openDrawer, setOpenDrawer] = useState<boolean>(false);
-    const [expanded, setExpanded] = useState<boolean>(false);
     const [expandedFilterItem, setExpandedFilterItem] = React.useState<string | false>(false);
     const [order, setOrder] = useState<Order>(initialOrder);
-    const [orderBy, setOrderBy] = useState<string>(initialOrderBy);
+    const [orderBy, setOrderBy] = useState<OrderBy>(initialOrderBy);
     const [skip, setSkip] = useState<number>(initialSkip);
     const [limit, setLimit] = useState<number>(initialLimit);
     const [filterList, setFilterList] = useState<GoodsFilterList>(initialFilterList);
@@ -308,22 +306,75 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
     const [priceFieldState, setPriceFieldState] = React.useState<PriceType>(initialPriceFilterState);
     const [priceFilterState, setPriceFilterState] = React.useState<PriceType>(initialPriceFilterState);
     const [priceOnBlur, setPriceOnBlur] = React.useState<boolean>(false);
+    const [openFavourites, setOpenFavourites] = React.useState<boolean>(initialOpenFavourites);
     const classes = useStyles();
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchGoods({
-                skip: 0,
-                limit,
-                count: true,
-                fields: fieldsList,
-            }, {
-                ...getFilters(getSelectedOptions()),
-                priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
-                priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
-            }
-        ));
+        if (openFavourites) {
+            dispatch(fetchFavouritesGoods({orderBy, fields: fieldsList}));
+        } else {
+            dispatch(fetchGoods({
+                    skip,
+                    limit,
+                    orderBy,
+                    count: true,
+                    fields: fieldsList,
+                }, {
+                    ...getFilters(getSelectedOptions()),
+                    priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                    priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+                }
+            ));
+        }
     }, [dispatch]);
+
+    const prevOpenFavourites = usePrevious(openFavourites);
+
+    useEffect(() => {
+        if (prevOpenFavourites !== undefined && openFavourites && openFavourites !== prevOpenFavourites) {
+            dispatch(fetchFavouritesGoods({orderBy, fields: fieldsList}));
+            url.searchParams.set('favourites', 'true');
+            replaceURL();
+        } else if (prevOpenFavourites !== undefined && !openFavourites) {
+            dispatch(fetchGoods({
+                    skip,
+                    limit,
+                    orderBy,
+                    count: true,
+                    fields: fieldsList,
+                }, {
+                    ...getFilters(getSelectedOptions()),
+                    priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                    priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+                }
+            ));
+            url.searchParams.delete('favourites');
+            replaceURL();
+        }
+    }, [openFavourites]);
+
+    const prevOrderBy = usePrevious(orderBy);
+
+    useEffect(() => {
+        if (prevOrderBy && orderBy !== prevOrderBy) {
+            dispatch(fetchGoods({
+                    skip: 0,
+                    limit,
+                    orderBy,
+                    count: true,
+                    fields: fieldsList,
+                }, {
+                    ...getFilters(getSelectedOptions()),
+                    priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
+                    priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
+                }
+            ));
+            setSkip(0);
+            url.searchParams.set('skip', '0');
+            replaceURL();
+        }
+    }, [orderBy]);
 
     const prevBrands = usePrevious(brands);
     const prevSexes = usePrevious(sexes);
@@ -355,7 +406,6 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
             updateURL(newFilterList);
         }
         if (JSON.stringify(sizes) !== JSON.stringify(prevSizes)) {
-            console.log(sizes);
             newFilterList.sizes.fields = sizes;
             setFilterList(newFilterList);
             updateURL(newFilterList);
@@ -374,6 +424,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
             dispatch(fetchGoods({
                 skip,
                 limit,
+                orderBy,
                 count: true,
                 fields: fieldsList,
             }, {
@@ -410,6 +461,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
             dispatch(fetchGoods({
                 skip: 0,
                 limit,
+                orderBy,
                 count: true,
                 fields: fieldsList,
             }, {
@@ -430,6 +482,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
         } else {
             dispatch(fetchGoods({
                     skip: 0,
+                    orderBy,
                     limit,
                     count: true,
                 }, {
@@ -464,7 +517,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
                 url.searchParams.set('order', "asc");
                 break;
             default:
-                setOrderBy(event.target.value);
+                setOrderBy(event.target.value as OrderBy);
                 url.searchParams.set('orderBy', event.target.value);
         }
         replaceURL();
@@ -509,6 +562,7 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
             dispatch(fetchGoods({
                 skip: limit,
                 limit: newLimit,
+                orderBy,
                 count: true,
                 fields: fieldsList,
             }, {
@@ -521,7 +575,6 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
             setLimit(newLimit);
             url.searchParams.set('limit', newLimit.toString());
             replaceURL();
-            setExpanded(true);
         }
     }
 
@@ -633,17 +686,13 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
                     formControlClass={classes.formControl}
                     handleChange={handleChange}
                     setOpenDrawer={setOpenDrawer}
+                    openFavourites={openFavourites}
+                    setOpenFavourites={setOpenFavourites}
                 />
-                <div className={`row ${justifyCards}`}>
-                    {goods.length > 0 ?
-                        _.map(goods.sort(getComparator<CompareGoods>(order, orderBy.includes("price") ? "price" : orderBy)),
-                            (good, index) =>
-                                <CommodityCard key={index} good={good}/>
-                        ) : <div>Loading...</div>
-                    }
-                </div>
+                <GoodsList goods={goods} order={order} orderBy={orderBy}
+                           handleLoadClick={handleLoadClick}/>
             </div>
-            <Drawer
+            {!openFavourites && <Drawer
                 anchor="left"
                 open={openDrawer}
                 onClose={toggleDrawer}
@@ -658,38 +707,15 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
                         <p className={classes.filterCount}>{count} товарів</p>
                     </div>
                 </div>
-                <Accordion expanded={expandedFilterItem === 'availability'}
-                           onChange={handleChangeFilter('availability')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="availability-content"
-                        id="availability-header"
-                    >
-                        <Typography className={classes.heading}>Наявність</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup>
-                            {_map(filterList.availability.fields, item =>
-                                <FormControlLabel
-                                    key={item.label}
-                                    className={classes.drawerFormGroup}
-                                    control={
-                                        <Checkbox
-                                            disabled={item.count === 0}
-                                            checked={availabilityFilterState[item.value]}
-                                            onChange={handleChangeFilterAvailability}
-                                            name={item.label}
-                                            color="primary"
-                                        />
-                                    }
-                                    classes={{label: classes.drawerFormControl}}
-                                    label={`${item.label} (${item.count})`}
-                                />
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
+                <AccordionFilterMenu
+                    name="availability"
+                    label="Наявність"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.availability.fields}
+                    filterState={availabilityFilterState}
+                    handleChangeFilterOption={handleChangeFilterAvailability}
+                />
                 <Accordion expanded={expandedFilterItem === 'price'} onChange={handleChangeFilter('price')}
                            classes={{expanded: classes.accordionExpanded}}>
                     <AccordionSummary
@@ -727,175 +753,63 @@ const Goods: React.FC<GoodsPropsI> = ({justifyCards, brands, sexes, types, avail
                         </FormControl>
                     </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expandedFilterItem === 'brand'} onChange={handleChangeFilter('brand')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="brand-content"
-                        id="brand-header"
-                    >
-                        <Typography className={classes.heading}>Бренд</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup>
-                            {_map(filterList.brand.fields, brand =>
-                                <FormControlLabel
-                                    key={brand.label}
-                                    className={classes.drawerFormGroup}
-                                    control={
-                                        <Checkbox
-                                            disabled={brand.count === 0}
-                                            checked={brandFilterState[brand.label]}
-                                            onChange={handleChangeFilterBrand}
-                                            name={brand.label}
-                                            color="primary"
-                                        />
-                                    }
-                                    classes={{label: classes.drawerFormControl}}
-                                    label={`${brand.label} (${brand.count})`}
-                                />
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expandedFilterItem === 'sex'} onChange={handleChangeFilter('sex')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="sex-content"
-                        id="sex-header"
-                    >
-                        <Typography className={classes.heading}>Стать</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup>
-                            {_map(filterList.sex.fields, sex =>
-                                <FormControlLabel
-                                    key={sex.label}
-                                    className={classes.drawerFormGroup}
-                                    control={
-                                        <Checkbox
-                                            disabled={sex.count === 0}
-                                            checked={sexFilterState[sex.label]}
-                                            onChange={handleChangeFilterSex}
-                                            name={sex.label}
-                                            color="primary"
-                                        />
-                                    }
-                                    classes={{label: classes.drawerFormControl}}
-                                    label={`${sex.label} (${sex.count})`}
-                                />
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expandedFilterItem === 'type'} onChange={handleChangeFilter('type')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="type-content"
-                        id="type-header"
-                    >
-                        <Typography className={classes.heading}>Тип</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup>
-                            {_map(filterList.type.fields, type =>
-                                <FormControlLabel
-                                    key={type.label}
-                                    className={classes.drawerFormGroup}
-                                    control={
-                                        <Checkbox
-                                            disabled={type.count === 0}
-                                            checked={typeFilterState[type.label]}
-                                            onChange={handleChangeFilterType}
-                                            name={type.label}
-                                            color="primary"
-                                        />
-                                    }
-                                    classes={{label: classes.drawerFormControl}}
-                                    label={`${type.label} (${type.count})`}
-                                />
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expandedFilterItem === 'color'} onChange={handleChangeFilter('color')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="color-content"
-                        id="color-header"
-                    >
-                        <Typography className={classes.heading}>Колір</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup classes={{root: classes.colorDirection}}>
-                            {_map(filterList.color.fields, color =>
-                                <FormControlLabel
-                                    key={color.label}
-                                    className={classes.drawerFormGroup}
-                                    control={
-                                        <Checkbox
-                                            disabled={color.count === 0}
-                                            checked={colorFilterState[color.value]}
-                                            onChange={handleChangeFilterColor}
-                                            name={color.label}
-                                            value={color.value}
-                                            color="primary"
-                                        />
-                                    }
-                                    classes={{label: classes.drawerFormControl}}
-                                    label={`${color.label} (${color.count})`}
-                                />
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expandedFilterItem === 'sizes'} onChange={handleChangeFilter('sizes')}
-                           classes={{expanded: classes.accordionExpanded}}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                        aria-controls="size-content"
-                        id="size-header"
-                    >
-                        <Typography className={classes.heading}>Розмір</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <FormGroup row={true}>
-                            {_map(filterList.sizes.fields, size => {
-                                return   <FormControlLabel
-                                        key={size.label}
-                                        className={classes.drawerFormGroup}
-                                        control={
-                                            <Checkbox
-                                                disabled={size.count === 0}
-                                                checked={sizeFilterState[size.label]}
-                                                onChange={handleChangeFilterSize}
-                                                name={size.label}
-                                                color="primary"
-                                            />
-                                        }
-                                        classes={{label: classes.drawerFormControl}}
-                                        label={`${size.label} (${size.count})`}
-                                    />
-                                }
-                            )}
-                        </FormGroup>
-                    </AccordionDetails>
-                </Accordion>
+                <AccordionFilterMenu
+                    name="brand"
+                    label="Бренд"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.brand.fields}
+                    filterState={brandFilterState}
+                    handleChangeFilterOption={handleChangeFilterBrand}
+                />
+                <AccordionFilterMenu
+                    name="sex"
+                    label="Стать"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.sex.fields}
+                    filterState={sexFilterState}
+                    handleChangeFilterOption={handleChangeFilterSex}
+                />
+                <AccordionFilterMenu
+                    name="type"
+                    label="Тип"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.type.fields}
+                    filterState={typeFilterState}
+                    handleChangeFilterOption={handleChangeFilterType}
+                />
+                <AccordionFilterMenu
+                    name="color"
+                    label="Колір"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.color.fields}
+                    filterState={colorFilterState}
+                    handleChangeFilterOption={handleChangeFilterColor}
+                />
+                <AccordionFilterMenu
+                    name="sizes"
+                    label="Розмір"
+                    expandedFilterItem={expandedFilterItem}
+                    handleChangeFilter={handleChangeFilter}
+                    filterFields={filterList.sizes.fields}
+                    filterState={sizeFilterState}
+                    handleChangeFilterOption={handleChangeFilterSize}
+                    row={true}
+                />
                 <div className="d-flex">
                     <Button text="Застосувати" onClick={() => setOpenDrawer(false)}/>
                     <Button text="Очистити" onClick={handleClearFilters}/>
                 </div>
             </Drawer>
-            <LoadCommodities onTransitionEnd={() => setExpanded(false)} expanded={expanded}
-                             handleLoadClick={handleLoadClick}/>
+            }
         </>
     )
 };
 
-const BrandsWrapper: React.FC<{ justifyCards: string }> = (props) => {
+const BrandsWrapper: React.FC = (props) => {
     const filters: SearchItemParameters = {};
     if (url.searchParams.toString().length > 0) {
         url.searchParams.forEach((value, key) => {

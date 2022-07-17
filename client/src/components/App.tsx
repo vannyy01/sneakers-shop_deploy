@@ -45,7 +45,6 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
                     <NavBar/>
                     <div>
                         <Switch>
-                            <Route exact={true} path="/" component={Landing}/>
                             {this.props.auth !== null &&
                             <ProtectedRoute
                                 authenticationPath="/auth/google"
@@ -54,6 +53,7 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
                                 component={AdminModule}
                             />
                             }
+                            <Route path="/" component={Landing}/>
                         </Switch>
                     </div>
                 </div>
