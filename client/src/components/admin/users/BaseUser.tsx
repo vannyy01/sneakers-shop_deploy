@@ -253,6 +253,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
             </Snackbar>
         </React.Fragment>
     };
+
     protected handleComeBack = (): void => {
         this.props.history.goBack();
     };
@@ -265,6 +266,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
             this.validateField(name, newState[name]);
         });
     };
+
     protected handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
         if (!this.state.formValid) {
@@ -283,6 +285,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
         };
         this.setState({showDialog: true, user});
     };
+
     protected handleClose = (name: "cancel" | "alert" | "save"): void => {
         switch (name) {
             case "cancel":
@@ -297,6 +300,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                 break;
         }
     };
+
     protected validateField = (fieldName: string, value: any): void => {
         const fieldValidationErrors = this.state.formErrors;
         const {isValid} = this.state;
@@ -325,6 +329,8 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
                     fieldValidationErrors.givenName = 'некоректний тип';
                     isValid.givenNameValid = false;
                 }
+                fieldValidationErrors.givenName = '';
+                isValid.givenNameValid = true;
                 break;
             case 'familyName' :
                 if (typeof value !== 'string') {
@@ -381,6 +387,7 @@ export abstract class BaseUser<P extends PropsTypeUser, S extends StateTypeUser>
         }
         this.setState({formValid: isValid});
     };
+
     protected showDeleteDialog = (): void => {
         this.setState({showDeleteDialog: true})
     };

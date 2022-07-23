@@ -7,6 +7,7 @@ import {usersReducer} from "./usersReducer";
 import {CLEAR_GOODS, CLEAR_USERS} from "../actions/types";
 import {brandsReducer} from "./brandsReducer";
 import {filtersReducer} from "./filtersReducer";
+import {siteOptionsReducer} from "./siteOptionsReducer";
 
 const appReducer = combineReducers({
     auth: authReducer,
@@ -16,6 +17,7 @@ const appReducer = combineReducers({
     brands: brandsReducer,
     cartItems: cartReducer,
     poll: pollReducer,
+    siteOptions: siteOptionsReducer
 });
 
 export default (state: any, action: any) => {

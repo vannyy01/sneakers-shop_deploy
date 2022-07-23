@@ -211,7 +211,6 @@ export const fetchGoods = ({
                                priceTo
                            }: FetchGoodsParams, filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
-        console.log(orderBy);
         count = count ? count : false;
         fields = fields ? fields : ["*"];
         const options = addFilters(filters);

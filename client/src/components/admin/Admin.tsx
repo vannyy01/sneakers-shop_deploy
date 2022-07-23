@@ -1,24 +1,22 @@
 import * as React from 'react';
-
 import AddShoppingCart from '@material-ui/icons/AddShoppingCart';
 import PeopleIcon from '@material-ui/icons/People';
 import Bookmark from '@material-ui/icons/Bookmark';
 import Payment from '@material-ui/icons/Payment';
 import AdminMenu from './AdminMenu';
-import {Theme, withStyles} from '@material-ui/core/styles';
+import {Theme, makeStyles} from '@material-ui/core/styles';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {Route, Switch} from "react-router-dom";
-import Default from "./Default";
+import SiteOptions from "./site_options/SiteOptions";
 import Edit from "./goods/EditGood";
 import Goods from "./goods/Goods";
 import Users from "./users/Users";
 import CreateGood from "./goods/CreateGood";
 import CreateUser from "./users/CreateUser";
 import EditUser from "./users/EditUser";
+import SiteOptionEdit from "./site_options/SiteOptionEdit";
 
-const drawerWidth = 250;
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme: Theme) => createStyles({
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
     },
@@ -35,7 +33,7 @@ const styles = (theme: Theme) => createStyles({
     },
     drawerPaper: {
         position: 'relative',
-        width: drawerWidth,
+        width: 250,
     },
     root: {
         display: 'flex',
@@ -46,60 +44,53 @@ const styles = (theme: Theme) => createStyles({
         zIndex: 1,
     },
     toolbar: theme.mixins.toolbar,
-});
+}));
 
-interface AdminModulePropsI {
-    classes: {
-        appBar: string,
-        content: string,
-        drawerPaper: string,
-        root: string,
-        toolbar: string,
+const routes = [
+    {
+        icon: <Payment/>,
+        route: `/admin`,
+        title: 'Налаштування сайту'
+    },
+    {
+        icon: <AddShoppingCart/>,
+        route: '/admin/goods',
+        title: 'Склад',
+    },
+    {
+        icon: <PeopleIcon/>,
+        route: `/admin/users`,
+        title: 'Користувачі'
+    },
+    {
+        icon: <Bookmark/>,
+        route: `/`,
+        title: 'Замовлення'
     }
-}
+];
 
-function AdminModule(props: AdminModulePropsI) {
-    const {classes} = props;
+function AdminModule() {
+    const classes = useStyles();
 
     return (
         <div className={classes.root}>
-            <AdminMenu classes={{drawerPaper: classes.drawerPaper, toolbar: classes.toolbar}} rows={[
-                {
-                    icon: <AddShoppingCart/>,
-                    route: '/admin/goods',
-                    title: 'Склад',
-                },
-                {
-                    icon: <PeopleIcon/>,
-                    route: `/admin/users`,
-                    title: 'Користувачі'
-                },
-                {
-                    icon: <Bookmark/>,
-                    route: `/`,
-                    title: 'Замовлення'
-                },
-                {
-                    icon: <Payment/>,
-                    route: `/`,
-                    title: 'Оплата'
-                }
-            ]}/>
+            <AdminMenu classes={{drawerPaper: classes.drawerPaper, toolbar: classes.toolbar}} rows={routes}/>
             <main className={classes.content}>
                 <Switch>
-                    <Route path="/" exact={true} component={Default}/>
+                    <Route path="/admin" exact={true} component={SiteOptions}/>
+                    <Route path="/admin/options/edit/:optionName" component={SiteOptionEdit}/>
                     <Route path="/admin/goods" exact={true} component={Goods}/>
                     <Route path="/admin/goods/create" component={CreateGood}/>
                     <Route path="/admin/goods/edit/:commID" component={Edit}/>
                     <Route path="/admin/users" exact={true} component={Users}/>
                     <Route path="/admin/users/create" component={CreateUser}/>
                     <Route path="/admin/users/edit/:userID" component={EditUser}/>
-                    <Route path="/admin/orders" component={Default}/>
-                    <Route path="/admin/payments" component={Default}/>
+                    <Route path="/admin/orders" component={SiteOptions}/>
+                    <Route path="/admin/payments" component={SiteOptions}/>
                 </Switch>
             </main>
         </div>
     );
 }
 
-export default withStyles(styles)(AdminModule);
+export default AdminModule;

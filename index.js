@@ -7,6 +7,7 @@ const keys = require('./config/keys');
 require('./models/User');
 require('./models/Order');
 require('./models/Brand');
+require('./models/SiteOption');
 require('./services/passport');
 
 mongoose.connect(keys.mongoDBConnect);
@@ -29,6 +30,7 @@ require('./routes/userRoutes')(app);
 require('./routes/orderRoutes')(app);
 require('./routes/commodityRoutes')(app);
 require('./routes/fileRoutes')(app);
+require('./routes/siteOptionsRoutes')(app);
 
 if (process.env.__ENV__ === 'production') {
     const path = require('path');

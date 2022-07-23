@@ -33,7 +33,8 @@
     "react-transition-group": "^4.4.2",
     "redux": "^4.1.2",
     "redux-thunk": "^2.3.0",
-    "use-constant": "^1.1.0"
+    "use-constant": "^1.1.0",
+    "uuid": "^8.3.2"
   },
   "scripts": {
     "start": "react-scripts-ts start",
@@ -52,6 +53,7 @@
     "@types/react-redux": "^7.1.22",
     "@types/react-router-dom": "^5.1.6",
     "@types/react-transition-group": "^4.4.4",
+    "@types/uuid": "^8.3.4",
     "typescript": "^4.5.4"
   }
 }

@@ -1,11 +1,13 @@
 import * as React from 'react';
-import {RefObject} from "react";
-import {connect} from "react-redux";
+import {useEffect, useRef, useState} from "react";
+import {shallowEqual, useDispatch, useSelector} from "react-redux";
+import {fetchSiteOptions} from "../actions/siteOptionController";
 import Header from './Header';
 import {Card, Goods, ParagraphHeader} from './landing';
-import {fetchGoods, clearGoodsState} from '../actions';
 import Shopping from '@material-ui/icons/ShoppingBasket';
 import {TransitionGroup, CSSTransition} from 'react-transition-group';
+import {SiteOptionType} from "../actions/types";
+import {isEmpty} from "lodash";
 import './landing/landing.css';
 
 const shoppingStyle = {
@@ -30,100 +32,76 @@ const animationProperties = {
     exit: 1400
 };
 
-interface CardContent {
-    id: string,
-    headerText: string,
-    text: string
-}
+const Main: React.FC<{siteOptions: SiteOptionType[]}> = ({siteOptions}) => {
 
-const cardsContent: CardContent[] = [
-    {
-        id: '1',
-        headerText: "Easy to use",
-        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
-    },
-    {
-        id: '2',
-        headerText: "Comfy",
-        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
-    },
-    {
-        id: '3',
-        headerText: "Customizable",
-        text: "We build pretty complex tools and this allows us to take designs and turn them into functional quickly."
-    }
-];
+    const [showCard, setShowCard] = useState<boolean>(false);
+    const cards = siteOptions.filter(item => item.name !== "main_page_header");
+    const mainHeader = siteOptions.find(item => item.name === "main_page_header");
+    const ScrollRef = useRef();
 
-interface LandingStateI {
-    showCard: boolean,
-}
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+    }, []);
 
-// tslint:disable-next-line:no-empty-interface
-interface LandingPropsI {
-}
 
-class Main extends React.PureComponent<LandingPropsI, LandingStateI> {
-    private readonly ScrollRef: RefObject<any>;
+    useEffect(() => {
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-    constructor(props: LandingPropsI) {
-        super(props);
-        this.state = {
-            showCard: false,
-        };
-        this.ScrollRef = React.createRef();
-    }
-
-    public componentDidMount() {
-        window.addEventListener('scroll', this.handleScroll);
-    }
-
-    public componentWillUnmount() {
-        window.removeEventListener('scroll', this.handleScroll);
+    const handleScroll = (): void => {
+        if (!showCard && window.scrollY >= innerHeight / 2.2) {
+            setShowCard(true);
+        }
     };
 
-    public render() {
-        return (
-            <div ref={this.ScrollRef} onScroll={this.handleScroll}>
-                <Header styles={styles} title="Брендове взуття" description="Купіть взуття за доступними цінами"/>
+    return (
+            <div ref={ScrollRef} onScroll={handleScroll}>
+                <Header styles={styles} title={mainHeader.title} description={mainHeader.description}/>
                 <section className="special-area section_padding_100">
                     <ParagraphHeader title="Оберіть взуття"/>
                     <Goods/>
                 </section>
-                <section style={{marginBottom: !this.state.showCard ? '300px' : '0px'}}
+                <section style={{marginBottom: !showCard ? '300px' : '0px'}}
                          className="special-area bg-white section_padding_100" id="about">
                     <div className="container">
                         <div className="row">
                             <ParagraphHeader title="Чому ми?"/>
                             <TransitionGroup className="d-flex justify-content-around">
-                                {this.state.showCard && cardsContent.map(({id, headerText, text}) =>
-                                    <CSSTransition key={id} timeout={500} classNames="card">
-                                        <Card Icon={Shopping}
-                                              styles={{headerStyle, iconStyle: shoppingStyle}}
-                                              headerText={headerText}
-                                              text={text}/>
-                                    </CSSTransition>
-                                )}
+                                {showCard && cards.length > 0
+                                    && cards.map(({
+                                                      name,
+                                                      title,
+                                                      description
+                                                  }) =>
+                                        <CSSTransition key={name} timeout={500} classNames="card">
+                                            <Card Icon={Shopping}
+                                                  styles={{headerStyle, iconStyle: shoppingStyle}}
+                                                  headerText={title}
+                                                  text={description}/>
+                                        </CSSTransition>
+                                    )}
                             </TransitionGroup>
                         </div>
                     </div>
                 </section>
             </div>
-        )
-    }
-
-    protected handleScroll = (): void => {
-        if (window.scrollY >= innerHeight / 2.2) {
-            this.setState(() => ({showCard: true}))
-        }
-    };
-
-
+            // <div style={{marginTop: 100, marginLeft: 50}}>
+            //     <p>Вибачте, сайт тимчасово не працює. Спробуйте зайти пізніше.</p>
+            // </div>
+    )
 }
 
-/**
- * @param {any} goods
- * @returns {{goods}}
- */
-const mapStateToProps = ({goods: {goods}}: any) => ({goods});
+const MainWrapper: React.FC = () => {
 
-export default connect(mapStateToProps, {fetchGoods, clearGoodsState})(Main);
+    const dispatch = useDispatch();
+    const getSelector = ({siteOptions: siteOpts}: { siteOptions: SiteOptionType[] }): SiteOptionType[] => siteOpts;
+    const siteOptions = useSelector(getSelector, shallowEqual);
+
+    useEffect(() => {
+        dispatch(fetchSiteOptions(["*"]));
+    }, [dispatch]);
+
+    return !isEmpty(siteOptions) && <Main siteOptions={siteOptions}/>
+}
+
+export default MainWrapper;

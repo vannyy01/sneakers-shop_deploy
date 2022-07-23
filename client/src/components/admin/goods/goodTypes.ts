@@ -29,7 +29,7 @@ export const shoeTypes: ItemsType = {
 
 export const colors: ItemsType = {
     "white": {
-        label: "білий",
+        label: "білі",
         value: "white"
     },
     "yellow": {
@@ -41,11 +41,11 @@ export const colors: ItemsType = {
         value: "green",
     },
     "black": {
-        label: "чорний",
+        label: "чорні",
         value: "black",
     },
     "blue": {
-        label: "синій",
+        label: "сині",
         value: "blue",
     },
     "grey": {

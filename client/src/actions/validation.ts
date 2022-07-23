@@ -17,6 +17,7 @@ export function setStorage(name: string, item: string): boolean {
     return false;
 }
 
+// return true if value is absent in localStorage
 export function checkStorage(name: string, item: string): boolean {
     const matches = getStorage(name);
     return !matches.includes(item);

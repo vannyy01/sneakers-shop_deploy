@@ -44,7 +44,7 @@ const setConditions = (req, action = "") => {
     }
     delete conditions.availability;
     if (action !== "sizes" && conditions.sizes && !isEmpty(conditions.sizes)) {
-        if(conditions.$and){
+        if (conditions.$and) {
             conditions.$and = [...conditions.$and, {sizes: {$elemMatch: {sizeValue: {$in: conditions.sizes}}}}];
         } else {
             conditions.$and = [{sizes: {$elemMatch: {sizeValue: {$in: conditions.sizes}}}}];
@@ -105,14 +105,10 @@ module.exports = app => {
 
     app.put('/api/commodity/edit/:id', requireLogin, async (req, res, next) => {
         try {
-            await Commodity.updateOne({_id: req.params.id}, req.body, {upsert: true}).exec(function (err, comm) {
-                if (err) {
-                    res.status(500).send(`Cannot update the good with _id: ${req.params.id}. Error: !${err}`);
-                } else {
-                    res.status(200).send(comm);
-                }
-            });
+            const comm = await Commodity.updateOne({_id: req.params.id}, req.body, {upsert: true}).exec();
+            res.status(200).send(comm);
         } catch (error) {
+            res.status(500).send(`Cannot update the good with _id: ${req.params.id}. Error: !${error}`);
             next(error);
         }
     });
@@ -149,7 +145,7 @@ module.exports = app => {
             const filters = req.query.filters ? req.query.filters : {};
             const conditions = setConditions(req);
             let orderBy = {price: 1};
-            if(req.query.orderBy === "title"){
+            if (req.query.orderBy === "title") {
                 orderBy = {title: 1};
             } else if (req.query.orderBy === "priceDesc") {
                 orderBy = {price: -1};
@@ -178,7 +174,7 @@ module.exports = app => {
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
             const filters = req.query.filters ? req.query.filters : {};
             let orderBy = {price: 1};
-            if(req.query.orderBy === "title"){
+            if (req.query.orderBy === "title") {
                 orderBy = {title: 1};
             } else if (req.query.orderBy === "priceDesc") {
                 orderBy = {price: -1};

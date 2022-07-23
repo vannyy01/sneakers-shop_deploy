@@ -242,6 +242,15 @@ export interface ShoeInterface extends CommodityInterface {
     sizes?: SizeInterface[],
 }
 
+export interface SiteOptionType {
+    _id: string,
+    name: string,
+    label: string,
+    title: string,
+    description?: string,
+    backgroundImage?: string
+}
+
 type GET_CART_ITEMS = 'GET_CART_ITEMS';
 export const GET_CART_ITEMS: GET_CART_ITEMS = 'GET_CART_ITEMS';
 

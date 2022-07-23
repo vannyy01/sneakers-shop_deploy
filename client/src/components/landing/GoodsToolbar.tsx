@@ -34,7 +34,7 @@ const GoodsToolbar: React.FC<GoodsToolbarType> = ({
                                                   }) => {
 
     return (
-        <div className="d-flex justify-content-sm-end">
+        <div className="d-flex justify-content-sm-end" style={{marginBottom: 20}}>
             <FormControl className={formControlClass}>
                 <InputLabel htmlFor="orderBy-simple">Сортування</InputLabel>
                 <SortSelect

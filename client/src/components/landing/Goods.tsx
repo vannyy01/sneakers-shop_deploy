@@ -39,6 +39,7 @@ import {validateNumberInput} from "../../actions/validation";
 import GoodsToolbar from "./GoodsToolbar";
 import GoodsList from "./GoodsList";
 import AccordionFilterMenu from "./AccordionFilterMenu";
+import useGoodsSearchParams, {BASE_LIMIT, BASE_SKIP} from "./useGoodsSearchParams";
 
 
 const useStyles = makeStyles((theme: Theme) => createStyles(
@@ -190,94 +191,38 @@ const baseFilterList = ({
 
 const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, colors, sizes}) => {
 
-    const initialFilterList = structuredClone(baseFilterList({brands, sexes, types, availability, colors, sizes}));
-    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'mainImage'];
-    const BASE_SKIP = 0;
-    const initialSkip = BASE_SKIP;
-    const BASE_LIMIT = 6;
-    let initialLimit = BASE_LIMIT;
-    let initialOrder: Order = 'asc';
-    let initialOrderBy: OrderBy = 'priceAsc';
+    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'sizes', 'mainImage'];
     const initialBrands = mapValues(brands, () => false);
-    const initialBrandFilterState: FilterStateType = structuredClone(initialBrands);
     const initialSexes = mapValues(sexes, () => false);
-    const initialSexFilterState: FilterStateType = structuredClone(initialSexes);
     const initialTypes = mapValues(types, () => false);
-    const initialTypeFilterState: FilterStateType = structuredClone(initialTypes);
     const initialAvailability = mapValues(availability, () => false);
-    const initialAvailabilityFilterState: FilterStateType = structuredClone(initialAvailability);
     const initialColors = mapValues(colors, () => false);
-    const initialColorFilterState: FilterStateType = structuredClone(initialColors);
     const initialSizes = mapValues(sizes, () => false);
-    const initialSizeFilterState: FilterStateType = structuredClone(initialSizes);
     const initialPrice: PriceType = {priceFrom: undefined, priceTo: undefined};
-    const initialPriceFilterState: PriceType = structuredClone(initialPrice);
-    let initialOpenFavourites = false;
 
-    if (url.searchParams.toString().length > 0) {
-        url.searchParams.forEach((value, key) => {
-            switch (key) {
-                case 'skip':
-                    url.searchParams.set('skip', initialSkip.toString());
-                    break;
-                case 'limit':
-                    initialLimit = +value;
-                    break;
-                case 'favourites':
-                    initialOpenFavourites = value as unknown as boolean;
-                    break;
-                case 'order':
-                    initialOrder = value as Order;
-                    break;
-                case 'orderBy':
-                    initialOrderBy = value as OrderBy;
-                    break;
-                case 'priceFrom':
-                    initialPriceFilterState.priceFrom = +value;
-                    break;
-                case 'priceTo':
-                    initialPriceFilterState.priceTo = +value;
-                    break;
-                default:
-                    const val: string[] = JSON.parse(value);
-                    val.forEach(item => {
-                            switch (key) {
-                                case 'brand':
-                                    initialBrandFilterState[item] = true;
-                                    break;
-                                case 'sex':
-                                    initialSexFilterState[item] = true;
-                                    break;
-                                case 'type':
-                                    initialTypeFilterState[item] = true;
-                                    break;
-                                case 'color':
-                                    initialColorFilterState[item] = true;
-                                    break;
-                                case 'sizes':
-                                    initialSizeFilterState[item] = true;
-                                    break;
-                                case 'availability':
-                                    initialAvailabilityFilterState[item] = true;
-                            }
-                        }
-                    );
-                    val.forEach(thing => {
-                            initialFilterList[key].selectedOption.push({
-                                label: initialFilterList[key].fields[thing].label,
-                                value: initialFilterList[key].fields[thing].value
-                            })
-                        }
-                    );
-            }
-        });
-    } else {
-        url.searchParams.set('skip', initialSkip.toString());
-        url.searchParams.set('limit', initialLimit.toString());
-        url.searchParams.set('order', initialOrder as string);
-        url.searchParams.set('orderBy', initialOrderBy);
-        replaceURL();
-    }
+    const {
+        initialSkip,
+        initialOrder,
+        initialOrderBy,
+        initialFilterList,
+        initialBrandFilterState,
+        initialSexFilterState,
+        initialTypeFilterState,
+        initialAvailabilityFilterState,
+        initialColorFilterState,
+        initialSizeFilterState,
+        initialPriceFilterState,
+        initialOpenFavourites
+    } = useGoodsSearchParams({
+        baseFilterList: baseFilterList({brands, sexes, types, availability, colors, sizes}),
+        initialBrands,
+        initialSexes,
+        initialTypes,
+        initialAvailability,
+        initialColors,
+        initialSizes,
+        initialPrice
+    });
 
     const getSelector = ({
                              goods: {
@@ -295,7 +240,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
     const [order, setOrder] = useState<Order>(initialOrder);
     const [orderBy, setOrderBy] = useState<OrderBy>(initialOrderBy);
     const [skip, setSkip] = useState<number>(initialSkip);
-    const [limit, setLimit] = useState<number>(initialLimit);
+    // BASE_LIMIT uses instead of limit
     const [filterList, setFilterList] = useState<GoodsFilterList>(initialFilterList);
     const [brandFilterState, setBrandFilterState] = React.useState<FilterStateType>(initialBrandFilterState);
     const [sexFilterState, setSexFilterState] = React.useState<FilterStateType>(initialSexFilterState);
@@ -316,7 +261,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         } else {
             dispatch(fetchGoods({
                     skip,
-                    limit,
+                    limit: BASE_LIMIT,
                     orderBy,
                     count: true,
                     fields: fieldsList,
@@ -339,7 +284,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         } else if (prevOpenFavourites !== undefined && !openFavourites) {
             dispatch(fetchGoods({
                     skip,
-                    limit,
+                    limit: BASE_LIMIT,
                     orderBy,
                     count: true,
                     fields: fieldsList,
@@ -360,7 +305,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         if (prevOrderBy && orderBy !== prevOrderBy) {
             dispatch(fetchGoods({
                     skip: 0,
-                    limit,
+                    limit: BASE_LIMIT,
                     orderBy,
                     count: true,
                     fields: fieldsList,
@@ -423,7 +368,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         if (prevPriceState && JSON.stringify(prevPriceState) !== JSON.stringify(priceFilterState) && priceOnBlur) {
             dispatch(fetchGoods({
                 skip,
-                limit,
+                limit: BASE_LIMIT,
                 orderBy,
                 count: true,
                 fields: fieldsList,
@@ -460,7 +405,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
             const selectedFilters = getFilters(selectedOptions);
             dispatch(fetchGoods({
                 skip: 0,
-                limit,
+                limit: BASE_LIMIT,
                 orderBy,
                 count: true,
                 fields: fieldsList,
@@ -477,13 +422,11 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
             dispatch(fetchAvailabilityCount(selectedFilters));
             setSkip(0);
             url.searchParams.set('skip', '0');
-            setLimit(limit);
-            url.searchParams.set('limit', limit.toString());
         } else {
             dispatch(fetchGoods({
                     skip: 0,
+                    limit: BASE_LIMIT,
                     orderBy,
-                    limit,
                     count: true,
                 }, {
                     priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
@@ -557,11 +500,11 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
     };
 
     const handleLoadClick = (): void => {
-        const newLimit = limit + 6;
+        const newSkip = skip + 6;
         if (goods.length < count) {
             dispatch(fetchGoods({
-                skip: limit,
-                limit: newLimit,
+                skip: newSkip,
+                limit: BASE_LIMIT,
                 orderBy,
                 count: true,
                 fields: fieldsList,
@@ -570,10 +513,8 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
                 priceFrom: priceFilterState.priceFrom ? [priceFilterState.priceFrom.toString()] : undefined,
                 priceTo: priceFilterState.priceTo ? [priceFilterState.priceTo.toString()] : undefined
             }));
-            setSkip(limit);
-            url.searchParams.set('skip', limit.toString());
-            setLimit(newLimit);
-            url.searchParams.set('limit', newLimit.toString());
+            setSkip(newSkip);
+            url.searchParams.set('skip', newSkip.toString());
             replaceURL();
         }
     }
@@ -658,7 +599,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
     const handleClearFilters = (): void => {
         setFilterList(baseFilterList({brands, sexes, types, availability, colors, sizes}));
         setSkip(BASE_SKIP);
-        setLimit(BASE_LIMIT);
+        url.searchParams.set('skip', BASE_SKIP.toString());
         setBrandFilterState(initialBrands);
         setSexFilterState(initialSexes);
         setTypeFilterState(initialTypes);
@@ -668,8 +609,6 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         setPriceFieldState({priceFrom: undefined, priceTo: undefined});
         setPriceFilterState({priceFrom: undefined, priceTo: undefined});
         handleChangeFilter(false);
-        url.searchParams.set('skip', BASE_SKIP.toString());
-        url.searchParams.set('limit', BASE_LIMIT.toString());
         updateURL({
             ...baseFilterList({brands, sexes, types, availability, colors, sizes}),
             priceFrom: undefined,

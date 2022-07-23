@@ -20,6 +20,7 @@ import Done from '@material-ui/icons/Done';
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import './Cart.css';
+import {map} from "lodash";
 
 interface CartPropsI {
     deleteCartItem: (id: string) => void,
@@ -58,7 +59,7 @@ const styles = (theme: Theme) => createStyles({
         display: 'block',
         height: '464px',
         position: 'absolute',
-        top: '48px',
+        top: 55,
         zIndex: 2
     },
     button: {
@@ -173,7 +174,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
 
     protected sumTotalAmount = (): void => {
         let total = 0;
-        _.map(this.state.cart, item =>
+        map(this.state.cart, item =>
             total += item.price
         );
         this.setState(() => ({
@@ -181,7 +182,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
         }));
     };
 
-    protected handleRemoveProduct = (id: string) => (event: React.MouseEvent<HTMLDivElement>): void => {
+    protected handleRemoveProduct = (id: string) => (): void => {
         this.props.deleteCartItem(id);
     };
 
@@ -198,7 +199,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
     /*  protected handleScroll(event: any) {
           console.log(event);
           const positions = this.refs.scrollbars.getValues();
-          //When the bottom is reached and we're scrolling down, prevent scrolling of the window
+          //When the bottom is reached, and we're scrolling down, prevent scrolling of the window
           if (positions.top >= 1) {
               console.log("Reached scroll end!");
               event.stopPropagation();
