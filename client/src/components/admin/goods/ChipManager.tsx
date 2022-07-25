@@ -12,7 +12,7 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import TextField from '@material-ui/core/TextField';
 import {validateNumberInput} from "../../../actions/validation";
-import {inArray} from "../../utils";
+import {inArray} from "../../../utils";
 
 interface ChipManagerProps {
     label: string,

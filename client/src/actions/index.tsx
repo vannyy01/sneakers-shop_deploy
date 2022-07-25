@@ -32,9 +32,9 @@ import {
     UserInterface
 }
     from './types';
-import {addFilters} from "../components/utils";
+import {addFilters} from "../utils";
 import {SearchItemParameters} from "../components/GridView";
-import {ItemDataType, OrderBy} from "../components/types";
+import {ItemDataType, OrderBy} from "../types";
 import {Dispatch} from "redux";
 import {getStorage} from "./validation";
 

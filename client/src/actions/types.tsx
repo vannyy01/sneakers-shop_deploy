@@ -1,4 +1,4 @@
-import {ItemsType} from "../components/types";
+import {ItemsType} from "../types";
 import {SearchItemParameters} from "../components/GridView";
 
 export interface UserInterface {

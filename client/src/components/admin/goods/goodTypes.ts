@@ -1,4 +1,4 @@
-import {ItemsType} from "../../types";
+import {ItemsType} from "../../../types";
 
 
 export const sexes: ItemsType = {

@@ -41,3 +41,14 @@ export const updateSiteOption = (option: SiteOptionType, onSuccessCallback: () =
         console.error(error);
     }
 }
+
+type CLEAR_SITE_OPTIONS = 'CLEAR_SITE_OPTIONS';
+export const CLEAR_SITE_OPTIONS: CLEAR_SITE_OPTIONS = 'CLEAR_SITE_OPTIONS';
+
+export interface ClearSiteOptionsAction {
+    type: CLEAR_SITE_OPTIONS,
+}
+
+export const cleatSiteOptions = () => async (dispatch: Dispatch<ClearSiteOptionsAction>) => {
+    dispatch({type: CLEAR_SITE_OPTIONS});
+}

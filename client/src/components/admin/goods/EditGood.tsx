@@ -19,13 +19,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Draggable from 'react-draggable';
-import BaseGood, {BaseGoodPropsType, BaseGoodStateType, GoodStyles} from "./BaseGood";
+import BaseGood, {BaseGoodPropsType, BaseGoodStateType} from "./BaseGood";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
-import {ItemsType} from "../../types";
+import {ItemsType} from "../../../types";
 import EditableSelect from "../../select/EditableSelect";
 import {colors, sexes, shoeTypes} from "./goodTypes";
+import CRUDStyles from "../crudStyles";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -151,16 +152,14 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     id="mainImage"
                                     name="mainImage"
                                     label="Заставка. Оберіть одне із зображень нижче"
-                                    multiline={true}
                                     fullWidth={true}
-                                    autoComplete="mainImage-name"
-                                    value={mainImage}
+                                    value={mainImage || ""}
                                     helperText={formErrors.mainImage}
                                     error={formErrors.mainImage.length > 0}
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>
-                                <UploadImages commID={this.props.match.params.commID} mainImage={mainImage}
+                                <UploadImages dirPrefix="commodities/" dirName={this.props.match.params.commID} mainImage={mainImage}
                                               setMainImage={this.setMainImage}/>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
@@ -392,8 +391,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
         this.props.deleteGood(this.state.good._id,
             () => this.props.history.push('/admin/goods'));
 
-    }
-
+    };
 
 }
 
@@ -406,4 +404,4 @@ export default connect(mapStateToProps, {
     fetchBrands,
     createBrand,
     deleteBrand
-})(withStyles(GoodStyles)(EditGood));
+})(withStyles(CRUDStyles)(EditGood));

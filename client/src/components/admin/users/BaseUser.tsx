@@ -16,7 +16,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Snackbar from "@material-ui/core/Snackbar";
-import {ItemsType} from "../../types";
+import {ItemsType} from "../../../types";
 import _map from "lodash/map";
 
 

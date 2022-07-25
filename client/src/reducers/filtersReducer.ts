@@ -3,7 +3,7 @@ import {
     FETCH_SEXES_COUNT, FETCH_SIZES_COUNT, FETCH_TYPES_COUNT, FetchAvailabilityCountAction, FetchColorsCountAction,
     FetchSexesCountAction, FetchSizesCountAction, FetchTypesCountAction
 } from "../actions/types";
-import {ItemsType} from "../components/types";
+import {ItemsType} from "../types";
 import {availabilityFields} from "../components/landing/Goods";
 import {colors, sexes, shoeTypes, sizes} from "../components/admin/goods/goodTypes";
 

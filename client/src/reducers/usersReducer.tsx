@@ -38,7 +38,7 @@ const initialState: StateType = {users: [], searchMode: false, filters: {}};
  * @param {AuthAction} action
  * @returns {StateType}
  */
-export const usersReducer = (state: StateType = Object.assign({}, initialState), action: AuthAction): StateType => {
+export const usersReducer = (state: StateType =  initialState, action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_USERS:
             // If previously SEARCH_USERS was used

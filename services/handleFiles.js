@@ -1,13 +1,12 @@
 const fs = require("fs/promises");
 const uploadFile = require("../middlewares/upload");
-const relativePath = "/resources/commodities";
-
-const envPath = process.env.__ENV__ === 'production' ? "/client/build/resources/commodities"
-    : "/client/public/resources/commodities";
+const relativePath = "/resources";
+const envPath = process.env.__ENV__ === 'production' ? "/client/build/resources"
+    : "/client/public/resources";
 const directoryPath = __basedir + envPath;
 
 const replaceTempDir = async (existingCommodity, userEmail) => {
-    await fs.rename(`${directoryPath}/temp-${userEmail}`, `${directoryPath}/${existingCommodity._id}`);
+    await fs.rename(`${directoryPath}/temp-${userEmail}`, `${directoryPath}/commodities/${existingCommodity._id}`);
 };
 
 const dirExists = async (path) => {
@@ -20,18 +19,18 @@ const dirExists = async (path) => {
 }
 
 const uploadDir = async (req) => {
-    let dirName;
+    let directoryName;
     if (req.user.role === 20) {
-        if (req.query.id && req.query.id !== "undefined") {
-            dirName = req.query.id;
+        if (req.query.dirName && req.query.dirName !== "undefined") {
+            directoryName = req.query.dirName;
         } else {
-            dirName = `temp-${req.user.email}`;
-            if (!(await dirExists(`${directoryPath}/${dirName}`))) {
-                await fs.mkdir(`${directoryPath}/${dirName}`);
+            directoryName = `temp-${req.user.email}`;
+            if (!(await dirExists(`${directoryPath}/${directoryName}`))) {
+                await fs.mkdir(`${directoryPath}/${directoryName}`);
             }
         }
     }
-    return `${directoryPath}/${dirName}`;
+    return `${directoryPath}/${directoryName}`;
 };
 
 const upload = async (req, res, next) => {
@@ -64,7 +63,7 @@ const getListFiles = async (req, res, next) => {
     try {
         const userDir = `temp-${req.user.email}`;
         const nonExistedDir = `${directoryPath}/${userDir}`;
-        let files = req.params.id === "undefined" ? [] : await fs.readdir(`${directoryPath}/${req.params.id}`);
+        let files = req.query.dirName === "undefined" ? [] : await fs.readdir(`${directoryPath}/${req.query.dirName}`);
         if (files.length === 0) {
             const isDirExisted = await dirExists(nonExistedDir);
             if (!isDirExisted) {
@@ -78,7 +77,7 @@ const getListFiles = async (req, res, next) => {
         files.length > 0 && files.forEach((file) => {
             fileInfos.push({
                 name: file,
-                url: `${relativePath}/${req.params.id === "undefined" ? userDir : req.params.id}/${file}`,
+                url: `${relativePath}/${req.query.dirName === "undefined" ? userDir : req.query.dirName}/${file}`,
             });
         });
 
@@ -86,7 +85,7 @@ const getListFiles = async (req, res, next) => {
     } catch (error) {
         if (error.code === "ENOENT") {
             try {
-                await fs.mkdir(`${directoryPath}/${req.params.id}`);
+                await fs.mkdir(`${directoryPath}/${req.query.dirName}`);
                 res.redirect(req.get('referer'));
             } catch (createError) {
                 next(createError);
@@ -102,11 +101,11 @@ const getListFiles = async (req, res, next) => {
 
 const deleteFile = async (req, res, next) => {
     try {
-        const {name, id} = req.query;
-        const filePath = id ? `${directoryPath}/${id}` : `${directoryPath}/temp-${req.user.email}`;
-        await fs.rm(`${filePath}/${name}`);
+        const {imageName, dirName} = req.query;
+        const filePath = dirName ? `${directoryPath}/${dirName}` : `${directoryPath}/temp-${req.user.email}`;
+        await fs.rm(`${filePath}/${imageName}`);
         res.status(200).send({
-            message: `File ${name} in the directory ${directoryPath}/${id} has been successfully deleted.`
+            message: `File ${imageName} in the directory ${directoryPath}/${dirName} has been successfully deleted.`
         });
     } catch (error) {
         res.status(500).send({

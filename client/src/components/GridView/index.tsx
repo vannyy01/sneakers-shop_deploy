@@ -20,10 +20,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import {useEffect, useState} from "react";
 import {TablePaginationActions} from "./TablePaginationActions";
-import {HeadCell, ItemDataType, ItemsType, Order} from "../types";
+import {HeadCell, ItemDataType, ItemsType, Order} from "../../types";
 import _forIn from "lodash/forIn";
 import {ActionMeta} from "react-select";
-import {getComparator, getFilters, usePrevious} from "../utils";
+import {getComparator, getFilters, usePrevious} from "../../utils";
 import {forEach, isEmpty} from "lodash";
 
 function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {

@@ -6,7 +6,7 @@ const siteOptionSchema = new Schema({
     label: {type: String, required: true},
     title: {type: String, required: true},
     description: {type: String, required: true},
-    mainImage: String,
+    backgroundImage: String,
 });
 
 mongoose.model('site_options', siteOptionSchema);

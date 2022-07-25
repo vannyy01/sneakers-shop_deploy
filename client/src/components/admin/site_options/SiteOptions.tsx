@@ -4,7 +4,7 @@ import createStyles from "@material-ui/core/styles/createStyles";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
 import {SiteOptionType} from "../../../actions/types";
 import {useEffect} from "react";
-import {fetchSiteOptions} from "../../../actions/siteOptionController";
+import {fetchSiteOptions} from "../../../actions/SiteOptionController";
 import {isEmpty} from "lodash";
 import SiteOptionCard from "./SiteOptionCard";
 

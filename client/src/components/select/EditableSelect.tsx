@@ -2,7 +2,7 @@ import * as React from "react";
 import {ReactElement} from "react";
 import {ActionMeta, components, OptionProps} from "react-select";
 import CreatableSelect from "react-select/creatable";
-import {ItemDataType} from "../types";
+import {ItemDataType} from "../../types";
 import IconButton from "@material-ui/core/IconButton";
 import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import Placeholder from "./Placeholder";
@@ -26,6 +26,7 @@ const EditableSelect: React.FC<SelectProps> = ({
                                                    name,
                                                    label,
                                                    options,
+                                                   optionValue,
                                                    errorMessage,
                                                    showDeleteOptionDialog,
                                                    changeList,
@@ -46,7 +47,6 @@ const EditableSelect: React.FC<SelectProps> = ({
     return (
         <>
             <CreatableSelect
-                key={name}
                 aria-required={required}
                 closeMenuOnSelect={true}
                 isClearable={true}
@@ -71,6 +71,7 @@ const EditableSelect: React.FC<SelectProps> = ({
                     })
                 }}
                 options={options}
+                defaultValue={optionValue ? {label: optionValue, value: optionValue} : undefined}
                 aria-errormessage={errorMessage}
             />
             {errorMessage.length > 0 &&

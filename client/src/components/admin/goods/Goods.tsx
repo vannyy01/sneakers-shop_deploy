@@ -9,7 +9,7 @@ import {
 } from "../../../actions";
 import GridView, {FilterListTypeArray} from '../../GridView';
 import {ShoeInterface} from "../../../actions/types";
-import {HeadCell, ItemsType} from "../../types";
+import {HeadCell, ItemsType} from "../../../types";
 import {useEffect} from "react";
 import _isEmpty from "lodash/isEmpty";
 import {sexes, shoeTypes} from "./goodTypes";

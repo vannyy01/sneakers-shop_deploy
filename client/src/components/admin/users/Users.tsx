@@ -9,7 +9,7 @@ import {
 } from "../../../actions";
 import {UserInterface} from "../../../actions/types";
 import {roles} from "./BaseUser";
-import {HeadCell} from "../../types";
+import {HeadCell} from "../../../types";
 
 interface PropsInterface {
     users: UserInterface[],

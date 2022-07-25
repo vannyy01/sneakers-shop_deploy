@@ -13,8 +13,8 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import createStyles from "@material-ui/core/styles/createStyles";
 import {useEffect, useState} from "react";
-import {ItemDataType, ItemsType, Order, OrderBy} from "../types";
-import {getFilters, replaceURL, updateURL, usePrevious} from "../utils";
+import {ItemDataType, ItemsType, Order, OrderBy} from "../../types";
+import {getFilters, replaceURL, updateURL, usePrevious} from "../../utils";
 import {FilterListTypeArray, SearchItemParameters} from "../GridView";
 import {
     clearGoodsState,

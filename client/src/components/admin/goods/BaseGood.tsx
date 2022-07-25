@@ -4,9 +4,8 @@ import {RouteComponentProps} from "react-router-dom";
 import MuiAlert, {AlertProps} from "@material-ui/lab/Alert";
 import Paper, {PaperProps} from "@material-ui/core/Paper";
 import Draggable from "react-draggable";
-import {createStyles, Theme} from "@material-ui/core";
 import {validateNumberInput} from "../../../actions/validation";
-import {ItemDataType, ItemsType} from "../../types";
+import {ItemDataType, ItemsType} from "../../../types";
 import {ActionMeta} from "react-select";
 
 export function Alert(props: AlertProps) {
@@ -20,27 +19,6 @@ export function PaperComponent(props: PaperProps) {
         </Draggable>
     );
 }
-
-export const GoodStyles = (theme: Theme) => createStyles({
-    alert: {
-        marginTop: theme.spacing(7)
-    },
-    button: {
-        margin: theme.spacing(1)
-    },
-    paper: {
-        marginBottom: theme.spacing(3),
-        marginTop: theme.spacing(3),
-        padding: theme.spacing(2),
-        [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
-            marginBottom: theme.spacing(6),
-            marginTop: theme.spacing(6),
-            padding: theme.spacing(3),
-        },
-        width: "60em"
-    },
-    root: {height: 27},
-});
 
 interface PathParams {
     commID: string
@@ -121,7 +99,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
 
     protected handleAddChips = (chipArray: SizeInterface[]): void => {
         const newState: ShoeInterface = this.state.good;
-        newState.sizes = chipArray.sort((a,b) => a.sizeValue - b.sizeValue);
+        newState.sizes = chipArray.sort((a, b) => a.sizeValue - b.sizeValue);
         this.setState({good: newState});
     };
 
@@ -295,12 +273,6 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         this.setState({formValid: isValid});
     };
 
-    protected setMainImage = (mainImage: string): void => {
-        const newState: ShoeInterface = this.state.good;
-        newState.mainImage = mainImage;
-        this.setState({good: newState});
-    }
-
     protected handleOnChange = ({
                                     target: {name, value},
                                 }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -370,6 +342,14 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             });
         }, 1000);
     };
+
+    protected setMainImage = (imageName: string): void => {
+        if (!this.state.good.mainImage || this.state.good.mainImage !== imageName) {
+            this.setState(({good}) => ({good: {...good, mainImage: imageName}}));
+        } else {
+            this.setState(({good}) => ({good: {...good, mainImage: undefined}}));
+        }
+    }
 
     protected abstract handleSave(): void;
 

@@ -2,8 +2,8 @@ import * as React from "react";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
 import {SiteOptionType} from "../../../actions/types";
 import {useEffect, useState} from "react";
-import {fetchSiteOptions, updateSiteOption} from "../../../actions/siteOptionController";
-import {Button, createStyles, makeStyles, Paper, Typography} from "@material-ui/core";
+import {cleatSiteOptions, fetchSiteOptions, updateSiteOption} from "../../../actions/SiteOptionController";
+import {Button, makeStyles, Paper, Typography} from "@material-ui/core";
 import {useHistory, useParams} from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -16,29 +16,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import Snackbar from "@material-ui/core/Snackbar";
+import UploadImages from "../UploadImages";
+import CRUDStyles from "../crudStyles";
 
-const useStyles = makeStyles((theme) => createStyles(
-    {
-        alert: {
-            marginTop: theme.spacing(7)
-        },
-        button: {
-            margin: theme.spacing(1)
-        },
-        paper: {
-            marginBottom: theme.spacing(3),
-            marginTop: theme.spacing(3),
-            padding: theme.spacing(2),
-            [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
-                marginBottom: theme.spacing(6),
-                marginTop: theme.spacing(6),
-                padding: theme.spacing(3),
-            },
-            width: "60em"
-        },
-        root: {height: 27},
-    }
-));
+const useStyles = makeStyles(CRUDStyles);
 
 type FormsErrorsType = {
     [key in keyof Omit<SiteOptionType, "_id">]: { valid: boolean; errorText: string; };
@@ -57,7 +38,8 @@ const SiteOptionEdit: React.FC = () => {
         name: {valid: true, errorText: ""},
         label: {valid: true, errorText: ""},
         title: {valid: true, errorText: ""},
-        description: {valid: true, errorText: ""}
+        description: {valid: true, errorText: ""},
+        backgroundImage: {valid: true, errorText: ""}
     };
     const [formErrors, setFormErrors] = useState<FormsErrorsType>(initialFormErrors);
     const [formValid, setFormValid] = useState<boolean>(true);
@@ -69,9 +51,14 @@ const SiteOptionEdit: React.FC = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        console.log(siteOption);
         setOption(siteOption);
     }, [siteOption]);
+
+    useEffect(() => {
+        return () => {
+            dispatch(cleatSiteOptions())
+        }
+    }, []);
 
     const validateField = (fieldName: string, value: any): void => {
         const fieldValidationErrors = formErrors;
@@ -138,16 +125,23 @@ const SiteOptionEdit: React.FC = () => {
         }, 400));
     };
 
+    const setBackgroundImage = (backgroundImage: string): void => {
+        setOption(currentOption => ({
+            ...currentOption, backgroundImage
+        }));
+    };
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
         if (!formValid) {
             setShowAlert(true);
             return;
         }
-        const {_id, name, label, title, description} = option;
+        const {_id, name, label, title, description, backgroundImage} = option;
         const updatedOption = {
             _id,
             name,
+            backgroundImage,
             label: label.trim(),
             title: title.trim(),
             description: description.trim(),
@@ -176,24 +170,13 @@ const SiteOptionEdit: React.FC = () => {
         );
     }
 
-    return option ? (
+    return option && siteOption ? (
             <Paper className={classes.paper}>
                 <Typography variant="h6" gutterBottom={true}>
-                    Змінити параметр сайту {optionName}
+                    Змінити параметр сайту <span style={{color: "#8c8484"}}>{optionName}</span>
                 </Typography>
                 <form noValidate={true} onSubmit={handleSubmit}>
                     <Grid container={true} spacing={3}>
-                        <Grid item={true} xs={12} sm={6}>
-                            <TextField
-                                required={true}
-                                id="name"
-                                name="name"
-                                label="Параметр сайту"
-                                fullWidth={true}
-                                value={option.name}
-                                disabled={true}
-                            />
-                        </Grid>
                         <Grid item={true} xs={12} sm={6}>
                             <TextField
                                 required={true}
@@ -237,6 +220,28 @@ const SiteOptionEdit: React.FC = () => {
                                 error={!formErrors.description.valid}
                             />
                         </Grid>
+                        {siteOption.backgroundImage !== undefined &&
+                            <>
+                                <Grid item={true} xs={12}>
+                                    <TextField
+                                        required={true}
+                                        disabled={true}
+                                        id="backgroundImage"
+                                        name="backgroundImage"
+                                        label="Зображення"
+                                        multiline={true}
+                                        fullWidth={true}
+                                        value={option.backgroundImage}
+                                        helperText={formErrors.description.errorText}
+                                        error={!formErrors.description.valid}
+                                    />
+                                </Grid>
+                                <Grid item={true} xs={12}>
+                                    <UploadImages dirName={optionName} mainImage={option.backgroundImage}
+                                                  setMainImage={setBackgroundImage}/>
+                                </Grid>
+                            </>
+                        }
                         <Grid item={true} xs={12}>
                             <Button
                                 variant="contained"

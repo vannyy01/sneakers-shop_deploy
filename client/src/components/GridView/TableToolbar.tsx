@@ -17,7 +17,7 @@ import {useState} from "react";
 import {FilterListTypeArray} from "./index";
 import Select, {ActionMeta, components, PlaceholderProps} from 'react-select';
 import _map from "lodash/map";
-import {ItemDataType} from "../types";
+import {ItemDataType} from "../../types";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     actions: {

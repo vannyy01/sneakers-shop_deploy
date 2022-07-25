@@ -2,11 +2,11 @@ import axios, {AxiosResponse} from 'axios';
 
 class UploadFilesService {
     /**
-     * @param commID
+     * @param dirName
      * @param file
      * @param onUploadProgress
      */
-    public upload(commID: string, file: File, onUploadProgress: (event: any) => void): Promise<AxiosResponse> {
+    public upload(dirName: string, file: File, onUploadProgress: (event: any) => void): Promise<AxiosResponse> {
         const formData = new FormData();
 
         formData.append("file", file)
@@ -15,18 +15,18 @@ class UploadFilesService {
             method: "post",
             url: "/api/files/upload",
             data: formData,
-            params: {id: commID},
+            params: {dirName},
             headers: {"Content-Type": "multipart/form-data"},
             onUploadProgress
         });
     }
 
-    public async getFiles(commID: string): Promise<AxiosResponse> {
-        return axios.get(`/api/files/${commID}`);
+    public async getFiles(dirName: string): Promise<AxiosResponse> {
+        return axios.get(`/api/files`, {params: {dirName}});
     }
 
-    public async deleteFile(imageName: string, commID: string): Promise<AxiosResponse> {
-        return axios.delete(`/api/files/delete`, {params: {name: imageName, id: commID}});
+    public async deleteFile(imageName: string, dirName: string): Promise<AxiosResponse> {
+        return axios.delete(`/api/files/delete`, {params: {imageName, dirName}});
     }
 
     // public async swapDir(goodBody: { brand: string, title: string, sex: string }) {

@@ -6,35 +6,16 @@ import {
     Typography,
     Button,
     ImageList,
-    ImageListItem,
-    ImageListItemBar,
-    IconButton,
     withStyles
 } from '@material-ui/core';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
 import createStyles from "@material-ui/core/styles/createStyles";
-import Star from "@material-ui/icons/Star";
-import {DeleteOutline} from "@material-ui/icons";
 import Dialog from "@material-ui/core/Dialog";
 import {PaperComponent} from "./goods/BaseGood";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
+import UploadImageItem from "./UploadImageItem";
 
-function Image({name, url}: { name: string, url: string }) {
-    // let imgSrc;
-    // if (process.env.NODE_ENV === 'production') {
-    //     imgSrc = `../../../resources/commodities/${id}/${name}`;
-    // } else {
-    //     imgSrc = `/resources/commodities/${id}/${name}`;
-    // }
-    return (
-        <a href={url} style={{cursor: "pointer"}}>
-            <img src={url} alt={name} style={{height: "320px", width: "300px"}}
-                 className="mr20"/>
-        </a>
-    )
-}
 
 const BorderLinearProgress = withStyles(() => ({
     root: {
@@ -50,19 +31,11 @@ const BorderLinearProgress = withStyles(() => ({
     }
 }))(LinearProgress);
 
-const styles = () => createStyles({
+const styles = createStyles({
     imageList: {
-        width: 600,
+        width: 615,
         height: 450,
         transform: 'translateZ(0)',
-    },
-    titleBar: {
-        background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-            'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-    },
-    icon: {
-        color: 'white',
     }
 });
 
@@ -71,7 +44,6 @@ interface UploadImagesState {
     previewImage?: string,
     progress: number,
     renderImage?: { name: string, url: string },
-    mainImage?: string,
     delImageName?: string,
     imageInfos: Array<{ name: string, url: string }>,
     message: string,
@@ -80,17 +52,20 @@ interface UploadImagesState {
 }
 
 interface UploadImageProps {
-    commID?: string,
+    dirName?: string,
+    dirPrefix?: string,
     mainImage?: string,
-    classes?: {
-        imageList: string,
-        titleBar: string,
-        icon: string,
-    },
-    setMainImage: (mainImage: string) => void,
+    setMainImage?: (mainImage: string) => void,
+    classes: {
+        imageList: string
+    }
 }
 
 class UploadImages extends React.Component<UploadImageProps, UploadImagesState> {
+    public static defaultProps = {
+        dirPrefix: ""
+    };
+
     constructor(props: UploadImageProps) {
         super(props);
         this.state = {
@@ -98,7 +73,6 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
             previewImage: undefined,
             progress: 0,
             renderImage: undefined,
-            mainImage: undefined,
             imageInfos: [],
             message: "",
             isError: false,
@@ -110,10 +84,9 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
         await this.loadImages();
     }
 
-    public componentDidUpdate(prevProps: Readonly<UploadImageProps>, prevState: Readonly<UploadImagesState>) {
-        if (this.state.mainImage !== prevState.mainImage) {
-            this.setState({imageInfos: this.state.imageInfos.sort(this.sortImageInfos)},
-                () => this.props.setMainImage(this.state.mainImage));
+    public componentDidUpdate(prevProps: Readonly<UploadImageProps>) {
+        if (this.props.mainImage !== prevProps.mainImage) {
+            this.setState({imageInfos: this.state.imageInfos.sort(this.sortImageInfos)});
         }
     }
 
@@ -122,12 +95,11 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
             currentFile,
             previewImage,
             progress,
-            mainImage,
             imageInfos,
             message,
             isError
         } = this.state;
-        const {classes} = this.props;
+        const {classes, mainImage} = this.props;
         return (
             <div className="mg20">
                 <label htmlFor="btn-upload">
@@ -186,31 +158,10 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
                 </Typography>
                 <ImageList rowHeight={280} gap={1} className={classes.imageList}>
                     {imageInfos.length > 0 &&
-                        imageInfos.map((image: { name: string, url: string }) => (
-                            <ImageListItem key={image.name}>
-                                <Image name={image.name} url={image.url}/>
-                                <ImageListItemBar
-                                    title={image.name}
-                                    position="top"
-                                    actionIcon={
-                                        <div style={{display: 'flex'}}>
-                                            <IconButton aria-label={`star ${image.name}`}
-                                                        onClick={() => this.pickMainImage(image.name)}>
-                                                {mainImage === image.name ?
-                                                    <Star style={{color: '#FFDF00'}}/>
-                                                    :
-                                                    <StarBorderIcon className={classes.icon}/>
-                                                }
-                                            </IconButton>
-                                            <IconButton onClick={() => this.showDeleteDialog(image.name)}>
-                                                <DeleteOutline className={classes.icon}/>
-                                            </IconButton>
-                                        </div>
-                                    }
-                                    actionPosition="left"
-                                    className={classes.titleBar}
-                                />
-                            </ImageListItem>
+                        imageInfos.map((image) => (
+                            <UploadImageItem key={image.name} image={image} mainImage={mainImage}
+                                             pickMainImage={this.props.setMainImage}
+                                             showDeleteDialog={this.showDeleteDialog}/>
                         ))}
                 </ImageList>
                 <Dialog
@@ -242,28 +193,28 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
         try {
             let imageInfos;
 
-            const uploadFiles = await UploadService.getFiles(this.props.commID);
+            const uploadFiles = await UploadService.getFiles(this.props.dirPrefix + this.props.dirName);
             imageInfos = uploadFiles.data.map((item: { name: string, url: string }) => (
                 {url: item.url, name: item.name}
             ));
 
-            this.setState({mainImage: this.props.mainImage});
             imageInfos.sort(this.sortImageInfos);
             this.setState({
                 imageInfos
             });
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
-    private upload = async () => {
+    private upload = async (): Promise<void> => {
         this.setState({
             progress: 0
         });
 
+
         try {
-            const uploadResponse = await UploadService.upload(this.props.commID, this.state.currentFile, (event) => {
+            const uploadResponse = await UploadService.upload(this.props.dirPrefix + this.props.dirName, this.state.currentFile, (event) => {
                 this.setState({
                     progress: Math.round((100 * event.loaded) / event.total),
                 });
@@ -272,10 +223,9 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
                 message: uploadResponse.data.message,
                 isError: false
             });
-            const uploadFiles = await UploadService.getFiles(this.props.commID);
-            uploadFiles.data.sort(this.sortImageInfos);
+            const uploadFiles = await UploadService.getFiles(this.props.dirPrefix + this.props.dirName);
             this.setState({
-                imageInfos: uploadFiles.data,
+                imageInfos: uploadFiles.data.sort(this.sortImageInfos)
             });
         } catch (error) {
             this.setState({
@@ -296,17 +246,12 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
         });
     }
 
-    private pickMainImage = (imageName: string): void => {
-        if (!this.state.mainImage || this.state.mainImage !== imageName) {
-            this.setState({mainImage: imageName});
-        } else {
-            this.setState({mainImage: undefined});
-        }
-    }
-
     private handleDeleteImage = async (): Promise<void> => {
         try {
-            await UploadService.deleteFile(this.state.delImageName, this.props.commID);
+            await UploadService.deleteFile(this.state.delImageName, this.props.dirPrefix + this.props.dirName);
+            if (this.props.mainImage === this.state.delImageName) {
+                this.props.setMainImage(undefined);
+            }
             await this.loadImages();
             this.showDeleteDialog();
         } catch (error) {
@@ -322,7 +267,7 @@ class UploadImages extends React.Component<UploadImageProps, UploadImagesState> 
     };
 
     private sortImageInfos = (item: { name: string, url: string }) =>
-        (this.state.mainImage === item.name ? -1 : 1);
+        (this.props.mainImage === item.name ? -1 : 1);
 }
 
 export default withStyles(styles)(UploadImages);

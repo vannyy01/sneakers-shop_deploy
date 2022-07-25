@@ -3,7 +3,7 @@ import {
     FETCH_BRANDS,
     FetchBrandsAction
 } from "../actions/types";
-import {ItemsType} from "../components/types";
+import {ItemsType} from "../types";
 
 type AuthAction =
     FetchBrandsAction |
@@ -13,7 +13,7 @@ type AuthAction =
 type StateType = ItemsType;
 
 const initialState: StateType = {};
-export const brandsReducer = (state: StateType = Object.assign({}, initialState), action: AuthAction): StateType => {
+export const brandsReducer = (state: StateType = initialState, action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_BRANDS:
             return action.payload;

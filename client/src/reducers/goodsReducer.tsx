@@ -39,7 +39,7 @@ interface StateType {
 }
 
 const initialState: StateType = {goods: [], searchMode: false, filters: {}};
-export const goodsReducer = (state: StateType = Object.assign({}, initialState), action: AuthAction): StateType => {
+export const goodsReducer = (state: StateType = initialState, action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_GOODS:
             // If previously SEARCH_GOODS was used

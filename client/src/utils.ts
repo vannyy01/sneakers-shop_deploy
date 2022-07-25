@@ -1,10 +1,10 @@
 import {useEffect, useRef} from "react";
 import {forEach, isEmpty, map} from "lodash";
-import {FilterListTypeArray, SearchItemParameters} from "./GridView";
+import {FilterListTypeArray, SearchItemParameters} from "./components/GridView";
 import {ItemDataType, Order} from "./types";
 import _mapValues from "lodash/mapValues";
-import {url} from "../index";
-import {GoodsFilterList} from "./landing/Goods";
+import {url} from "./index";
+import {GoodsFilterList} from "./components/landing/Goods";
 
 export const inArray = <T>(item: T, label: string, items: T[]): boolean =>
     items.findIndex(value => value[label] === item[label]) >= 0;

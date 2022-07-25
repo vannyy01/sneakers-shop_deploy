@@ -6,7 +6,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel/FormControlLabe
 import Checkbox from "@material-ui/core/Checkbox";
 import {makeStyles} from "@material-ui/core/styles";
 import createStyles from "@material-ui/core/styles/createStyles";
-import {ItemsType} from "../types";
+import {ItemsType} from "../../types";
 import {FilterStateType} from "./Goods";
 import {map} from "lodash";
 

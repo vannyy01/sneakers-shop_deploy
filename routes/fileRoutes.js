@@ -5,6 +5,6 @@ const {upload, download, getListFiles, deleteFile} = require("../services/handle
 module.exports = (app) => {
     app.post('/api/files/upload', requireLogin, upload);
     app.get('/api/files/download', requireLogin, download);
-    app.get('/api/files/:id', requireLogin, getListFiles);
+    app.get('/api/files', requireLogin, getListFiles);
     app.delete('/api/files/delete', requireLogin, deleteFile);
 }

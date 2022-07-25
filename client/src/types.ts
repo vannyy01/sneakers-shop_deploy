@@ -1,3 +1,6 @@
+export const envPath = process.env.__ENV__ === 'production' ? "/client/build/resources"
+    : "/client/public/resources";
+
 export interface ItemDataType {
     __isNew__?: boolean;
     count?: number,

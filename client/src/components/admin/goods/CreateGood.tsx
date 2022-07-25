@@ -15,7 +15,6 @@ import Paper from "@material-ui/core/Paper";
 import MenuItem from "@material-ui/core/MenuItem";
 import BaseGood, {
     Alert,
-    GoodStyles,
     PaperComponent,
     BaseGoodPropsType, BaseGoodStateType
 } from "./BaseGood";
@@ -26,9 +25,10 @@ import {ShoeInterface} from "../../../actions/types";
 import UploadImages from "../UploadImages";
 import ChipManager from "./ChipManager";
 import _map from "lodash/map";
-import {ItemsType} from "../../types";
+import {ItemsType} from "../../../types";
 import EditableSelect from "../../select/EditableSelect";
 import {colors, sexes, shoeTypes} from "./goodTypes";
+import CRUDStyles from "../crudStyles";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -110,16 +110,14 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 id="mainImage"
                                 name="mainImage"
                                 label="Заставка. Оберіть одне із зображень нижче"
-                                multiline={true}
                                 fullWidth={true}
-                                autoComplete="mainImage-name"
-                                value={mainImage}
+                                value={mainImage || ""}
                                 helperText={formErrors.mainImage}
                                 error={formErrors.mainImage.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>
-                            <UploadImages mainImage={mainImage}
+                            <UploadImages dirPrefix="commodities/" mainImage={mainImage}
                                           setMainImage={this.setMainImage}/>
                         </Grid>
                         <Grid item={true} xs={12} sm={6}>
@@ -284,14 +282,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
 
     protected handleDelete = (): void => {
         this.setState(CreateGood.defaultState())
-    }
-
-    protected setMainImage = (mainImage: string): void => {
-        const newState: ShoeInterface = this.state.good;
-        newState.mainImage = mainImage;
-        this.setState({good: newState});
-    }
-
+    };
 }
 
 const mapStateToProps = ({brands}: { brands: ItemsType }) => ({brands});
@@ -301,4 +292,4 @@ export default connect(mapStateToProps, {
     fetchBrands,
     createBrand,
     deleteBrand
-})(withStyles(GoodStyles)(CreateGood));
+})(withStyles(CRUDStyles)(CreateGood));

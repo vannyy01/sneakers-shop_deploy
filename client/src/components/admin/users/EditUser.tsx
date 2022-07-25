@@ -3,10 +3,10 @@ import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 import Paper from "@material-ui/core/Paper";
 import {UserInterface} from "../../../actions/types";
-import {GoodStyles as UserStyles} from "../goods/BaseGood";
 import {connect} from "react-redux";
 import {withStyles} from "@material-ui/core";
 import {deleteUser, fetchUserByID, updateUser} from "../../../actions";
+import CRUDStyles from "../crudStyles";
 
 interface EditUserProps extends PropsTypeUser {
     updateUser: (user: UserInterface, callback: () => void) => void;
@@ -59,4 +59,4 @@ class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
 
 const mapStateToProps = ({users}: { users: UserInterface }) => ({user: users});
 
-export default connect(mapStateToProps, {fetchUserByID, updateUser, deleteUser})(withStyles(UserStyles)(EditUser));
+export default connect(mapStateToProps, {fetchUserByID, updateUser, deleteUser})(withStyles(CRUDStyles)(EditUser));

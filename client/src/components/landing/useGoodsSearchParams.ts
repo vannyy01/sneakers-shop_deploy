@@ -1,6 +1,6 @@
 import {url} from "../../index";
-import {Order, OrderBy} from "../types";
-import {replaceURL} from "../utils";
+import {Order, OrderBy} from "../../types";
+import {replaceURL} from "../../utils";
 import {FilterStateType, PriceType} from "./Goods";
 import {useEffect, useState} from "react";
 

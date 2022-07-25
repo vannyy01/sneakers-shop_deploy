@@ -1,9 +1,9 @@
 import * as _ from "lodash";
-import {getComparator} from "../utils";
+import {getComparator} from "../../utils";
 import CommodityCard from "./CommodityCard";
 import * as React from "react";
 import {ShoeInterface} from "../../actions/types";
-import {Order, OrderBy} from "../types";
+import {Order, OrderBy} from "../../types";
 import {LoadCommodities} from "./index";
 import {useState} from "react";
 

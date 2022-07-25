@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useEffect, useRef, useState} from "react";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
-import {fetchSiteOptions} from "../actions/siteOptionController";
+import {fetchSiteOptions} from "../actions/SiteOptionController";
 import Header from './Header';
 import {Card, Goods, ParagraphHeader} from './landing';
 import Shopping from '@material-ui/icons/ShoppingBasket';
@@ -20,7 +20,7 @@ const headerStyle = {
 };
 
 const styles = {
-    backgroundImage: "url(https://static.highsnobiety.com/thumbor/AtgJm2sPhxXbYXvsZcCtaK2YcQc=/1200x720/static.highsnobiety.com/wp-content/uploads/2019/09/04164635/custom-sneakers-good-bad-ugly-feature.jpg)",
+    // backgroundImage: "url(https://static.highsnobiety.com/thumbor/AtgJm2sPhxXbYXvsZcCtaK2YcQc=/1200x720/static.highsnobiety.com/wp-content/uploads/2019/09/04164635/custom-sneakers-good-bad-ugly-feature.jpg)",
     height: innerHeight,
     marginBottom: 0,
     marginTop: "2em",
@@ -32,11 +32,12 @@ const animationProperties = {
     exit: 1400
 };
 
-const Main: React.FC<{siteOptions: SiteOptionType[]}> = ({siteOptions}) => {
+const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
 
     const [showCard, setShowCard] = useState<boolean>(false);
     const cards = siteOptions.filter(item => item.name !== "main_page_header");
     const mainHeader = siteOptions.find(item => item.name === "main_page_header");
+    const backgroundImage = `url(resources/main_page_header/${mainHeader.backgroundImage})`;
     const ScrollRef = useRef();
 
     useEffect(() => {
@@ -55,39 +56,40 @@ const Main: React.FC<{siteOptions: SiteOptionType[]}> = ({siteOptions}) => {
     };
 
     return (
-            <div ref={ScrollRef} onScroll={handleScroll}>
-                <Header styles={styles} title={mainHeader.title} description={mainHeader.description}/>
-                <section className="special-area section_padding_100">
-                    <ParagraphHeader title="Оберіть взуття"/>
-                    <Goods/>
-                </section>
-                <section style={{marginBottom: !showCard ? '300px' : '0px'}}
-                         className="special-area bg-white section_padding_100" id="about">
-                    <div className="container">
-                        <div className="row">
-                            <ParagraphHeader title="Чому ми?"/>
-                            <TransitionGroup className="d-flex justify-content-around">
-                                {showCard && cards.length > 0
-                                    && cards.map(({
-                                                      name,
-                                                      title,
-                                                      description
-                                                  }) =>
-                                        <CSSTransition key={name} timeout={500} classNames="card">
-                                            <Card Icon={Shopping}
-                                                  styles={{headerStyle, iconStyle: shoppingStyle}}
-                                                  headerText={title}
-                                                  text={description}/>
-                                        </CSSTransition>
-                                    )}
-                            </TransitionGroup>
-                        </div>
+        <div ref={ScrollRef} onScroll={handleScroll}>
+            <Header styles={{...styles, backgroundImage}} title={mainHeader.title}
+                    description={mainHeader.description}/>
+            <section className="special-area section_padding_100">
+                <ParagraphHeader title="Оберіть взуття"/>
+                <Goods/>
+            </section>
+            <section style={{marginBottom: !showCard ? '300px' : '0px'}}
+                     className="special-area bg-white section_padding_100" id="about">
+                <div className="container">
+                    <div className="row">
+                        <ParagraphHeader title="Чому ми?"/>
+                        <TransitionGroup className="d-flex justify-content-around">
+                            {showCard && cards.length > 0
+                                && cards.map(({
+                                                  name,
+                                                  title,
+                                                  description
+                                              }) =>
+                                    <CSSTransition key={name} timeout={500} classNames="card">
+                                        <Card Icon={Shopping}
+                                              styles={{headerStyle, iconStyle: shoppingStyle}}
+                                              headerText={title}
+                                              text={description}/>
+                                    </CSSTransition>
+                                )}
+                        </TransitionGroup>
                     </div>
-                </section>
-            </div>
-            // <div style={{marginTop: 100, marginLeft: 50}}>
-            //     <p>Вибачте, сайт тимчасово не працює. Спробуйте зайти пізніше.</p>
-            // </div>
+                </div>
+            </section>
+        </div>
+        // <div style={{marginTop: 100, marginLeft: 50}}>
+        //     <p>Вибачте, сайт тимчасово не працює. Спробуйте зайти пізніше.</p>
+        // </div>
     )
 }
 
