@@ -11,7 +11,8 @@
     "exclude": [
       "public",
       "config/**/*.js",
-      "node_modules/**/*.ts"
+      "node_modules/**/*.ts",
+      "node_modules/**/*.mjs"
     ]
   },
   "ordered-imports": [

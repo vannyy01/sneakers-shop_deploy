@@ -33,7 +33,8 @@ const SiteOptions: React.FC = () => {
 
     useEffect(() => {
         dispatch(fetchSiteOptions(["*"]));
-    }, [dispatch]);
+        document.title = 'Налаштування сайту';
+    }, []);
 
     return (
         <main className={"container " + classes.content}>

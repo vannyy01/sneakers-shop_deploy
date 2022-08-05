@@ -11,6 +11,7 @@ import {fetchUser} from '../actions';
 import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from "./ProtectedRoute";
+import ProductPage from './productPage';
 
 
 interface AppPropsI {
@@ -45,6 +46,8 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
                     <NavBar/>
                     <div>
                         <Switch>
+                            <Route path="/good/:id" component={ProductPage}/>
+                            <Route exact={true} path="/" component={Landing}/>
                             {this.props.auth !== null &&
                             <ProtectedRoute
                                 authenticationPath="/auth/google"
@@ -53,7 +56,6 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
                                 component={AdminModule}
                             />
                             }
-                            <Route path="/" component={Landing}/>
                         </Switch>
                     </div>
                 </div>

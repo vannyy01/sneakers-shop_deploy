@@ -32,7 +32,7 @@ type AuthAction =
     | DeleteManyGoodsAction;
 
 interface StateType {
-    goods: ShoeInterface | ShoeInterface[],
+    goods: ShoeInterface[],
     count?: number,
     searchMode: boolean,
     filters: SearchItemParameters
@@ -95,7 +95,8 @@ export const goodsReducer = (state: StateType = initialState, action: AuthAction
         case CLEAR_GOODS:
             return initialState;
         case FETCH_GOOD:
-            return {...state, ...action.payload};
+            action.payload.availability = action.payload.sizes.reduce((acc, size) => acc + size.count, 0) > 0;
+            return {...state, goods: [action.payload]};
         case UPDATE_GOOD:
             return initialState;
         case CREATE_GOOD:

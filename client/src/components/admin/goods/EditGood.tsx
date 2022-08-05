@@ -9,7 +9,15 @@ import Button from "@material-ui/core/Button";
 import DeleteIcon from '@material-ui/icons/Delete';
 import ArrowBack from '@material-ui/icons/ArrowBackIos';
 import {connect} from 'react-redux';
-import {createBrand, deleteGood, fetchBrands, fetchGoodByID, updateGood, deleteBrand} from "../../../actions";
+import {
+    createBrand,
+    deleteGood,
+    fetchBrands,
+    fetchGoodByID,
+    updateGood,
+    deleteBrand,
+    clearGoodsState
+} from "../../../actions";
 import {ShoeInterface} from "../../../actions/types";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, {AlertProps} from '@material-ui/lab/Alert';
@@ -27,6 +35,8 @@ import {ItemsType} from "../../../types";
 import EditableSelect from "../../select/EditableSelect";
 import {colors, sexes, shoeTypes} from "./goodTypes";
 import CRUDStyles from "../crudStyles";
+import {isEmpty} from "lodash";
+import he from "he";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -41,16 +51,17 @@ function PaperComponent(props: PaperProps) {
 }
 
 interface EditGoodPropsType extends BaseGoodPropsType {
-    classes: { alert: string, button: string, paper: string, root: string},
+    classes: { alert: string, button: string, paper: string, root: string },
     fetchGoodByID: (id: string, onErrorCallback: () => void) => void,
     good: ShoeInterface,
     brands?: ItemsType,
     updateGood: (good: ShoeInterface | {}, callback: () => void) => void,
     deleteGood: (id: string, callback: () => void) => void,
+    clearGoodsState: () => void,
 }
 
 interface EditGoodStateType extends BaseGoodStateType {
-    showDeleteDialog: boolean
+    showDeleteDialog: boolean,
 }
 
 class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
@@ -60,7 +71,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
 
     constructor(props: EditGoodPropsType) {
         super(props);
-        this.state = EditGood.defaultState();
+        this.state = {...EditGood.defaultState(), good: undefined};
     }
 
     public componentDidMount() {
@@ -77,11 +88,26 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
         }
     }
 
+    public componentWillUnmount() {
+        this.props.clearGoodsState();
+    }
+
     public render() {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
-        if (this.state.good?._id && brands) {
-            const {title, brand, description, mainImage, type, sex, color, price, sizes} = this.state.good;
+        if (!isEmpty(this.state.good) && !isEmpty(brands)) {
+            const {
+                title,
+                brand,
+                description,
+                fullDescription,
+                mainImage,
+                type,
+                sex,
+                color,
+                price,
+                sizes
+            } = this.state.good;
             const {
                 showAlert,
                 showDialog,
@@ -148,6 +174,22 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                             <Grid item={true} xs={12}>
                                 <TextField
                                     required={true}
+                                    id="fullDescription"
+                                    name="fullDescription"
+                                    multiline={true}
+                                    maxRows={10}
+                                    label="Детальний опис"
+                                    fullWidth={true}
+                                    autoComplete="fullDescription-name"
+                                    value={he.decode(fullDescription)}
+                                    onChange={this.handleOnChange}
+                                    helperText={formErrors.fullDescription}
+                                    error={formErrors.fullDescription.length > 0}
+                                />
+                            </Grid>
+                            <Grid item={true} xs={12}>
+                                <TextField
+                                    required={true}
                                     disabled={true}
                                     id="mainImage"
                                     name="mainImage"
@@ -159,37 +201,38 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>
-                                <UploadImages dirPrefix="commodities/" dirName={this.props.match.params.commID} mainImage={mainImage}
+                                <UploadImages dirPrefix="commodities/" dirName={this.props.match.params.commID}
+                                              mainImage={mainImage}
                                               setMainImage={this.setMainImage}/>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
                                 <ChipManager label="Вкажіть розміри" sizes={sizes} setChips={this.handleAddChips}/>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
-                                    <TextField
-                                        required={true}
-                                        id="color"
-                                        name="color"
-                                        label="Колір"
-                                        SelectProps={{classes: {root: classes.root}}}
-                                        fullWidth={true}
-                                        autoComplete="color-name"
-                                        select={true}
-                                        value={color}
-                                        onChange={this.handleOnChange}
-                                        helperText={formErrors.color}
-                                        error={formErrors.color.length > 0}
-                                    >
-                                        {_map(colors, option => (
-                                            <MenuItem key={option.value} value={option.value}
-                                                      style={{
-                                                          backgroundColor: option.value.toString(),
-                                                          color: option.value.toString() === "black" ? "#ffffff" : "inherit"
-                                                      }}>
-                                               {option.label}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                <TextField
+                                    required={true}
+                                    id="color"
+                                    name="color"
+                                    label="Колір"
+                                    SelectProps={{classes: {root: classes.root}}}
+                                    fullWidth={true}
+                                    autoComplete="color-name"
+                                    select={true}
+                                    value={color}
+                                    onChange={this.handleOnChange}
+                                    helperText={formErrors.color}
+                                    error={formErrors.color.length > 0}
+                                >
+                                    {_map(colors, option => (
+                                        <MenuItem key={option.value} value={option.value}
+                                                  style={{
+                                                      backgroundColor: option.value.toString(),
+                                                      color: option.value.toString() === "black" ? "#ffffff" : "inherit"
+                                                  }}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
                             </Grid>
                             <Grid item={true} xs={12} sm={6}>
                                 <TextField
@@ -395,10 +438,14 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
 
 }
 
-const mapStateToProps = ({goods, brands}: { goods: ShoeInterface, brands: ItemsType }) => ({good: goods, brands});
+const mapStateToProps = ({goods: {goods}, brands}: { goods: {goods: ShoeInterface[]}, brands: ItemsType }) => ({
+    good: goods[0],
+    brands
+});
 
 export default connect(mapStateToProps, {
     fetchGoodByID,
+    clearGoodsState,
     updateGood,
     deleteGood,
     fetchBrands,

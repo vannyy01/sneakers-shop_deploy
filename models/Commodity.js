@@ -11,6 +11,7 @@ const commoditySchema = new Schema({
     title: String,
     brand: String,
     description: String,
+    fullDescription: String,
     price: Number,
     mainImage: String,
     images: [String],

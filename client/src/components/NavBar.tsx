@@ -12,6 +12,8 @@ import {withStyles} from '@material-ui/core/styles';
 import PollButton from './poll/PollButton';
 import PollModal from './poll/PollModal';
 import CartButton from './ShoppingCart/CartButton';
+import {ShoeInterface} from "../actions/types";
+import {getCartItems} from "../actions";
 
 
 const styles = {
@@ -43,7 +45,9 @@ interface HeaderPropsI {
         flex: string,
         menuButton: string,
     },
-    auth?: any
+    auth?: any,
+    getCartItems: () => void,
+    cartItems: { [id: string]: ShoeInterface },
 }
 
 class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, showModal: boolean }> {
@@ -53,6 +57,10 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
             showCart: false,
             showModal: false
         }
+    }
+
+    public componentDidMount():void {
+        this.props.getCartItems();
     }
 
     public render() {
@@ -69,8 +77,8 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
                     </Typography>
                     <PollButton onClick={this.handleShowModal}/>
                     {modal}
-                    <CartButton openCart={this.handleCart}/>
-                    <Cart handleCart={this.handleCart} showCart={this.state.showCart}/>
+                    <CartButton totalItems={Object.keys(this.props.cartItems).length} openCart={this.handleCart}/>
+                    <Cart cartItems={this.props.cartItems} handleCart={this.handleCart} showCart={this.state.showCart}/>
                     {this.renderContent()}
                 </Toolbar>
             </AppBar>
@@ -100,8 +108,12 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
     };
 }
 
-const mapStateToProps = ({auth}: any) => {
-    return {auth};
+const mapStateToProps = ({
+                             auth,
+                             cartItems
+                         }: { auth: any, cartItems: { [id: string]: ShoeInterface } }):
+    { auth: any, cartItems: { [id: string]: ShoeInterface } } => {
+    return {auth, cartItems};
 };
 
-export default connect(mapStateToProps)(withStyles(styles)(NavBar));
+export default connect(mapStateToProps, {getCartItems})(withStyles(styles)(NavBar));

@@ -47,7 +47,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
     public render() {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
-        const {title, description, mainImage, type, sex, price, color, sizes} = this.state.good;
+        const {title, description, fullDescription, mainImage, type, sex, price, color, sizes} = this.state.good;
         const {showAlert, showDialog, formErrors, isLoading} = this.state;
 
         return <Paper className={classes.paper}>
@@ -101,6 +101,22 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 onChange={this.handleOnChange}
                                 helperText={formErrors.description}
                                 error={formErrors.description.length > 0}
+                            />
+                        </Grid>
+                        <Grid item={true} xs={12}>
+                            <TextField
+                                required={true}
+                                id="fullDescription"
+                                name="fullDescription"
+                                multiline={true}
+                                maxRows={10}
+                                label="Детальний опис"
+                                fullWidth={true}
+                                autoComplete="fullDescription-name"
+                                value={fullDescription}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.fullDescription}
+                                error={formErrors.fullDescription.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>

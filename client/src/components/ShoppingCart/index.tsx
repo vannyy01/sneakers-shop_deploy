@@ -4,14 +4,8 @@ import {RefObject} from "react";
 import {connect} from "react-redux";
 import {deleteCartItem, getCartItems} from "../../actions";
 import {ShoeInterface} from "../../actions/types";
-
-import Scrollbars from "react-custom-scrollbars";
-
 import Button from '@material-ui/core/Button';
-
 import {Theme} from "@material-ui/core";
-import CartItem from './CartItem';
-
 import createStyles from "@material-ui/core/styles/createStyles";
 import {findDOMNode} from "react-dom";
 
@@ -21,6 +15,7 @@ import withStyles from "@material-ui/core/styles/withStyles";
 
 import './Cart.css';
 import {map} from "lodash";
+import CartItemsList from "./CartItemsList";
 
 interface CartPropsI {
     deleteCartItem: (id: string) => void,
@@ -35,7 +30,6 @@ interface CartPropsI {
         rightIcon: string,
     },
     handleCart: () => void,
-    getCartItems: () => void,
     showCart: boolean,
 }
 
@@ -86,8 +80,6 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
-const EmptyCart = () => (<div>Ваша корзина пуста :(</div>);
-
 class Cart extends React.PureComponent<CartPropsI, CartStateI> {
     private readonly cartPreview: RefObject<any>;
 
@@ -107,7 +99,6 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
             this.handleClickOutside,
             true
         );
-        this.props.getCartItems();
     }
 
     public componentWillUnmount() {
@@ -133,16 +124,7 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
                     className={"cart-preview " + classes.active}
                     ref={this.cartPreview}
                 >
-                    <Scrollbars style={{width: 360, height: 320}}>
-                        {!this.state.cart ? <EmptyCart/> :
-                            _.map(this.state.cart, (item, index) =>
-                                <CartItem key={index}
-                                          product={item}
-                                          productID={index}
-                                          removeProduct={this.handleRemoveProduct}/>
-                            )
-                        }
-                    </Scrollbars>
+                    <CartItemsList cartItems={this.state.cart} removeCartItem={this.handleRemoveProduct}/>
                     <div className={classes.actionBlock}>
                         <div className={classes.count + " rounded"}>
                             <div className={classes.paragraph + "  p-1 d-flex justify-content-between"}>
@@ -207,6 +189,4 @@ class Cart extends React.PureComponent<CartPropsI, CartStateI> {
       } */
 }
 
-const mapStateToProps = ({cartItems}: any) => ({cartItems});
-
-export default connect(mapStateToProps, {getCartItems, deleteCartItem})(withStyles(styles)(Cart));
+export default connect(null, {getCartItems, deleteCartItem})(withStyles(styles)(Cart));

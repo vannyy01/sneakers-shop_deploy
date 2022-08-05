@@ -10,7 +10,7 @@ import {
 } from "../actions/types";
 
 type AuthAction = GetCartItemsAction | SetCartItemsAction | DeleteCartItemsAction;
-type StateType = { [id: number]: ShoeInterface } | {};
+type StateType = { [id: string]: ShoeInterface };
 
 export const cartReducer = (state: StateType = {}, action: AuthAction) => {
     switch (action.type) {
@@ -19,8 +19,7 @@ export const cartReducer = (state: StateType = {}, action: AuthAction) => {
         case SET_CART_ITEM:
             return {...state, ...action.payload};
         case DELETE_CART_ITEM:
-            const newState: StateType = state;
-            return _.filter(newState,
+            return _.filter(state,
                 (item: any, index) => {
                     return index !== action.payload
                 });

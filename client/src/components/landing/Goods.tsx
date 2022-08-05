@@ -280,7 +280,7 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
         if (prevOpenFavourites !== undefined && openFavourites && openFavourites !== prevOpenFavourites) {
             dispatch(fetchFavouritesGoods({orderBy, fields: fieldsList}));
             url.searchParams.set('favourites', 'true');
-            replaceURL();
+            handleClearFilters();
         } else if (prevOpenFavourites !== undefined && !openFavourites) {
             dispatch(fetchGoods({
                     skip,

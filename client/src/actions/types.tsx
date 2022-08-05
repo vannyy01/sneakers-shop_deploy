@@ -128,7 +128,7 @@ export const FETCH_GOOD: FETCH_GOOD = 'FETCH_GOOD';
 
 export interface FetchGoodAction {
     type: FETCH_GOOD,
-    payload: { goods: ShoeInterface }
+    payload: ShoeInterface
 }
 
 type UPDATE_GOOD = 'UPDATE_GOOD';
@@ -235,10 +235,13 @@ export interface CommodityInterface {
     mainImage: string,
     price: number,
     description?: string,
+    fullDescription?: string,
+    availability?: boolean,
 }
 
 export interface ShoeInterface extends CommodityInterface {
-    color: string
+    color: string,
+    size?: SizeInterface,
     sizes?: SizeInterface[],
 }
 

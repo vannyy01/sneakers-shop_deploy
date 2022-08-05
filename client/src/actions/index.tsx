@@ -444,7 +444,7 @@ export const fetchAvailabilityCount = (filters?: SearchItemParameters) => async 
 /**
  * @param item
  */
-export const setCartItem = (item: { [id: number]: ShoeInterface; }) => (dispatch: any) => {
+export const setCartItem = (item: { [id: string]: ShoeInterface; }) => (dispatch: any) => {
     dispatch({type: SET_CART_ITEM, payload: item})
 };
 

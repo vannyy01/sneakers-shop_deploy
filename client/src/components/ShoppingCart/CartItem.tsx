@@ -47,7 +47,7 @@ const CartItem: React.FC<CartItemI> = ({product, productID, removeProduct}) => {
     const imageUrl = `/resources/commodities/${_id}/${mainImage}`;
 
     return (
-        <li className="cart-item">
+        <li className="cart-item" id={productID}>
             <img className={classes.productImage} alt={brand + " " + title} src={imageUrl}/>
             <div className={classes.productInfo}>
                 <p className={classes.productName}>{brand + " " + title}</p>

@@ -20,7 +20,6 @@ const headerStyle = {
 };
 
 const styles = {
-    // backgroundImage: "url(https://static.highsnobiety.com/thumbor/AtgJm2sPhxXbYXvsZcCtaK2YcQc=/1200x720/static.highsnobiety.com/wp-content/uploads/2019/09/04164635/custom-sneakers-good-bad-ugly-feature.jpg)",
     height: innerHeight,
     marginBottom: 0,
     marginTop: "2em",
@@ -68,7 +67,7 @@ const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
                 <div className="container">
                     <div className="row">
                         <ParagraphHeader title="Чому ми?"/>
-                        <TransitionGroup className="d-flex justify-content-around">
+                        <TransitionGroup className="d-flex flex-column flex-lg-row align-items-center justify-content-lg-around">
                             {showCard && cards.length > 0
                                 && cards.map(({
                                                   name,

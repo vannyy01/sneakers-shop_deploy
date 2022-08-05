@@ -7,6 +7,7 @@ import Draggable from "react-draggable";
 import {validateNumberInput} from "../../../actions/validation";
 import {ItemDataType, ItemsType} from "../../../types";
 import {ActionMeta} from "react-select";
+import he from "he";
 
 export function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -40,10 +41,10 @@ export interface BaseGoodStateType {
     typing: boolean,
     isLoading: boolean,
     typingTimeout?: NodeJS.Timeout,
-    formErrors: { title: string, brand: string, description: string, mainImage: string, images: string, type: string, color: string, sex: string, price: string },
+    formErrors: { title: string, brand: string, description: string, fullDescription: string, mainImage: string, images: string, type: string, color: string, sex: string, price: string },
     formValid: boolean
     good: ShoeInterface,
-    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, colorValid: boolean, sexValid: boolean, priceValid: boolean },
+    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, fullDescriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, colorValid: boolean, sexValid: boolean, priceValid: boolean },
 }
 
 abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType> extends React.Component<P, S> {
@@ -71,6 +72,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 titleValid: true,
                 brandValid: true,
                 descriptionValid: true,
+                fullDescriptionValid: true,
                 mainImageValid: true,
                 imagesValid: true,
                 typeValid: true,
@@ -82,6 +84,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 title: '',
                 brand: '',
                 description: '',
+                fullDescription: '',
                 mainImage: '',
                 images: '',
                 type: '',
@@ -109,12 +112,13 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             this.setState({showAlert: true});
             return;
         }
-        const {_id, title, description, mainImage, type, sex, price, brand, color, sizes} = this.state.good;
+        const {_id, title, description, fullDescription, mainImage, type, sex, price, brand, color, sizes} = this.state.good;
         const good: ShoeInterface = {
             _id,
             title: title.trim(),
             brand: brand.trim(),
             description: description.trim(),
+            fullDescription: he.encode(fullDescription.trim()),
             price,
             mainImage: mainImage.trim(),
             sizes,
@@ -197,6 +201,20 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 }
                 fieldValidationErrors.description = '';
                 isValid.descriptionValid = true;
+                break;
+            case 'fullDescription':
+                if (typeof value !== 'string') {
+                    fieldValidationErrors.fullDescription = 'некоректний текст';
+                    isValid.fullDescriptionValid = false;
+                    break;
+                }
+                if (value.length < 15) {
+                    fieldValidationErrors.fullDescription = 'короткий текст';
+                    isValid.fullDescriptionValid = false;
+                    break;
+                }
+                fieldValidationErrors.fullDescription = '';
+                isValid.fullDescriptionValid = true;
                 break;
             case 'sex':
                 if (typeof value !== 'string') {
