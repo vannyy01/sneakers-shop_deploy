@@ -74,3 +74,16 @@ export const updateURL = (filterArr: GoodsFilterList): void => {
     replaceURL();
 };
 
+export const useImperativeDisableScroll = ({element, disabled}: { element: HTMLElement, disabled: boolean }): void => {
+    useEffect(() => {
+        if (!element) {
+            // @ts-ignore
+            return;
+        }
+        element.style.overflow = disabled ? 'hidden' : 'scroll';
+        return () => {
+            element.style.overflowY = 'scroll';
+            console.log(element.style.overflowY);
+        }
+    }, [disabled]);
+}

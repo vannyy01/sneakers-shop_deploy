@@ -3,16 +3,12 @@ import {connect} from "react-redux";
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import AdminModule from './admin/Admin';
 import NavBar from './NavBar';
-
 import Landing from './Main';
-
 import {fetchUser} from '../actions';
-
-import './styles.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from "./ProtectedRoute";
 import ProductPage from './productPage';
-
+import './styles.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface AppPropsI {
     fetchUser: any,

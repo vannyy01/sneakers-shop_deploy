@@ -80,7 +80,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles(
             flexGrow: 1,
         },
         drawerPaper: {
-            width: '20%',
+            maxWidth: '20%',
         },
         drawerFormGroup: {
             marginBottom: 0,

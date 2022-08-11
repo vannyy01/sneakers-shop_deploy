@@ -12,14 +12,13 @@ import UploadService from "../../actions/upload-files.service";
 import {colors} from "../admin/goods/goodTypes";
 import {ParagraphHeader} from "../landing";
 import he from "he";
-import {Chip, createStyles, makeStyles} from "@material-ui/core";
+import {capitalize, Chip, createStyles, makeStyles} from "@material-ui/core";
 import {v4 as uuid} from "uuid";
 import Counter from "./Counter";
 import Button from "../button";
-import IconButton from "@material-ui/core/IconButton";
-import Star from "@material-ui/icons/Star";
-import StarBorder from "@material-ui/icons/StarBorder";
-import {checkStorage, removeStorage, setStorage} from "../../actions/validation";
+import ProductField from "./ProductField";
+import ProductHeader from "./ProductHeader";
+import PriceBlock from "./PriceBlock";
 
 const useStyles = makeStyles(() => createStyles({
     chip: {
@@ -63,8 +62,7 @@ const ProductPage: React.FC = () => {
         const [product, setProduct] = useState<ShoeInterface>(initialProduct);
         const [images, setImages] = useState<ImageType[]>();
         const [checkedSize, setCheckedSize] = useState<number>();
-        const [count, setCount] = useState<number>(1);
-        const [fav, setFav] = useState<boolean>();
+        const [count, setCount] = useState<number>(1)
         const classes = useStyles();
 
         const loadImages = useCallback(async () => {
@@ -85,7 +83,6 @@ const ProductPage: React.FC = () => {
 
         useEffect(() => {
             loadImages().catch((error) => console.error(error));
-            setFav(!checkStorage("FavouritesGoods", id));
         }, []);
 
         useEffect(() => {
@@ -111,16 +108,6 @@ const ProductPage: React.FC = () => {
             }
         }
 
-        const likeGood = (): void => {
-            setStorage("FavouritesGoods", id);
-            setFav(!checkStorage("FavouritesGoods", id));
-        };
-
-        const dislikeGood = (): void => {
-            removeStorage("FavouritesGoods", id);
-            setFav(!checkStorage("FavouritesGoods", id));
-        };
-
         return (
             !isEmpty(product) && !isEmpty(classes) && !isEmpty(images) &&
             <section className="special-area bg-white section_padding_100" style={{marginTop: 100}}>
@@ -130,69 +117,21 @@ const ProductPage: React.FC = () => {
                             <ImageGallery items={images} showPlayButton={false}/>
                         </div>
                         <div className="d-flex flex-wrap col-12 col-lg-6">
-                            <h1 className="product__title d-flex align-items-center col-12" style={{fontSize: 23}}>
-                                {product.brand + " " + product.title} <span
-                                style={{textTransform: "capitalize"}}>{" " + colors[product.color].label}</span>
-                                <div style={{marginLeft: 15}}>
-                                    {fav ?
-                                        <IconButton aria-label="Додати в улюблені" onClick={dislikeGood}>
-                                            <Star style={{color: '#FFDF00'}}/>
-                                        </IconButton> :
-                                        <IconButton aria-label="Додати в улюблені" onClick={likeGood}>
-                                            <StarBorder/>
-                                        </IconButton>
-                                    }
-                                </div>
-                            </h1>
-                            <div className="price-product col-12" style={{marginBottom: 0}}>
-                                <div className="product-price" style={{float: "left", width: 100}}>
-                                    <div className={"price price--large price--on-sale align-items-start " + classes.price}>
-                                        <dl className="d-flex" style={{margin: 0, float: "left",}}>
-                                            <div className="price__sale d-flex justify-content-start flex-row">
-                                                <dd style={{margin: "0 1rem 0 0"}}>
-                                            <span className="price-item price-item--sale">
-                                             {product.price}грн
-                                            </span>
-                                                </dd>
-                                                <dd className="price__compare" style={{margin: "0 1rem 0 0"}}>
-                                                    <s className="price-item price-item--regular"
-                                                       style={{textDecoration: "line-through", color: "#777777"}}>
-                                                        $19.00
-                                                    </s>
-                                                </dd>
-                                            </div>
-                                        </dl>
-                                    </div>
-                                </div>
-                            </div>
+                            <ProductHeader id={id} brand={product.brand} title={product.title} color={product.color}/>
+                            <PriceBlock price={product.price} priceDiscount={1000}/>
                             <div className={"col-12 " + classes.description}>
                                 {product.description}
                             </div>
-                            <div className="product__type col-12" style={{margin: "10px 0"}}>
-                            <span className="d-inline-block product-type"
-                                  style={{minWidth: 110, fontWeight: 700}}>Тип:</span> {product.type}
-                            </div>
-                            <div className="product__type col-12" style={{margin: "10px 0"}}>
-                            <span className="d-inline-block product-type"
-                                  style={{minWidth: 110, fontWeight: 700}}>Бренд:</span> {product.brand}
-                            </div>
-                            <div className="product__type col-12"
-                                 style={{margin: "10px 0", textTransform: "capitalize"}}>
-                            <span className="d-inline-block product-type"
-                                  style={{minWidth: 110, fontWeight: 700}}>Стать:</span> {product.sex}
-                            </div>
-                            <div className="product__type col-12" style={{margin: "10px 0"}}>
-                            <span
-                                className="d-inline-block product-type" style={{
-                                minWidth: 110,
-                                fontWeight: 700
-                            }}>Наявність:</span> {product.availability ? "Доступні" : "Відсутні"}
-                            </div>
+                            <ProductField label="Тип" value={product.type}/>
+                            <ProductField label="Бренд" value={product.brand}/>
+                            <ProductField label="Стать" value={capitalize(product.sex)}/>
+                            <ProductField label="Наявність" value={product.availability ? "Доступні" : "Відсутні"}/>
                             <div className="product__type d-flex col-12"
                                  style={{margin: "10px 0", textTransform: "capitalize"}}>
                             <span className="d-inline-block product-type"
                                   style={{minWidth: 110, fontWeight: 700}}>Колір:</span>
-                                <div className={classes.color} style={{backgroundColor: colors[product.color].value.toString()}}/>
+                                <div className={classes.color}
+                                     style={{backgroundColor: colors[product.color].value.toString()}}/>
                                 {colors[product.color].label}
                             </div>
                             <div className="product__type d-flex align-items-center col-12">

@@ -1,16 +1,13 @@
 import {
-    FETCH_USER, FetchUserAction
+    FETCH_USER, FetchUserAction, UserInterface
 } from "../actions/types";
 
 type AuthAction = FetchUserAction;
 
-/**
- * @param {{}} state
- * @param {AuthAction} action
- * @returns {{}}
- */
+type StateType = UserInterface | null;
 
-export const authReducer = (state:any = null, action: AuthAction) => {
+const initialState: StateType = null;
+export const authReducer = (state = initialState, action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_USER:
             return action.payload;

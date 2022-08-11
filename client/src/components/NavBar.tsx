@@ -1,19 +1,16 @@
 import * as React from 'react';
 import {connect} from "react-redux";
-
 import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
 import Cart from './ShoppingCart';
-
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-
 import {withStyles} from '@material-ui/core/styles';
 import PollButton from './poll/PollButton';
 import PollModal from './poll/PollModal';
 import CartButton from './ShoppingCart/CartButton';
-import {ShoeInterface} from "../actions/types";
+import {ShoeInterface, UserInterface} from "../actions/types";
 import {getCartItems} from "../actions";
+import AuthMenu from "./AuthMenu";
 
 
 const styles = {
@@ -23,6 +20,10 @@ const styles = {
         fontSize: '1.125rem',
         fontWeight: 500,
         lineHeight: '1.16667em',
+        textDecoration: "none",
+        '&:hover': {
+            textDecoration: "none",
+        }
     },
     flex: {
         flex: 1,
@@ -45,7 +46,7 @@ interface HeaderPropsI {
         flex: string,
         menuButton: string,
     },
-    auth?: any,
+    auth?: UserInterface,
     getCartItems: () => void,
     cartItems: { [id: string]: ShoeInterface },
 }
@@ -79,23 +80,13 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
                     {modal}
                     <CartButton totalItems={Object.keys(this.props.cartItems).length} openCart={this.handleCart}/>
                     <Cart cartItems={this.props.cartItems} handleCart={this.handleCart} showCart={this.state.showCart}/>
-                    {this.renderContent()}
+                    <AuthMenu user={this.props.auth}/>
                 </Toolbar>
             </AppBar>
         );
     }
 
-    protected renderContent() {
-        switch (!!this.props.auth) {
-            case null:
-                return 'Still logging';
-            case false:
-                return <Button className={this.props.classes.aStyle} href="/auth/google">Ввійти через
-                    гугл</Button>;
-            default:
-                return <Button className={this.props.classes.aStyle} href="/api/logout">Вийти</Button>
-        }
-    }
+
 
     protected handleCart = (): void => {
         this.setState(state => ({showCart: !state.showCart}))
