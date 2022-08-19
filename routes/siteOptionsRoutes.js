@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const SiteOption = mongoose.model('site_options');
-const requireLogin= require("../middlewares/requireLogin");
+const isUserAdmin= require("../middlewares/isUserAdmin");
 
 module.exports = (app) => {
     app.get('/api/site_options/blocks', async (req, res, next) => {
@@ -20,7 +20,7 @@ module.exports = (app) => {
         }
     });
 
-    app.put('/api/site_options/blocks/edit/:name', requireLogin, async (req, res, next) => {
+    app.put('/api/site_options/blocks/edit/:name', isUserAdmin, async (req, res, next) => {
         try {
             await SiteOption.updateOne({name: req.params.name}, req.body).exec();
             res.status(200).send(`Option ${req.params.name} has been updated successfully.`);

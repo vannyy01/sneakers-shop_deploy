@@ -1,9 +1,9 @@
-const requireLogin = require('../middlewares/requireLogin');
+const isUserAdmin = require('../middlewares/isUserAdmin');
 const mongoose = require('mongoose');
 const Order = mongoose.model('orders');
 
 module.exports = app => {
-    app.post('/api/order', requireLogin, (req, res) => {
+    app.post('/api/order', isUserAdmin, (req, res) => {
         const {goods, count, sum} = req.body;
         const order = new Order({
             goods,

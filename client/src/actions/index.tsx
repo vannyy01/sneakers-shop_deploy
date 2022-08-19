@@ -14,14 +14,21 @@ import {
     DELETE_MANY_USERS,
     DELETE_USER,
     FETCH_AVAILABILITY_COUNT,
-    FETCH_BRANDS, FETCH_COLORS_COUNT, FETCH_FAVOURITE_GOODS,
+    FETCH_BRANDS,
+    FETCH_COLORS_COUNT,
+    FETCH_FAVOURITE_GOODS,
     FETCH_GOOD,
     FETCH_GOODS,
-    FETCH_SEXES_COUNT, FETCH_SIZES_COUNT,
+    FETCH_SEXES_COUNT,
+    FETCH_SIZES_COUNT,
     FETCH_TYPES_COUNT,
     FETCH_USER,
     FETCH_USER_BY_ID,
-    FETCH_USERS, FetchColorsCountAction, FetchFavouriteGoodsAction, FetchSizesCountAction, FetchTypesCountAction,
+    FETCH_USERS,
+    FetchColorsCountAction,
+    FetchFavouriteGoodsAction,
+    FetchSizesCountAction,
+    FetchTypesCountAction,
     GET_CART_ITEMS,
     SEARCH_GOODS,
     SEARCH_USERS,
@@ -44,8 +51,29 @@ import {getStorage} from "./validation";
  */
 export const createUser = (user: UserInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
-        const res = await axios.post('/api/user/create', user);
+        const res = await axios.post('/api/users/create', user);
         dispatch({type: CREATE_USER, payload: res.data});
+        onSuccessCallback();
+    } catch (err) {
+        alert('Помилка ' + err.response.data.message);
+    }
+};
+
+type CREATE_USER_BY_EMAIL = 'CREATE_USER_BY_EMAIL';
+export const CREATE_USER_BY_EMAIL: CREATE_USER_BY_EMAIL = 'CREATE_USER_BY_EMAIL';
+
+export interface CreateUserByEmailAction {
+    type: CREATE_USER_BY_EMAIL,
+}
+
+/**
+ * @param user
+ * @param onSuccessCallback
+ */
+export const createUserByEmail = (user: Omit<UserInterface, "_id" | "role">, onSuccessCallback: () => void) => async (dispatch: Dispatch<CreateUserByEmailAction>) => {
+    try {
+        await axios.post('/api/users/create_by_email', user);
+        dispatch({type: CREATE_USER_BY_EMAIL});
         onSuccessCallback();
     } catch (err) {
         alert('Помилка ' + err.response.data.message);
@@ -61,6 +89,22 @@ export const fetchUser = () => async (dispatch: any) => {
         dispatch({type: FETCH_USER, payload: res.data});
     } catch (error) {
         console.log('Unable to fetch user', error);
+    }
+};
+
+type CHECK_USER_EMAIL = 'CHECK_USER_EMAIL';
+export const CHECK_USER_EMAIL: CHECK_USER_EMAIL = 'CHECK_USER_EMAIL';
+
+export interface CheckUserEmailAction {
+    type: CHECK_USER_EMAIL,
+    payload: { status: boolean}
+}
+export const checkUserEmail = (email: string) =>async (dispatch: Dispatch<CheckUserEmailAction>) => {
+    try {
+        const res = await axios.get('/api/users/check_email', {params: {email}});
+        dispatch({type: CHECK_USER_EMAIL, payload: res.data});
+    } catch (error) {
+        console.log('Unable to check email', error);
     }
 };
 

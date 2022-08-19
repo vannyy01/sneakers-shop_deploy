@@ -66,6 +66,12 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
         setAnchorEl(null);
     };
 
+    const handleCloseSign = (event: React.MouseEvent): void => {
+        event.preventDefault();
+        setShowSingUp(false);
+        setShowSingIn(false);
+    };
+
     const toggleModal = (event: KeyboardEvent | React.MouseEvent) => {
         if (
             event.type === 'keydown' &&
@@ -76,11 +82,22 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
         }
     };
 
-    const handleShowSingOut = (event: React.MouseEvent): void => {
-        console.log({showSingIn, showSingUp});
+    const handleShowSingUp = (event: React.MouseEvent): void => {
         event.preventDefault();
         setShowSingIn(false);
         setShowSingUp(true);
+    };
+
+    const handleShowSingIn = (event: React.MouseEvent): void => {
+        event.preventDefault();
+        setShowSingUp(false);
+        setShowSingIn(true);
+    };
+
+    const onSignUpCallback = (): void => {
+        alert("Вітаємо, Вас зареєстровано.");
+        setShowSingUp(false);
+        setShowSingIn(true);
     };
 
     const renderContent = (): string | JSX.Element => {
@@ -105,10 +122,10 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
     return (
         <>
             {showSingIn && <SingInUp>
-                <SingInWindow goSingUp={handleShowSingOut}/>
+                <SingInWindow goSingUp={handleShowSingUp} onClose={handleCloseSign}/>
             </SingInUp>}
             {showSingUp && <SingInUp>
-                <SingUpWindow/>
+                <SingUpWindow goSingIn={handleShowSingIn} onClose={handleCloseSign} onSignUpCallback={onSignUpCallback}/>
             </SingInUp>}
             <Tooltip title={user ? "Мій профіль" : "Увійти"}>
                 <IconButton

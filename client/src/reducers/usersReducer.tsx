@@ -1,4 +1,4 @@
-import { SearchItemParameters } from "src/components/GridView";
+import {SearchItemParameters} from "src/components/GridView";
 import {
     CLEAR_USERS,
     ClearUsersAction,
@@ -15,30 +15,35 @@ import {
     UPDATE_USER,
     UpdateUserAction, UserInterface
 } from "../actions/types";
+import {CHECK_USER_EMAIL, CheckUserEmailAction, CREATE_USER_BY_EMAIL, CreateUserByEmailAction} from "../actions";
 
 type AuthAction =
     FetchUsersAction
     | FetchUserByIdAction
     | SearchUsersAction
     | CreateUserAction
+    | CreateUserByEmailAction
     | UpdateUserAction
     | DeleteUserAction
-    | DeleteManyUsersAction | ClearUsersAction;
+    | DeleteManyUsersAction
+    | ClearUsersAction
+    | CheckUserEmailAction;
 
 interface StateType {
     users: UserInterface | UserInterface[],
     count?: number,
     searchMode: boolean,
-    filters: SearchItemParameters
+    filters: SearchItemParameters,
+    emailStatus?: boolean,
 }
 
-const initialState: StateType = {users: [], searchMode: false, filters: {}};
+const initialState: StateType = {users: [], searchMode: false, filters: {}, emailStatus: undefined};
 /**
  * @param {StateType} state
  * @param {AuthAction} action
  * @returns {StateType}
  */
-export const usersReducer = (state: StateType =  initialState, action: AuthAction): StateType => {
+export const usersReducer = (state: StateType = initialState, action: AuthAction): StateType => {
     switch (action.type) {
         case FETCH_USERS:
             // If previously SEARCH_USERS was used
@@ -50,7 +55,7 @@ export const usersReducer = (state: StateType =  initialState, action: AuthActio
 
             // If loads the next part of the same query condition OR data from the new query condition
             if (Array.isArray(state.users)) {
-                if (JSON.stringify(action.payload.filters) !== JSON.stringify(state.filters)){
+                if (JSON.stringify(action.payload.filters) !== JSON.stringify(state.filters)) {
                     return {
                         ...state,
                         ...action.payload
@@ -103,6 +108,8 @@ export const usersReducer = (state: StateType =  initialState, action: AuthActio
             return {...state, ...action.payload};
         case CREATE_USER:
             return initialState;
+        case CREATE_USER_BY_EMAIL:
+            return initialState;
         case UPDATE_USER:
             return initialState;
         case DELETE_USER:
@@ -111,6 +118,8 @@ export const usersReducer = (state: StateType =  initialState, action: AuthActio
             return initialState;
         case CLEAR_USERS:
             return initialState;
+        case CHECK_USER_EMAIL:
+            return {...state, emailStatus: action.payload.status}
         default:
             return state;
     }

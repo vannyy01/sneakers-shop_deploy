@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void }> = ({goSingUp}) => {
+const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onClose: (event: React.MouseEvent) => void }> = ({goSingUp, onClose}) => {
     const [isValid, setIsValid] = useState({login: true, password: true});
     const [formValid, setFormValid] = useState(false);
     const [formErrors, setFormErrors] = useState({login: '', password: ''});
@@ -203,6 +203,9 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void }> = 
                         <Grid item xs>
                             <Link href="#" variant="body2">
                                 Forgot password?
+                            </Link>
+                            <Link href="#" onClick={onClose} variant="body2">
+                                Скасувати
                             </Link>
                         </Grid>
                         <Grid item>

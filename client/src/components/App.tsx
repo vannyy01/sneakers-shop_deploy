@@ -9,6 +9,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import ProductPage from './productPage';
 import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {MuiPickersUtilsProvider} from "@material-ui/pickers";
+import DateFnsUtils from '@date-io/date-fns';
 
 interface AppPropsI {
     fetchUser: any,
@@ -37,25 +39,27 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
 
     public render() {
         return (
-            <BrowserRouter>
-                <div>
-                    <NavBar/>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <BrowserRouter>
                     <div>
-                        <Switch>
-                            <Route path="/good/:id" component={ProductPage}/>
-                            <Route exact={true} path="/" component={Landing}/>
-                            {this.props.auth !== null &&
-                            <ProtectedRoute
-                                authenticationPath="/auth/google"
-                                isAuthenticated={!!this.props.auth}
-                                path='/admin'
-                                component={AdminModule}
-                            />
-                            }
-                        </Switch>
+                        <NavBar/>
+                        <div>
+                            <Switch>
+                                <Route path="/good/:id" component={ProductPage}/>
+                                <Route exact={true} path="/" component={Landing}/>
+                                {this.props.auth !== null &&
+                                    <ProtectedRoute
+                                        authenticationPath="/auth/google"
+                                        isAuthenticated={!!this.props.auth}
+                                        path='/admin'
+                                        component={AdminModule}
+                                    />
+                                }
+                            </Switch>
+                        </div>
                     </div>
-                </div>
-            </BrowserRouter>
+                </BrowserRouter>
+            </MuiPickersUtilsProvider>
         )
     }
 }

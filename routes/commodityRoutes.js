@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Commodity = mongoose.model('commodities');
 const Brand = mongoose.model('brands');
-const requireLogin = require('../middlewares/requireLogin');
+const isUserAdmin = require('../middlewares/isUserAdmin');
 const {replaceTempDir, deleteFilesDir} = require("../services/handleFiles");
 const _difference = require("lodash/difference");
 const _ = require("lodash");
@@ -103,7 +103,7 @@ module.exports = app => {
         }
     });
 
-    app.put('/api/commodity/edit/:id', requireLogin, async (req, res, next) => {
+    app.put('/api/commodity/edit/:id', isUserAdmin, async (req, res, next) => {
         try {
             const comm = await Commodity.updateOne({_id: req.params.id}, req.body, {upsert: true}).exec();
             res.status(200).send(comm);
@@ -113,7 +113,7 @@ module.exports = app => {
         }
     });
 
-    app.delete('/api/commodity/delete/:id', requireLogin, async (req, res, next) => {
+    app.delete('/api/commodity/delete/:id', isUserAdmin, async (req, res, next) => {
         try {
             await Commodity.deleteOne({_id: req.params.id}).exec();
             await deleteFilesDir(req.params.id);
@@ -124,7 +124,7 @@ module.exports = app => {
         }
     });
 
-    app.delete('/api/commodity/delete_many', requireLogin, async (req, res, next) => {
+    app.delete('/api/commodity/delete_many', isUserAdmin, async (req, res, next) => {
         let result = [];
         try {
             for (let id of req.query.items) {
@@ -291,7 +291,7 @@ module.exports = app => {
         }
     });
 
-    app.delete('/api/commodity/brand/delete/:name', requireLogin, async (req, res, next) => {
+    app.delete('/api/commodity/brand/delete/:name', isUserAdmin, async (req, res, next) => {
         try {
             await Brand.deleteOne({label: req.params.name}).exec();
             let brands = await Brand.find();

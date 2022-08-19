@@ -2,6 +2,11 @@
     --primary-color: #03A9F4;
     --secondary-color: #fff
 }
+
+html {
+    scroll-behavior: smooth;
+}
+
 button:focus {
     outline: 1px !important;
 }

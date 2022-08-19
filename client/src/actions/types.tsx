@@ -2,13 +2,18 @@ import {ItemsType} from "../types";
 import {SearchItemParameters} from "../components/GridView";
 
 export interface UserInterface {
+    _id: string,
     googleID?: string,
     email: string,
-    _id: string,
     role: 0 | 10 | 20,
-    givenName?: string,
-    familyName?: string,
-    photo?: string
+    givenName: string,
+    familyName: string,
+    secondName?: string,
+    sex?: string,
+    phone?: string,
+    birthday?: Date,
+    photo?: string,
+    password?: string
 }
 
 type CREATE_USER = 'CREATE_USER';
