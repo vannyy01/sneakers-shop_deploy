@@ -11,10 +11,11 @@ import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from '@date-io/date-fns';
+import {UserInterface} from "../actions/types";
 
 interface AppPropsI {
     fetchUser: any,
-    auth: object | ''
+    user: UserInterface | null
 }
 
 class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
@@ -32,8 +33,8 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
     }
 
     public componentDidUpdate(prevProps: Readonly<AppPropsI>): void {
-        if (JSON.stringify(this.props.auth) !== JSON.stringify(prevProps.auth)) {
-            this.setState({auth: !!this.props.auth});
+        if (JSON.stringify(this.props.user) !== JSON.stringify(prevProps.user)) {
+            this.setState({auth: !!this.props.user});
         }
     }
 
@@ -47,10 +48,10 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
                             <Switch>
                                 <Route path="/good/:id" component={ProductPage}/>
                                 <Route exact={true} path="/" component={Landing}/>
-                                {this.props.auth !== null &&
+                                {this.props.user !== null &&
                                     <ProtectedRoute
                                         authenticationPath="/auth/google"
-                                        isAuthenticated={!!this.props.auth}
+                                        isAuthenticated={!!this.props.user}
                                         path='/admin'
                                         component={AdminModule}
                                     />
@@ -64,7 +65,7 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
     }
 }
 
-const mapStateToProps = ({auth}: any) => {
-    return {auth};
+const mapStateToProps = ({auth: {user}}: { auth: { user: UserInterface | null, error: { message: string } | null } }): { user: UserInterface | null } => {
+    return {user};
 };
 export default connect(mapStateToProps, {fetchUser})(App);

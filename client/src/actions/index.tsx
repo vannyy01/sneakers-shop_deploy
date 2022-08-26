@@ -80,6 +80,24 @@ export const createUserByEmail = (user: Omit<UserInterface, "_id" | "role">, onS
     }
 };
 
+type LOGIN_BY_EMAIL_ERROR = 'LOGIN_BY_EMAIL_ERROR';
+export const LOGIN_BY_EMAIL_ERROR: LOGIN_BY_EMAIL_ERROR = 'LOGIN_BY_EMAIL_ERROR';
+
+export interface LoginByEmailErrorAction {
+    type: LOGIN_BY_EMAIL_ERROR,
+    payload: { message: string, ERROR: string }
+}
+
+export const loginByEmail = (userCredentials: { email: string, password: string }, onSuccessCallback: () => void) => async (dispatch: Dispatch<LoginByEmailErrorAction>) => {
+    try {
+        await axios.post('/auth/login/email', userCredentials);
+        onSuccessCallback();
+    } catch (error) {
+        dispatch({type: LOGIN_BY_EMAIL_ERROR, payload: error.response.data});
+    }
+}
+;
+
 /**
  * @returns {(dispatch: any) => Promise<void>}
  */
@@ -97,9 +115,10 @@ export const CHECK_USER_EMAIL: CHECK_USER_EMAIL = 'CHECK_USER_EMAIL';
 
 export interface CheckUserEmailAction {
     type: CHECK_USER_EMAIL,
-    payload: { status: boolean}
+    payload: { status: boolean }
 }
-export const checkUserEmail = (email: string) =>async (dispatch: Dispatch<CheckUserEmailAction>) => {
+
+export const checkUserEmail = (email: string) => async (dispatch: Dispatch<CheckUserEmailAction>) => {
     try {
         const res = await axios.get('/api/users/check_email', {params: {email}});
         dispatch({type: CHECK_USER_EMAIL, payload: res.data});

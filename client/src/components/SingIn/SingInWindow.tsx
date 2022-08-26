@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     Avatar,
     Button, Checkbox,
@@ -11,6 +11,10 @@ import {
 } from "@material-ui/core";
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import {escape} from "lodash";
+import {fetchUser, loginByEmail} from "../../actions";
+import {shallowEqual, useDispatch, useSelector} from "react-redux";
+import {validateEmail} from "../../actions/validation";
+import GoogleButton from "react-google-button";
 
 const CssTextField = withStyles({
     root: {
@@ -45,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: "#fff",
     },
     paper: {
-        marginTop: theme.spacing(8),
+        marginTop: theme.spacing(5),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -66,27 +70,51 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         backgroundColor: "var(--primary-color)",
         height: "3.5em",
-        margin: theme.spacing(1, 0, 2),
+        marginBottom: theme.spacing(1),
         "&:hover": {
             backgroundColor: "var(--primary)"
         }
     },
+    googleSubmit: {
+        height: "3.5em",
+        width: "100% !important",
+        margin: theme.spacing(1, 0, 2),
+    }
 }));
 
-const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onClose: (event: React.MouseEvent) => void }> = ({goSingUp, onClose}) => {
+const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onClose: (event?: React.MouseEvent) => void }> = ({
+                                                                                                                                  goSingUp,
+                                                                                                                                  onClose
+                                                                                                                              }) => {
     const [isValid, setIsValid] = useState({login: true, password: true});
     const [formValid, setFormValid] = useState(false);
     const [formErrors, setFormErrors] = useState({login: '', password: ''});
     const [credentials, setCredentials] = useState({login: '', password: ''});
+    const dispatch = useDispatch();
+    const getSelector = ({auth: {error}}: { auth: { error: { message: string, ERROR: string } } }): { message: string, ERROR: string } => error;
+    const authError = useSelector(getSelector, shallowEqual);
     const classes = useStyles();
+
+    useEffect(() => {
+        authError && setFormErrors(prevFormErrors => {
+            if (authError.ERROR === "USER_NOT_FOUND") {
+                return {...prevFormErrors, login: "Користувача не знайдено."}
+            }
+            if (authError.ERROR === "WRONG_PASSWORD") {
+                return {...prevFormErrors, password: "Неправильний пароль."}
+            }
+            return prevFormErrors;
+        });
+        validateForm();
+    }, [authError]);
 
     const validateField = (fieldName: string, value: any): void => {
         const fieldValidationErrors = formErrors;
         const localIsValid = isValid;
         switch (fieldName) {
             case 'login':
-                if (typeof value !== 'string') {
-                    fieldValidationErrors.login = 'некоректний текст';
+                if (!validateEmail(value)) {
+                    fieldValidationErrors.login = 'неправильний email';
                     localIsValid.login = false;
                     break;
                 }
@@ -94,10 +122,6 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                 localIsValid.login = true;
                 break;
             case 'password':
-                if (typeof value !== 'string') {
-                    fieldValidationErrors.password = 'некоректний тип';
-                    localIsValid.password = false;
-                }
                 if (value.length < 8) {
                     fieldValidationErrors.password = 'закороткий пароль';
                     localIsValid.password = false;
@@ -132,12 +156,20 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
             return;
         }
         const userCredentials = {
-            login: escape(credentials.login.trim()),
+            email: escape(credentials.login.trim()),
             password: escape(credentials.password.trim()),
         };
         // authorize
         console.log(userCredentials);
+        dispatch(loginByEmail(userCredentials, () => {
+                dispatch(fetchUser());
+                onClose();
+            })
+        );
+    };
 
+    const submitByGoogle = (): void => {
+        window.location.replace("/auth/google");
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -199,17 +231,23 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                     >
                         Увійти
                     </Button>
-                    <Grid container>
-                        <Grid item xs>
+                    <GoogleButton
+                        className={classes.googleSubmit}
+                        type="light"
+                        label="Увійти через Google"
+                        onClick={submitByGoogle}
+                    />
+                    <Grid container direction="row" justifyContent="space-around">
+                        <Grid container xs item direction="column">
                             <Link href="#" variant="body2">
-                                Forgot password?
+                                Змінити пароль
                             </Link>
                             <Link href="#" onClick={onClose} variant="body2">
                                 Скасувати
                             </Link>
                         </Grid>
-                        <Grid item>
-                            <Link href="#" onClick={goSingUp} variant="body2">
+                        <Grid container xs justifyContent="flex-end">
+                            <Link href="#" onClick={goSingUp} variant="body2" style={{textAlign: "end"}}>
                                 Новий клієнт? Реєстрація
                             </Link>
                         </Grid>

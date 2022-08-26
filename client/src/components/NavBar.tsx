@@ -46,7 +46,7 @@ interface HeaderPropsI {
         flex: string,
         menuButton: string,
     },
-    auth?: UserInterface,
+    user?: UserInterface | null,
     getCartItems: () => void,
     cartItems: { [id: string]: ShoeInterface },
 }
@@ -80,7 +80,7 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
                     {modal}
                     <CartButton totalItems={Object.keys(this.props.cartItems).length} openCart={this.handleCart}/>
                     <Cart cartItems={this.props.cartItems} handleCart={this.handleCart} showCart={this.state.showCart}/>
-                    <AuthMenu user={this.props.auth}/>
+                    <AuthMenu user={this.props.user}/>
                 </Toolbar>
             </AppBar>
         );
@@ -100,11 +100,11 @@ class NavBar extends React.PureComponent<HeaderPropsI, { showCart: boolean, show
 }
 
 const mapStateToProps = ({
-                             auth,
+                             auth: {user},
                              cartItems
-                         }: { auth: any, cartItems: { [id: string]: ShoeInterface } }):
-    { auth: any, cartItems: { [id: string]: ShoeInterface } } => {
-    return {auth, cartItems};
+                         }: { auth: { user: UserInterface | null }, cartItems: { [id: string]: ShoeInterface } }):
+    { user: UserInterface | null, cartItems: { [id: string]: ShoeInterface } } => {
+    return {user, cartItems};
 };
 
 export default connect(mapStateToProps, {getCartItems})(withStyles(styles)(NavBar));

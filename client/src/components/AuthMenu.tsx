@@ -66,8 +66,8 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
         setAnchorEl(null);
     };
 
-    const handleCloseSign = (event: React.MouseEvent): void => {
-        event.preventDefault();
+    const handleCloseSign = (event?: React.MouseEvent): void => {
+        event && event.preventDefault();
         setShowSingUp(false);
         setShowSingIn(false);
     };
@@ -125,7 +125,8 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
                 <SingInWindow goSingUp={handleShowSingUp} onClose={handleCloseSign}/>
             </SingInUp>}
             {showSingUp && <SingInUp>
-                <SingUpWindow goSingIn={handleShowSingIn} onClose={handleCloseSign} onSignUpCallback={onSignUpCallback}/>
+                <SingUpWindow goSingIn={handleShowSingIn} onClose={handleCloseSign}
+                              onSignUpCallback={onSignUpCallback}/>
             </SingInUp>}
             <Tooltip title={user ? "Мій профіль" : "Увійти"}>
                 <IconButton
@@ -146,26 +147,24 @@ const AuthMenu: React.FC<{ user: UserInterface }> = ({user}) => {
                 open={open}
                 onClose={handleClose}
                 onClick={handleClose}
-                // keepMounted={true}
                 PaperProps={{
                     elevation: 0,
                     className: classes.userMenu
                 }}
             >
-                {user && <>
+                {user &&
                     <MenuItem>
                         <Avatar
                             className={classes.userAvatar}>{user.givenName[0] + user.familyName[0]}</Avatar>
                         {user.givenName + " " + user.familyName}
-                    </MenuItem>
-                    <Divider/>
-                    <MenuItem>
-                        <ListItemIcon style={{minWidth: 36}}>
-                            <Settings fontSize="small"/>
-                        </ListItemIcon>
-                        Мій профіль
-                    </MenuItem>
-                </>}
+                    </MenuItem>}
+                <Divider/>
+                {user && <MenuItem>
+                    <ListItemIcon style={{minWidth: 36}}>
+                        <Settings fontSize="small"/>
+                    </ListItemIcon>
+                    Мій профіль
+                </MenuItem>}
                 {user?.role === 20 &&
                     <a href="/admin" className={classes.link}>
                         <MenuItem>

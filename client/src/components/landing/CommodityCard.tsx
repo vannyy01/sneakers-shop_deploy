@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
         color: 'var(--primary-color)'
     },
     card: {
-        marginBottom: 15,
+        margin: "0 5px 15px 5px",
         maxWidth: 350,
         padding: 0
     },

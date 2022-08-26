@@ -24,6 +24,23 @@ module.exports = (app) => {
         }
     );
 
+    app.post('/auth/login/email', (req, res, next) => {
+        passport.authenticate('local', (err, user, info) => {
+            if (err) {
+                console.log(err)
+                return res.status(500).send();
+            }
+            if (!user && info) {
+                console.log(info)
+                return res.status(422).send(info);
+            }
+            req.logIn(user, (err) => {
+                if (err) throw err;
+                res.status(200).send({message: "Authenticated"})
+            });
+        })(req, res, next);
+    });
+
     app.get('/api/logout', (req, res) => {
         req.logout();
         res.redirect('/');
@@ -109,7 +126,7 @@ module.exports = (app) => {
                 return res.status(400).send({message: 'This user has been already created.'});
             }
             const password = (req.body.password && checkPassword(req.body.password.trim()))
-                ?? await bcrypt.hash(req.body.password, 10);
+                ? await bcrypt.hash(req.body.password, 10) : undefined;
             const newUser = {
                 email: (req.body.email && validateEmail(req.body.email.trim())) ? _.escape(req.body.email.trim()) : undefined,
                 givenName: (req.body.givenName && req.body.givenName.trim() !== '') ? _.escape(req.body.givenName.trim()) : undefined,
@@ -122,7 +139,7 @@ module.exports = (app) => {
             };
             console.log({body: req.body, newUser});
             await new User(newUser).save();
-            res.status(200).send("User have been successfully created.");
+            res.status(200).send("User has been successfully created.");
         } catch (error) {
             res.status(404).send({message: `Cannot create the user with email: ${req.body.email}. Error: !${error}`});
         }

@@ -23,7 +23,6 @@ const GoodsList: React.FC<GoodsListType> = ({
                                                 orderBy,
                                                 handleLoadClick
                                             }) => {
-    const justifyCards = innerWidth < 767 ? "justify-content-around" : "justify-content-between";
     const [expanded, setExpanded] = useState<boolean>(false);
     const [parent] = useAutoAnimate<HTMLDivElement>();
 
@@ -34,7 +33,7 @@ const GoodsList: React.FC<GoodsListType> = ({
 
     return (
         <>
-            <div className={`row align-items-baseline ${justifyCards}`} ref={parent}>
+            <div className="row align-items-baseline justify-content-center justify-content-lg-around justify-content-xl-between" ref={parent}>
                 {goods.length > 0 ?
                     _.map(goods.sort(getComparator<CompareGoods>(order, orderBy.includes("price") ? "price" : orderBy)),
                         (good, index) =>
