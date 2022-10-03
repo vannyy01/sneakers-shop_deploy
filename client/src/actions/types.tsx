@@ -37,7 +37,7 @@ export const FETCH_USER_BY_ID: FETCH_USER_BY_ID = 'FETCH_USER_BY_ID';
 
 export interface FetchUserByIdAction {
     type: FETCH_USER_BY_ID,
-    payload: { users: UserInterface }
+    payload: UserInterface 
 }
 
 type UPDATE_USER = 'UPDATE_USER';

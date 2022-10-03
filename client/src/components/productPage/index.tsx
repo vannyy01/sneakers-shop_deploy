@@ -93,13 +93,13 @@ const ProductPage: React.FC = () => {
             checkedSize !== sizeValue ? setCheckedSize(sizeValue) : setCheckedSize(undefined);
         };
 
-        const handleAddCartItems = async () => {
+        const handleAddCartItems = () => {
             if (!checkedSize) {
                 alert("Виберіть розмір.");
                 return;
             }
             for (let i = 0; i < count; i++) {
-                await dispatch(setCartItem({
+                 dispatch(setCartItem({
                     [uuid()]: {
                         ...product,
                         size: product.sizes.find(item => item.sizeValue === checkedSize)

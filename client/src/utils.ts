@@ -74,6 +74,10 @@ export const updateURL = (filterArr: GoodsFilterList): void => {
     replaceURL();
 };
 
+export const addUrlParams = (name: string, fields: string[]):string => {
+    return fields.reduce((prev, curr) => prev + `${name}[]=${curr}&`, "");
+};
+
 export const useImperativeDisableScroll = ({element, disabled}: { element: HTMLElement, disabled: boolean }): void => {
     useEffect(() => {
         if (!element) {

@@ -1,5 +1,6 @@
 const passport = require('passport');
 const isUserAdmin = require('../middlewares/isUserAdmin');
+const isUserClient = require('../middlewares/isUserClient');
 const mongoose = require('mongoose');
 const _difference = require("lodash/difference");
 const _ = require('lodash');
@@ -54,9 +55,10 @@ module.exports = (app) => {
         }
     });
 
-    app.get('/api/users/get/:id', isUserAdmin, async (req, res, next) => {
+    app.get('/api/users/get/:id', isUserClient, async (req, res, next) => {
         try {
-            await User.findById(req.params.id).exec(function (err, user) {
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            await User.findById(req.params.id).select(fields).exec(function (err, user) {
                 if (user === null) {
                     res.status(404).send(`Cannot get the user with id ${req.params.id}!`);
                     next(new Error(`User with id: ${req.params.id} did not found.`));
@@ -153,6 +155,15 @@ module.exports = (app) => {
                 res.status(200).send('User has been updated.');
             }
         });
+    });
+
+    app.put('/api/users/edit_by_client/:id', isUserClient, async (req, res) => {
+        try {
+            await User.updateOne({_id: req.params.id}, req.body).exec();
+            res.status(200).send('User has been updated.');
+        } catch (error) {
+            res.status(404).send(`Cannot update the user with email: ${req.body.email}. Error: !${error}`);
+        }
     });
 
     app.get('/api/users', isUserAdmin, async (req, res, next) => {

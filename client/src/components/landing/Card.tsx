@@ -14,7 +14,7 @@ interface CardI {
 
 const Card: React.FC<CardI> = ({headerText, Icon, styles, text}) => {
     return (
-        <div className="col-md-4">
+        <div className="col-lg-4">
             <div className="single-special text-center">
                 <div className="single-icon">
                     <Icon style={styles.iconStyle}/>

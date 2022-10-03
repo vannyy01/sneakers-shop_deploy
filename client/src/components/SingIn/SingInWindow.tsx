@@ -239,9 +239,6 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                     />
                     <Grid container direction="row" justifyContent="space-around">
                         <Grid container xs item direction="column">
-                            <Link href="#" variant="body2">
-                                Змінити пароль
-                            </Link>
                             <Link href="#" onClick={onClose} variant="body2">
                                 Скасувати
                             </Link>

@@ -39,7 +39,7 @@ import {
     UserInterface
 }
     from './types';
-import {addFilters} from "../utils";
+import {addFilters, addUrlParams} from "../utils";
 import {SearchItemParameters} from "../components/GridView";
 import {ItemDataType, OrderBy} from "../types";
 import {Dispatch} from "redux";
@@ -95,8 +95,7 @@ export const loginByEmail = (userCredentials: { email: string, password: string 
     } catch (error) {
         dispatch({type: LOGIN_BY_EMAIL_ERROR, payload: error.response.data});
     }
-}
-;
+};
 
 /**
  * @returns {(dispatch: any) => Promise<void>}
@@ -107,6 +106,21 @@ export const fetchUser = () => async (dispatch: any) => {
         dispatch({type: FETCH_USER, payload: res.data});
     } catch (error) {
         console.log('Unable to fetch user', error);
+    }
+};
+
+type LOGOUT_USER = 'LOGOUT_USER';
+export const LOGOUT_USER: LOGOUT_USER = 'LOGOUT_USER';
+
+export interface LogoutUserAction {
+    type: LOGOUT_USER,
+}
+export const logout = () => async (dispatch: any) => {
+    try {
+        await axios.get('/api/logout');
+        dispatch({type: LOGOUT_USER});
+    } catch (error) {
+        console.log('Unable to log out user', error);
     }
 };
 
@@ -130,20 +144,22 @@ export const checkUserEmail = (email: string) => async (dispatch: Dispatch<Check
 /**
  *
  * @param id
+ * @param fields
  * @param onErrorCallback
  */
-export const fetchUserByID = (id: string, onErrorCallback: () => void) => async (dispatch: any) => {
+export const fetchUserByID = (id: string, fields: string[] = ['_id', 'googleID', 'email', 'phone', 'secondName', 'givenName', 'familyName','sex', 'birthday'], onErrorCallback?: () => void) => async (dispatch: any) => {
     try {
-        const user = await axios.get(`/api/users/get/${id}`);
+        const params = addUrlParams("fields", fields);
+        const user = await axios.get(`/api/users/get/${id}?${params}`);
         dispatch({type: FETCH_USER_BY_ID, payload: user.data});
     } catch (error) {
         if (error.response) {
             if (error.response.status === 500) {
-                alert('Server error 500: ' + error.response.data);
+                alert('Server error 500: ' + error.response.data.error);
             } else if (error.response.status === 404) {
                 alert(`User with id: ${id} did not found`);
             } else {
-                alert('Response error: ' + error.response.data);
+                alert('Response error: ' + error.response.data.error);
             }
         } else if (error.request) {
             console.log('request', error.data);
@@ -209,6 +225,20 @@ export const clearUsersState = () => (dispatch: any) => {
 export const updateUser = (user: UserInterface, onSuccessCallback: () => void) => async (dispatch: any) => {
     try {
         const res = await axios.put(`/api/users/edit/${user._id}`, user);
+        dispatch({type: UPDATE_USER, payload: res.data});
+        onSuccessCallback();
+    } catch (error) {
+        alert(`Failed to update user. ${error}`);
+    }
+};
+
+/**
+ * @param user
+ * @param onSuccessCallback
+ */
+export const updateUserByClient = (user: UserInterface | Omit<UserInterface, 'role' | 'password'>, onSuccessCallback: () => void) => async (dispatch: any) => {
+    try {
+        const res = await axios.put(`/api/users/edit_by_client/${user._id}`, user);
         dispatch({type: UPDATE_USER, payload: res.data});
         onSuccessCallback();
     } catch (error) {

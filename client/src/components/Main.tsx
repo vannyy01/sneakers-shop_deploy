@@ -65,7 +65,7 @@ const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
             <section style={{marginBottom: !showCard ? '300px' : '0px'}}
                      className="special-area bg-white section_padding_100" id="about">
                 <div className="container">
-                    <div className="row">
+                    <div className="row justify-content-center">
                         <ParagraphHeader title="Чому ми?"/>
                         <TransitionGroup className="d-flex flex-column flex-lg-row align-items-center justify-content-lg-around">
                             {showCard && cards.length > 0

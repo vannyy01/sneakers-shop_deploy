@@ -10,7 +10,7 @@ import CRUDStyles from "../crudStyles";
 
 interface EditUserProps extends PropsTypeUser {
     updateUser: (user: UserInterface, callback: () => void) => void;
-    fetchUserByID: (id: string, onErrorCallback: () => void) => void,
+    fetchUserByID: (id: string, fields: string[], onErrorCallback: () => void) => void,
     deleteUser: (id: string, callback: () => void) => void,
     user?: UserInterface;
 }
@@ -22,6 +22,7 @@ class EditUser extends BaseUser<EditUserProps, StateTypeUser> {
     }
     public componentDidMount() {
         this.props.fetchUserByID(this.props.match.params.userID,
+            ['_id', 'googleID', 'email', 'phone', 'firstName', 'secondName', 'givenName', 'sex', 'birthday', 'role'],
             () => this.props.history.push('/admin/users')
             );
         this.setState({user: this.props.user})

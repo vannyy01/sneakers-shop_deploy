@@ -19,7 +19,7 @@ import {useDispatch} from "react-redux";
 import {createUserByEmail} from "../../actions";
 import {UserInterface} from "../../actions/types";
 
-const CssTextField = withStyles((theme) => ({
+export const CssTextField = withStyles((theme) => ({
     root: {
         [theme.breakpoints.up('md')]: {
             maxWidth: "49.5%",
@@ -38,7 +38,7 @@ const CssTextField = withStyles((theme) => ({
     },
 }))(TextField);
 
-const CssPhoneInput = withStyles((theme) => ({
+export const CssPhoneInput = withStyles((theme) => ({
     root: {
         [theme.breakpoints.up('md')]: {
             maxWidth: "49.5%",
@@ -57,7 +57,7 @@ const CssPhoneInput = withStyles((theme) => ({
     },
 }))(MuiTelInput);
 
-const CssDatePicker = withStyles((theme) => ({
+export const CssDatePicker = withStyles((theme) => ({
     root: {
         [theme.breakpoints.up('md')]: {
             maxWidth: "49.5%",
@@ -162,7 +162,7 @@ const SingUpWindow: React.FC<{ onSignUpCallback: () => void, goSingIn: (event: R
             alert("Перевірте правильність введених даних.");
             return;
         }
-        const userCredentials: Omit<UserInterface, "_id" | "role"> = {
+        const userCredentials: Omit<UserInterface, '_id' | 'role'> = {
             email: escape(credentials.email.trim()),
             password: escape(credentials.password.trim()),
             givenName: escape(credentials.givenName.trim()),

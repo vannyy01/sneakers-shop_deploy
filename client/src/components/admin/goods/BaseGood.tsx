@@ -97,7 +97,7 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
     };
 
     protected handleComeBack = (): void => {
-        this.props.history.goBack();
+        this.props.history.replace('/admin/goods');
     };
 
     protected handleAddChips = (chipArray: SizeInterface[]): void => {

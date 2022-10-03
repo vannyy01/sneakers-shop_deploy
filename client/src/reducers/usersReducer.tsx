@@ -30,7 +30,7 @@ type AuthAction =
     | CheckUserEmailAction;
 
 interface StateType {
-    users: UserInterface | UserInterface[],
+    users: UserInterface[],
     count?: number,
     searchMode: boolean,
     filters: SearchItemParameters,
@@ -105,7 +105,7 @@ export const usersReducer = (state: StateType = initialState, action: AuthAction
             }
             return state;
         case FETCH_USER_BY_ID:
-            return {...state, ...action.payload};
+            return {...state, users: [action.payload]};
         case CREATE_USER:
             return initialState;
         case CREATE_USER_BY_EMAIL:

@@ -1,24 +1,26 @@
 import * as  React from 'react';
-import {connect} from "react-redux";
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import { connect } from "react-redux";
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import AdminModule from './admin/Admin';
 import NavBar from './NavBar';
 import Landing from './Main';
-import {fetchUser} from '../actions';
+import { fetchUser, logout } from '../actions';
 import ProtectedRoute from "./ProtectedRoute";
 import ProductPage from './productPage';
 import './styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {MuiPickersUtilsProvider} from "@material-ui/pickers";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from '@date-io/date-fns';
-import {UserInterface} from "../actions/types";
+import { UserInterface } from "../actions/types";
+import Panel from './clientPanel/Panel';
 
 interface AppPropsI {
-    fetchUser: any,
+    fetchUser: () => void,
+    logout: () => void,
     user: UserInterface | null
 }
 
-class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
+class App extends React.PureComponent<AppPropsI, { auth: boolean }> {
     constructor(props: AppPropsI) {
         super(props);
         this.state = {
@@ -29,35 +31,51 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
     public componentDidMount() {
         document.title = 'Sneakers-shop';
         this.props.fetchUser();
-        //  this.setState({auth: !!this.props.auth});
+        // window.addEventListener("beforeunload", this.alertUser);
+        // window.addEventListener("unload", this.handleUnload);
     }
 
-    public componentDidUpdate(prevProps: Readonly<AppPropsI>): void {
-        if (JSON.stringify(this.props.user) !== JSON.stringify(prevProps.user)) {
-            this.setState({auth: !!this.props.user});
-        }
-    }
+    // public componentWillUnmount() {
+    //     window.removeEventListener("beforeunload", this.alertUser);
+    //     window.removeEventListener("unload", this.handleUnload);
+    // }
+
+    // public alertUser = (e: BeforeUnloadEvent) => {
+    //     e.preventDefault()
+    //     e.returnValue = ''
+    // }
+
+    // public handleUnload = (event: Event): void => {
+    //     event.preventDefault();
+    //     this.props.logout();
+    // }
 
     public render() {
         return (
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <BrowserRouter>
                     <div>
-                        <NavBar/>
-                        <div>
-                            <Switch>
-                                <Route path="/good/:id" component={ProductPage}/>
-                                <Route exact={true} path="/" component={Landing}/>
-                                {this.props.user !== null &&
+                        <NavBar />
+                        <Switch>
+                            <Route path="/good/:id" component={ProductPage} />
+                            <Route exact={true} path="/" component={Landing} />
+                            {this.props.user !== null &&
+                                <>
                                     <ProtectedRoute
                                         authenticationPath="/auth/google"
-                                        isAuthenticated={!!this.props.user}
+                                        isAuthenticated={Boolean(this.props.user)}
                                         path='/admin'
                                         component={AdminModule}
                                     />
-                                }
-                            </Switch>
-                        </div>
+
+                                    <ProtectedRoute
+                                        authenticationPath="/auth/google"
+                                        path="/client/:id" 
+                                        component={Panel}
+                                        isAuthenticated={Boolean(this.props.user)} />
+                                </>
+                            }
+                        </Switch>
                     </div>
                 </BrowserRouter>
             </MuiPickersUtilsProvider>
@@ -65,7 +83,7 @@ class App extends React.PureComponent<AppPropsI, { auth?: boolean }> {
     }
 }
 
-const mapStateToProps = ({auth: {user}}: { auth: { user: UserInterface | null, error: { message: string } | null } }): { user: UserInterface | null } => {
-    return {user};
+const mapStateToProps = ({ auth: { user } }: { auth: { user: UserInterface | null, error: { message: string } | null } }): { user: UserInterface | null } => {
+    return { user };
 };
-export default connect(mapStateToProps, {fetchUser})(App);
+export default connect(mapStateToProps, { fetchUser, logout })(App);
