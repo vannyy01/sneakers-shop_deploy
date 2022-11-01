@@ -29,6 +29,7 @@ import {ItemsType} from "../../../types";
 import EditableSelect from "../../select/EditableSelect";
 import {colors, sexes, shoeTypes} from "./goodTypes";
 import CRUDStyles from "../crudStyles";
+import CustomCheckbox from "../../common/CustomCheckbox";
 
 interface CreateGoodProps extends BaseGoodPropsType {
     createGood: (good: ShoeInterface, callback: () => void) => void;
@@ -47,7 +48,7 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
     public render() {
         const {classes, brands} = this.props;
         const options = _map(brands, ({label, value}) => ({label, value}));
-        const {title, description, fullDescription, mainImage, type, sex, price, color, sizes} = this.state.good;
+        const {title, description, fullDescription, mainImage, type, sex, price, color, sizes, discount, discountPrice} = this.state.good;
         const {showAlert, showDialog, formErrors, isLoading} = this.state;
 
         return <Paper className={classes.paper}>
@@ -222,6 +223,28 @@ class CreateGood extends BaseGood<CreateGoodProps, BaseGoodStateType> {
                                 value={(price * 1.2).toFixed(2)}
                                 helperText={formErrors.price}
                                 error={formErrors.price.length > 0}
+                            />
+                        </Grid>
+                        <Grid item={true} xs={12} sm={6}>
+                            <CustomCheckbox
+                                name="discount"
+                                checked={Boolean(discount)}
+                                onChange={this.handleChangeCheckbox}
+                            />
+                        </Grid>
+                        <Grid item={true} xs={12} sm={6}>
+                            <TextField
+                                required={false}
+                                disabled={!Boolean(discount)}
+                                id="discountPrice"
+                                name="discountPrice"
+                                label="ціна зі знижкою"
+                                fullWidth={true}
+                                autoComplete="discount price-name"
+                                value={discountPrice || 0}
+                                onChange={this.handleOnChange}
+                                helperText={formErrors.discountPrice}
+                                error={formErrors.discountPrice.length > 0}
                             />
                         </Grid>
                         <Grid item={true} xs={12}>

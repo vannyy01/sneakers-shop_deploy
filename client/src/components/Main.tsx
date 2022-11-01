@@ -9,6 +9,10 @@ import {TransitionGroup, CSSTransition} from 'react-transition-group';
 import {SiteOptionType} from "../actions/types";
 import {isEmpty} from "lodash";
 import './landing/landing.css';
+import CardSwiper from "./CardSwiper";
+import CommodityCard from "./landing/CommodityCard";
+import {useLookOverGoods} from "./common/useLookOverGood";
+import {useGoodsForSale} from "./common/useGoodsForSale";
 
 const shoppingStyle = {
     color: 'hotpink',
@@ -32,7 +36,8 @@ const animationProperties = {
 };
 
 const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
-
+    const lookedOverGoods = useLookOverGoods(true);
+    const goodsForSale = useGoodsForSale();
     const [showCard, setShowCard] = useState<boolean>(false);
     const cards = siteOptions.filter(item => item.name !== "main_page_header");
     const mainHeader = siteOptions.find(item => item.name === "main_page_header");
@@ -42,7 +47,6 @@ const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
     useEffect(() => {
         window.addEventListener('scroll', handleScroll);
     }, []);
-
 
     useEffect(() => {
         return () => window.removeEventListener('scroll', handleScroll);
@@ -58,32 +62,49 @@ const Main: React.FC<{ siteOptions: SiteOptionType[] }> = ({siteOptions}) => {
         <div ref={ScrollRef} onScroll={handleScroll}>
             <Header styles={{...styles, backgroundImage}} title={mainHeader.title}
                     description={mainHeader.description}/>
-            <section className="special-area section_padding_100">
+            <section className="goods_for_sale special-area section_padding_100 container">
+                <ParagraphHeader title="Акційні товари"/>
+                <CardSwiper>
+                    {goodsForSale.map(good =>
+                        <CommodityCard key={good._id} good={good} cardSize="col-6 col-md-4"
+                                       style={{minHeight: 420}}/>
+                    )}
+                </CardSwiper>
+            </section>
+            <section id="why_us" style={{marginBottom: !showCard ? '300px' : '0px'}}
+                     className="why_us special-area bg-white section_padding_100 container">
+                <div className="row justify-content-center">
+                    <ParagraphHeader title="Чому ми?"/>
+                    <TransitionGroup
+                        className="d-flex flex-column flex-lg-row align-items-center justify-content-lg-around">
+                        {showCard && cards.length > 0
+                            && cards.map(({
+                                              name,
+                                              title,
+                                              description
+                                          }) =>
+                                <CSSTransition key={name} timeout={500} classNames="card">
+                                    <Card Icon={Shopping}
+                                          styles={{headerStyle, iconStyle: shoppingStyle}}
+                                          headerText={title}
+                                          text={description}/>
+                                </CSSTransition>
+                            )}
+                    </TransitionGroup>
+                </div>
+            </section>
+            <section className="goodsList special-area section_padding_100">
                 <ParagraphHeader title="Оберіть взуття"/>
                 <Goods/>
             </section>
-            <section style={{marginBottom: !showCard ? '300px' : '0px'}}
-                     className="special-area bg-white section_padding_100" id="about">
-                <div className="container">
-                    <div className="row justify-content-center">
-                        <ParagraphHeader title="Чому ми?"/>
-                        <TransitionGroup className="d-flex flex-column flex-lg-row align-items-center justify-content-lg-around">
-                            {showCard && cards.length > 0
-                                && cards.map(({
-                                                  name,
-                                                  title,
-                                                  description
-                                              }) =>
-                                    <CSSTransition key={name} timeout={500} classNames="card">
-                                        <Card Icon={Shopping}
-                                              styles={{headerStyle, iconStyle: shoppingStyle}}
-                                              headerText={title}
-                                              text={description}/>
-                                    </CSSTransition>
-                                )}
-                        </TransitionGroup>
-                    </div>
-                </div>
+            <section className="looked_over_goods special-area section_padding_100 container">
+                <ParagraphHeader title="Переглянуті товари"/>
+                <CardSwiper>
+                    {lookedOverGoods.map(good =>
+                        <CommodityCard key={good._id} good={good} cardSize="col-6 col-md-4 col-lg-3"
+                                       style={{minHeight: 420}}/>
+                    )}
+                </CardSwiper>
             </section>
         </div>
         // <div style={{marginTop: 100, marginLeft: 50}}>

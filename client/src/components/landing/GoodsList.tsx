@@ -37,7 +37,7 @@ const GoodsList: React.FC<GoodsListType> = ({
                 {goods.length > 0 ?
                     _.map(goods.sort(getComparator<CompareGoods>(order, orderBy.includes("price") ? "price" : orderBy)),
                         (good, index) =>
-                            <CommodityCard key={index} good={good}/>
+                            <CommodityCard key={index} good={good} cardSize="col-12 col-md-6 col-lg-4"/>
                     ) : <div>Loading...</div>
                 }
             </div>

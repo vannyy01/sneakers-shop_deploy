@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useMemo, useState} from "react";
+import {CSSProperties, useEffect, useMemo, useState} from "react";
 import {v4 as uuid} from 'uuid';
 import {useDispatch} from "react-redux";
 import {makeStyles, Theme} from '@material-ui/core/styles';
@@ -26,11 +26,17 @@ import {Link} from "react-router-dom";
 const useStyles = makeStyles((theme: Theme) => createStyles({
     actions: {
         display: 'flex',
+        marginTop: "auto",
     },
     bdHighlight: {
         color: 'var(--primary-color)'
     },
+    bdDiscountPrice: {
+        color: '#f50057'
+    },
     card: {
+        display: 'flex',
+        flexDirection: 'column',
         margin: "0 5px 15px 5px",
         maxWidth: 350,
         padding: 0
@@ -73,11 +79,13 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 interface CommodityCardPropsI {
     good: ShoeInterface,
+    cardSize: string,
+    style?: CSSProperties
 }
 
-const CommodityCard: React.FC<CommodityCardPropsI> = ({good}) => {
+const CommodityCard: React.FC<CommodityCardPropsI> = ({good, cardSize, style}) => {
 
-    const {mainImage, description, title, price, brand, sizes, sex, color, _id} = good;
+    const {_id, mainImage, description, title, price, brand, sizes, sex, color, discount, discountPrice} = good;
     const imageUrl = `/resources/commodities/${_id}/${mainImage}`;
     const [expanded, setExpanded] = useState<boolean>(false);
     const [goodId, setGoodId] = useState<string>(uuid());
@@ -119,7 +127,7 @@ const CommodityCard: React.FC<CommodityCardPropsI> = ({good}) => {
     };
 
     return (
-        <Card className={"col-12 col-md-6 col-lg-4 " + classes.card}>
+        <Card className={cardSize + " " + classes.card} style={style}>
             <Link to={`/good/${_id}`}>
                 <CardMedia
                     className={classes.media}
@@ -130,9 +138,14 @@ const CommodityCard: React.FC<CommodityCardPropsI> = ({good}) => {
             <CardContent>
                 <Typography className="d-flex align-items-baseline justify-content-between" variant="h5" component="h5">
                     <Link to={`/good/${_id}`} className={classes.cardContentHeader}>
-                        <h3>{title}</h3>
+                        {title}
                     </Link>
-                    <span className={classes.bdHighlight}>{price} грн.</span>
+                    {discount ?
+                        <s className={"text-right text-nowrap " + classes.bdHighlight}>{price} ₴</s>
+                        : <span className={"text-right text-nowrap " + classes.bdHighlight}>{price} ₴</span>}
+                    {discount &&
+                        <span className={"text-right text-nowrap " + classes.bdDiscountPrice}>{discountPrice} ₴</span>
+                    }
                 </Typography>
                 <div className="d-flex">
                     <Typography className={classes.pos} color="textSecondary">

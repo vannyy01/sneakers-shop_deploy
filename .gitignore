@@ -1,7 +1,20 @@
 # IntelliJ project files
 .idea
+.fleet
+.vscode
 *.iml
 out
 gen
 /node_modules
 /config/dev.js
+
+# JPEG
+*.jpg
+*.jpeg
+*.jpe
+*.jif
+*.jfif
+*.jfi
+
+# Portable Network Graphics
+*.png

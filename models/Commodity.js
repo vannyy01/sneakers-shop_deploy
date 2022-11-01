@@ -8,17 +8,21 @@ const Size = require('./Size');
  * @returns {module:mongoose.Schema}
  */
 const commoditySchema = new Schema({
-    title: String,
-    brand: String,
-    description: String,
+    title: {required: true, type: String},
+    brand: {required: true, type: String},
+    description: {required: true, type: String},
     fullDescription: String,
     price: Number,
-    mainImage: String,
+    mainImage: {required: true, type: String},
     images: [String],
     sizes: [Size],
-    type: String,
-    sex: String,
-    color: String,
+    type: {required: true, type: String},
+    sex: {required: true, type: String},
+    color: {required: true, type: String},
+    discount: Boolean,
+    discountPrice: Number,
+}, {
+    timestamps: true
 });
 
 mongoose.model('commodities', commoditySchema);

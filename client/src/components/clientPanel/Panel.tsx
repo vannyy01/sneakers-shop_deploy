@@ -10,7 +10,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { UserData } from './UserData';
 import { Orders } from './Orders';
-import { useLinkStyles, useSelectedLinkStyles } from '../commonStyles';
+import { useLinkStyles, useSelectedLinkStyles } from '../common/commonStyles';
+import LookedOverGoods from "./LookedOverGoods";
 
 const Panel: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -22,7 +23,7 @@ const Panel: React.FC = () => {
     };
 
     return (
-        <section className="container" style={{ marginTop: 100 }}>
+        <section className="container" style={{ marginTop: 100, backgroundColor: "var(--blockBackground-color)", minHeight: "50vh" }}>
             <div className="d-flex flex-column flex-md-row">
                 <List component="nav" aria-label="main mailbox folders" style={{minWidth: 240}}>
                     <NavLink className={selectedItem === "user_data" ? activeLinkStyles.selected : linkStyles.link} isActive={() => selectedItem === "user_data"} to={`/client/${id}`}>
@@ -49,8 +50,8 @@ const Panel: React.FC = () => {
                             <ListItemText primary="Мої замовлення" />
                         </ListItem>
                     </NavLink>
-                    <NavLink className={selectedItem === "seen" ? activeLinkStyles.selected : linkStyles.link} isActive={() => selectedItem === "seen"} to={`/client/${id}/seen`}>
-                        <ListItem button selected={selectedItem === "seen"} onClick={() => handleListItemClick("seen")}>
+                    <NavLink className={selectedItem === "looked_over_goods" ? activeLinkStyles.selected : linkStyles.link} isActive={() => selectedItem === "looked_over_goods"} to={`/client/${id}/looked_over_goods`}>
+                        <ListItem button selected={selectedItem === "looked_over_goods"} onClick={() => handleListItemClick("looked_over_goods")}>
                             <ListItemIcon>
                                 <VisibilityIcon />
                             </ListItemIcon>
@@ -59,9 +60,10 @@ const Panel: React.FC = () => {
                     </NavLink>
                 </List>
                 <Switch>
-                    <Route path={`/client/${id}`} component={() => <UserData id={id} />} />
                     {/* <Route path={`/client/${id}/user_data/edit`} component={() => <EditUserData/>} /> */}
-                    <Route exact path={`/client/${id}/orders`} component={Orders} />
+                    <Route path={`/client/${id}/orders`} component={Orders} />
+                    <Route path={`/client/${id}/looked_over_goods`} component={LookedOverGoods} />
+                    <Route path={`/client/${id}`} component={() => <UserData id={id} />} />
                     {/* <Redirect to={`/client/${id}/user_data`} /> */}
                 </Switch>
             </div>

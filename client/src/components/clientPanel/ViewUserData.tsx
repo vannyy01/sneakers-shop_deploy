@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 import { UserInterface } from 'src/actions/types';
 import Button from '../button';
-import { useLinkStyles } from '../commonStyles';
+import { useLinkStyles } from '../common/commonStyles';
 import ProductField from '../productPage/ProductField'
 
 const ViewUserData: React.FC<{ client: UserInterface }> = ({ client }) => {

@@ -64,7 +64,7 @@ const setConditions = (req, action = "") => {
 };
 
 module.exports = app => {
-    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex'];
+    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex', "discount", 'discountPrice'];
     const colors = ['white', 'yellow', 'red', 'green', 'black', 'blue', 'grey', 'pink', 'brown'];
     const sizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'];
 
@@ -169,18 +169,37 @@ module.exports = app => {
         }
     });
 
-    app.get('/api/commodity_favourites', async (req, res, next) => {
+    app.get('/api/selected_commodities', async (req, res, next) => {
         try {
             const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
             const filters = req.query.filters ? req.query.filters : {};
-            let orderBy = {price: 1};
+            let orderBy;
             if (req.query.orderBy === "title") {
                 orderBy = {title: 1};
             } else if (req.query.orderBy === "priceDesc") {
                 orderBy = {price: -1};
             }
             filters.orderBy = orderBy;
-            const goods = await Commodity.find({_id: {$in: filters.favourites}}).limit(50).select(fields).sort(orderBy).exec();
+            const goods = await Commodity.find({_id: {$in: filters.selectedItems}}).limit(50).select(fields).sort(orderBy).exec();
+            if (goods !== null) {
+                res.status(200).send({goods, filters});
+            } else {
+                res.status(404).send(`Did not found ${{...fields}}`);
+                next(new Error(`Nothing is found using: ${{...fields}}`));
+            }
+        } catch (error) {
+            res.status(500).send(error);
+            next(error);
+        }
+    });
+
+    app.get('/api/commodity/sale', async (req, res, next) => {
+        try {
+            const fields = req.query.fields && req.query.fields[0] !== "*" ? req.query.fields : defaultFields;
+            const filters = req.query.filters ? req.query.filters : {};
+            const orderBy = {updatedAt: -1};
+            filters.orderBy = orderBy;
+            const goods = await Commodity.find({discount: true}).limit(req.query.limit).select(fields).sort(orderBy).exec();
             if (goods !== null) {
                 res.status(200).send({goods, filters});
             } else {

@@ -21,6 +21,8 @@ export const headCells: Array<HeadCell<ShoeInterface>> = [
     {id: 'price', numeric: true, disablePadding: false, label: 'Ціна'},
     {id: 'type', numeric: false, disablePadding: true, label: 'Тип'},
     {id: 'sex', numeric: false, disablePadding: true, label: 'Стать'},
+    {id: 'discount', numeric: true, disablePadding: false, label: 'Акція'},
+
 ];
 
 interface PropsInterface {
@@ -51,19 +53,20 @@ const Goods: React.FC<PropsInterface> = ({
                                          }) => {
 
     const goodsCount = 10;
+    const defaultFields = ['_id', 'brand', 'title', 'description', 'price', 'type', 'sex', 'discount'];
 
     const filterList: FilterListTypeArray<ShoeInterface> = {
-        [headCells[1].id]: {
+        brand: {
             filterName: headCells[1],
             filterLabel: "Бренд",
             fields: brands
         },
-        [headCells[4].id]: {
+        type: {
             filterName: headCells[4],
             filterLabel: "Тип",
             fields: shoeTypes
         },
-        [headCells[5].id]: {
+        sex: {
             filterName: headCells[5],
             filterLabel: "Стать",
             fields: sexes
@@ -74,9 +77,13 @@ const Goods: React.FC<PropsInterface> = ({
         fetchBrands();
     }, []);
 
+    const localFetchGoods = ({skip, limit, count}: { skip: number, limit: number, count: boolean }): void => {
+        fetchGoods({skip, limit, count, fields: defaultFields});
+    };
+
     const onDeleteCallback = (): void => {
         alert('Items are successfully deleted.');
-        fetchGoods({skip: 0, limit: goodsCount, count: true});
+        fetchGoods({skip: 0, limit: goodsCount, count: true, fields: defaultFields});
     }
 
     return (
@@ -90,7 +97,7 @@ const Goods: React.FC<PropsInterface> = ({
             count={count}
             data={goods}
             headCells={headCells}
-            fetchItems={fetchGoods}
+            fetchItems={localFetchGoods}
             searchItems={searchGoods}
             clearItems={clearGoodsState}
             deleteMessage="Ви справді хочете видалити виділенні товари?"
@@ -106,7 +113,10 @@ const mapStateToProps = ({
                              goods: {goods, count},
                              brands
                          }: { goods: { goods: ShoeInterface[], count: number }, brands: ItemsType }) => ({
-    goods,
+    goods: goods.map(item => ({
+        ...item,
+        discount: item.discount !== undefined ? (item.discount ? "Так" : "Ні") : "Ні"
+    })),
     count,
     brands
 });
@@ -117,4 +127,6 @@ export default connect(mapStateToProps, {
     clearGoodsState: clearItemsState,
     deleteManyGoods: deleteManyItems,
     fetchBrands: fetchBr
-})(Goods);
+})
+    // @ts-ignore
+    (Goods);

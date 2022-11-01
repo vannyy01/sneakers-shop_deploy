@@ -4,7 +4,7 @@ import {ShoeInterface} from "../../actions/types";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary,
+    AccordionSummary, IconButton,
     InputAdornment,
     OutlinedInput,
     Theme
@@ -19,7 +19,7 @@ import {FilterListTypeArray, SearchItemParameters} from "../GridView";
 import {
     clearGoodsState,
     fetchAvailabilityCount,
-    fetchBrands, fetchColorsCount, fetchFavouritesGoods,
+    fetchBrands, fetchColorsCount, fetchSelectedGoods,
     fetchGoods,
     fetchSexesCount, fetchSizesCount,
     fetchTypesCount
@@ -35,7 +35,7 @@ import Button from "../button";
 import {url} from "../../index";
 import {FiltersReducerStateType} from "../../reducers/filtersReducer";
 import CloseIcon from '@material-ui/icons/Close';
-import {validateNumberInput} from "../../actions/validation";
+import {getStorage, validateNumberInput} from "../../actions/validation";
 import GoodsToolbar from "./GoodsToolbar";
 import GoodsList from "./GoodsList";
 import AccordionFilterMenu from "./AccordionFilterMenu";
@@ -191,7 +191,7 @@ const baseFilterList = ({
 
 const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, colors, sizes}) => {
 
-    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'sizes', 'mainImage'];
+    const fieldsList = ['_id', 'brand', 'description', 'price', 'title', 'sex', 'type', 'color', 'sizes', 'mainImage', 'discount', 'discountPrice'];
     const initialBrands = mapValues(brands, () => false);
     const initialSexes = mapValues(sexes, () => false);
     const initialTypes = mapValues(types, () => false);
@@ -257,7 +257,8 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
 
     useEffect(() => {
         if (openFavourites) {
-            dispatch(fetchFavouritesGoods({orderBy, fields: fieldsList}));
+            const favourites = getStorage("FavouritesGoods");
+            dispatch(fetchSelectedGoods({orderBy, fields: fieldsList}, favourites));
         } else {
             dispatch(fetchGoods({
                     skip,
@@ -278,7 +279,8 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
 
     useEffect(() => {
         if (prevOpenFavourites !== undefined && openFavourites && openFavourites !== prevOpenFavourites) {
-            dispatch(fetchFavouritesGoods({orderBy, fields: fieldsList}));
+            const favourites = getStorage("FavouritesGoods");
+            dispatch(fetchSelectedGoods({orderBy, fields: fieldsList}, favourites));
             url.searchParams.set('favourites', 'true');
             handleClearFilters();
         } else if (prevOpenFavourites !== undefined && !openFavourites) {
@@ -638,9 +640,9 @@ const Goods: React.FC<GoodsPropsI> = ({brands, sexes, types, availability, color
                 classes={{paper: classes.drawerPaper}}
             >
                 <div className={classes.filterHeader}>
-                    <div>
-                        <CloseIcon fontSize="medium" style={{cursor: "pointer"}} onClick={toggleDrawer}/>
-                    </div>
+                    <IconButton onClick={toggleDrawer}>
+                        <CloseIcon fontSize="medium"/>
+                    </IconButton>
                     <div className={classes.filterHeaderInner}>
                         <h2 className={classes.filterHeading}>Фільтри</h2>
                         <p className={classes.filterCount}>{count} товарів</p>

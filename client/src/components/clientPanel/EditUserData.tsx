@@ -14,7 +14,7 @@ import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     button: {
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
     },
     container: {
         height: "90%",
@@ -230,12 +230,13 @@ const EditUserData: React.FC<{ client: UserInterface }> = ({client}) => {
                         helperText={formErrors.phone}
                         error={formErrors.phone.length > 0}
                     />
-                    <Grid item={true} xs={12}>
+                    <Grid container item xs={12}>
                         <SecondaryButton
                             variant="contained"
                             startIcon={<ArrowBack/>}
                             className={classes.button}
                             size="large"
+                            style={{marginLeft: 0}}
                             onClick={handleComeBack}
                         >
                             Повернутися назад

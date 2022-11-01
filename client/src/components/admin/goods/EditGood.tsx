@@ -37,6 +37,7 @@ import {colors, sexes, shoeTypes} from "./goodTypes";
 import CRUDStyles from "../crudStyles";
 import {isEmpty} from "lodash";
 import he from "he";
+import CustomCheckbox from "../../common/CustomCheckbox";
 
 function Alert(props: AlertProps) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -106,7 +107,9 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                 sex,
                 color,
                 price,
-                sizes
+                sizes,
+                discount,
+                discountPrice
             } = this.state.good;
             const {
                 showAlert,
@@ -181,7 +184,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     label="Детальний опис"
                                     fullWidth={true}
                                     autoComplete="fullDescription-name"
-                                    value={he.decode(fullDescription)}
+                                    value={he.decode(fullDescription || "")}
                                     onChange={this.handleOnChange}
                                     helperText={formErrors.fullDescription}
                                     error={formErrors.fullDescription.length > 0}
@@ -218,7 +221,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     fullWidth={true}
                                     autoComplete="color-name"
                                     select={true}
-                                    value={color}
+                                    value={color || ""}
                                     onChange={this.handleOnChange}
                                     helperText={formErrors.color}
                                     error={formErrors.color.length > 0}
@@ -296,6 +299,28 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
                                     value={(price * 1.2).toFixed(2)}
                                     helperText={formErrors.price}
                                     error={formErrors.price.length > 0}
+                                />
+                            </Grid>
+                            <Grid item={true} xs={12} sm={6}>
+                                <CustomCheckbox
+                                    name="discount"
+                                    checked={Boolean(discount)}
+                                    onChange={this.handleChangeCheckbox}
+                                />
+                            </Grid>
+                            <Grid item={true} xs={12} sm={6}>
+                                <TextField
+                                    required={false}
+                                    disabled={!Boolean(discount)}
+                                    id="discountPrice"
+                                    name="discountPrice"
+                                    label="ціна зі знижкою"
+                                    fullWidth={true}
+                                    autoComplete="discount price-name"
+                                    value={discountPrice || 0}
+                                    onChange={this.handleOnChange}
+                                    helperText={formErrors.discountPrice}
+                                    error={formErrors.discountPrice.length > 0}
                                 />
                             </Grid>
                             <Grid item={true} xs={12}>
@@ -438,7 +463,7 @@ class EditGood extends BaseGood<EditGoodPropsType, EditGoodStateType> {
 
 }
 
-const mapStateToProps = ({goods: {goods}, brands}: { goods: {goods: ShoeInterface[]}, brands: ItemsType }) => ({
+const mapStateToProps = ({goods: {goods}, brands}: { goods: { goods: ShoeInterface[] }, brands: ItemsType }) => ({
     good: goods[0],
     brands
 });

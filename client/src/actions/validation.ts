@@ -2,7 +2,7 @@
  * @param {string} name
  * @returns {[any]}
  */
-export function getStorage(name: string) {
+export function getStorage(name: string): string[] {
     const matches = localStorage.getItem(name) || '[]';
     return JSON.parse(matches);
 }

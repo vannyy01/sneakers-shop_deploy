@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {
     Avatar,
-    Button, Checkbox,
+    Button,
     Container,
     CssBaseline,
     FormControlLabel, Grid, Link,
     makeStyles,
-    TextField,
-    Typography, withStyles
+    Typography,
 } from "@material-ui/core";
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import {escape} from "lodash";
@@ -15,32 +14,8 @@ import {fetchUser, loginByEmail} from "../../actions";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
 import {validateEmail} from "../../actions/validation";
 import GoogleButton from "react-google-button";
-
-const CssTextField = withStyles({
-    root: {
-        '& label.Mui-focused': {
-            color: 'var(--primary-color)',
-        },
-        '& .MuiInput-underline:after': {
-            borderBottomColor: 'var(--primary-color)',
-        },
-        '& .MuiOutlinedInput-root': {
-            '&.Mui-focused fieldset': {
-                borderColor: 'var(--primary-color)',
-            },
-        },
-    },
-})(TextField);
-
-const CssCheckbox = withStyles({
-    root: {
-        color: 'var(--primary-color)',
-        "&$checked": {
-            color: 'var(--primary-color)',
-        },
-    },
-    checked: {}
-})(Checkbox);
+import CustomTextField from "../common/CustomTextField";
+import CustomCheckbox from "../common/CustomCheckbox";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -190,7 +165,7 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                     Вхід
                 </Typography>
                 <form className={classes.form} onSubmit={handleSubmit} noValidate>
-                    <CssTextField
+                    <CustomTextField
                         variant="outlined"
                         margin="normal"
                         required
@@ -204,7 +179,7 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                         helperText={formErrors.login}
                         error={formErrors.login.length > 0}
                     />
-                    <CssTextField
+                    <CustomTextField
                         variant="outlined"
                         margin="normal"
                         required
@@ -219,7 +194,7 @@ const SignInWindow: React.FC<{ goSingUp: (event: React.MouseEvent) => void, onCl
                         error={formErrors.password.length > 0}
                     />
                     <FormControlLabel
-                        control={<CssCheckbox value="remember"/>}
+                        control={<CustomCheckbox value="remember"/>}
                         label="Запам'ятати мене"
                     />
                     <Button

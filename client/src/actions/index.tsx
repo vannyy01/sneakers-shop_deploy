@@ -43,7 +43,6 @@ import {addFilters, addUrlParams} from "../utils";
 import {SearchItemParameters} from "../components/GridView";
 import {ItemDataType, OrderBy} from "../types";
 import {Dispatch} from "redux";
-import {getStorage} from "./validation";
 
 /**
  * @param user
@@ -305,6 +304,7 @@ export const fetchGoods = ({
                            }: FetchGoodsParams, filters?: SearchItemParameters) => async (dispatch: any) => {
     try {
         count = count ? count : false;
+        console.log(fields)
         fields = fields ? fields : ["*"];
         const options = addFilters(filters);
         const params = priceFrom && priceTo ? {skip, limit, orderBy, count, fields, priceFrom, priceTo} : priceFrom ? {
@@ -325,16 +325,17 @@ export const fetchGoods = ({
 /**
  * @param orderBy
  * @param fields
+ * @param selectedItems
  */
-export const fetchFavouritesGoods = ({
+export const fetchSelectedGoods = ({
                                          orderBy,
                                          fields,
-                                     }: { orderBy: OrderBy, fields?: string[] }) => async (dispatch: Dispatch<FetchFavouriteGoodsAction>) => {
+                                     }:{orderBy?: OrderBy, fields: string[]}, selectedItems: string[]) => async (dispatch: Dispatch<FetchFavouriteGoodsAction>) => {
     try {
         fields = fields ? fields : ["*"];
-        const favourites = addFilters({favourites: getStorage("FavouritesGoods")});
+        const filters = addFilters({selectedItems});
         const params = {orderBy, fields};
-        const res = await axios.get(`/api/commodity_favourites/${favourites}`, {params});
+        const res = await axios.get(`/api/selected_commodities/${filters}`, {params});
         dispatch({type: FETCH_FAVOURITE_GOODS, payload: res.data});
     } catch (error) {
         console.log(error);

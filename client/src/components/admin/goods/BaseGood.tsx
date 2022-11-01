@@ -41,10 +41,10 @@ export interface BaseGoodStateType {
     typing: boolean,
     isLoading: boolean,
     typingTimeout?: NodeJS.Timeout,
-    formErrors: { title: string, brand: string, description: string, fullDescription: string, mainImage: string, images: string, type: string, color: string, sex: string, price: string },
+    formErrors: { title: string, brand: string, description: string, fullDescription: string, mainImage: string, images: string, type: string, color: string, sex: string, price: string, discountPrice: string },
     formValid: boolean
     good: ShoeInterface,
-    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, fullDescriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, colorValid: boolean, sexValid: boolean, priceValid: boolean },
+    isValid: { titleValid: boolean, brandValid: boolean, descriptionValid: boolean, fullDescriptionValid: boolean, mainImageValid: boolean, imagesValid: boolean, typeValid: boolean, colorValid: boolean, sexValid: boolean, priceValid: boolean, discountPriceValid: boolean },
 }
 
 abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType> extends React.Component<P, S> {
@@ -66,7 +66,9 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 sex: '',
                 price: 0,
                 brand: '',
-                color: ''
+                color: '',
+                discount: false,
+                discountPrice: 0,
             },
             isValid: {
                 titleValid: true,
@@ -78,7 +80,8 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 typeValid: true,
                 colorValid: true,
                 sexValid: true,
-                priceValid: true
+                priceValid: true,
+                discountPriceValid: true,
             },
             formErrors: {
                 title: '',
@@ -90,7 +93,8 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 type: '',
                 color: '',
                 sex: '',
-                price: ''
+                price: '',
+                discountPrice: '',
             },
             formValid: false,
         }
@@ -112,19 +116,35 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
             this.setState({showAlert: true});
             return;
         }
-        const {_id, title, description, fullDescription, mainImage, type, sex, price, brand, color, sizes} = this.state.good;
+        const {
+            _id,
+            title,
+            description,
+            fullDescription,
+            mainImage,
+            type,
+            sex,
+            price,
+            brand,
+            color,
+            sizes,
+            discount,
+            discountPrice
+        } = this.state.good;
         const good: ShoeInterface = {
             _id,
             title: title.trim(),
             brand: brand.trim(),
             description: description.trim(),
-            fullDescription: he.encode(fullDescription.trim()),
+            fullDescription: he.encode(fullDescription?.trim() || ""),
             price,
             mainImage: mainImage.trim(),
             sizes,
             type: type.trim(),
             sex: sex.trim(),
-            color: color.trim()
+            color: color.trim(),
+            discount,
+            discountPrice
         };
         this.setState({showDialog: true, good});
     };
@@ -272,6 +292,30 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
                 fieldValidationErrors.price = '';
                 isValid.priceValid = true;
                 break;
+            case 'discountPrice':
+                if (+value === 0) {
+                    fieldValidationErrors.discountPrice = 'ви ввели 0';
+                    isValid.discountPriceValid = false;
+                    break;
+                }
+                if (+value > 99999) {
+                    fieldValidationErrors.discountPrice = 'товари за такою ціною відсутні';
+                    isValid.discountPriceValid = false;
+                    break;
+                }
+                if (isNaN(Number.parseInt(value))) {
+                    fieldValidationErrors.discountPrice = 'некоректний тип даних';
+                    isValid.discountPriceValid = false;
+                    break;
+                }
+                if (+value >= this.state.good.price) {
+                    fieldValidationErrors.discountPrice = 'ціна зі знижкою має бути меншою за ціну';
+                    isValid.discountPriceValid = false;
+                    break;
+                }
+                fieldValidationErrors.discountPrice = '';
+                isValid.discountPriceValid = true;
+                break;
             default:
                 break;
         }
@@ -291,6 +335,11 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         this.setState({formValid: isValid});
     };
 
+    protected handleChangeCheckbox = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        console.log(event.target.checked);
+        this.setState((state) => ({...state, good: {...state.good, discount: event.target.checked}}));
+    }
+
     protected handleOnChange = ({
                                     target: {name, value},
                                 }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -300,11 +349,12 @@ abstract class BaseGood<P extends BaseGoodPropsType, S extends BaseGoodStateType
         }
 
         const newState: ShoeInterface = this.state.good;
-        if (name === "price") {
+        if (name === "price" || name === "discountPrice") {
             newState[name] = validateNumberInput(value);
         } else if (name !== "sizes") {
             newState[name] = value;
         }
+        console.log(name, value, typeof value);
 
         self.setState({
             typing: false,

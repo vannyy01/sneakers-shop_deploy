@@ -19,12 +19,16 @@ import Button from "../button";
 import ProductField from "./ProductField";
 import ProductHeader from "./ProductHeader";
 import PriceBlock from "./PriceBlock";
+import {setLookedOverGood, useLookOverGoods} from "../common/useLookOverGood";
+import CardSwiper from "../CardSwiper";
+import CommodityCard from "../landing/CommodityCard";
 
 const useStyles = makeStyles(() => createStyles({
     chip: {
         height: 40,
         width: 60,
         marginRight: 10,
+        marginBottom: 4,
         fontSize: "inherit",
     },
     price: {
@@ -37,7 +41,10 @@ const useStyles = makeStyles(() => createStyles({
         paddingBottom: 20
     },
     color: {
-        width: 20, height: 20, marginRight: 10,
+        width: 20,
+        height: 20,
+        marginRight: 10,
+        boxShadow: "0px 0px 3px 0px rgb(0 0 0 / 50%)",
     },
     full: {
         backgroundColor: "#fafafa",
@@ -57,6 +64,7 @@ interface ImageType {
 const ProductPage: React.FC = () => {
         const {id} = useParams<{ id: string }>();
         const dispatch = useDispatch();
+        const lookedOverGoods = useLookOverGoods().filter(good => good._id !== id);
         const getSelector = ({goods: {goods: good}}: { goods: { goods: ShoeInterface[] } }): ShoeInterface => good[0];
         const initialProduct: ShoeInterface = useSelector(getSelector, shallowEqual);
         const [product, setProduct] = useState<ShoeInterface>(initialProduct);
@@ -83,6 +91,7 @@ const ProductPage: React.FC = () => {
 
         useEffect(() => {
             loadImages().catch((error) => console.error(error));
+            setLookedOverGood(id);
         }, []);
 
         useEffect(() => {
@@ -99,7 +108,7 @@ const ProductPage: React.FC = () => {
                 return;
             }
             for (let i = 0; i < count; i++) {
-                 dispatch(setCartItem({
+                dispatch(setCartItem({
                     [uuid()]: {
                         ...product,
                         size: product.sizes.find(item => item.sizeValue === checkedSize)
@@ -109,7 +118,7 @@ const ProductPage: React.FC = () => {
         }
 
         return (
-            !isEmpty(product) && !isEmpty(classes) && !isEmpty(images) &&
+            lookedOverGoods && !isEmpty(product) && !isEmpty(classes) && !isEmpty(images) &&
             <section className="special-area bg-white section_padding_100" style={{marginTop: 100}}>
                 <div className="container">
                     <div className="d-flex flex-column flex-lg-row">
@@ -118,7 +127,7 @@ const ProductPage: React.FC = () => {
                         </div>
                         <div className="d-flex flex-wrap col-12 col-lg-6">
                             <ProductHeader id={id} brand={product.brand} title={product.title} color={product.color}/>
-                            <PriceBlock price={product.price} priceDiscount={1000}/>
+                            <PriceBlock discount={product.discount} price={product.price} priceDiscount={product.discountPrice}/>
                             <div className={"col-12 " + classes.description}>
                                 {product.description}
                             </div>
@@ -166,6 +175,12 @@ const ProductPage: React.FC = () => {
                         <div className={"w-100 " + classes.full}
                              dangerouslySetInnerHTML={{__html: he.decode(product.fullDescription)}}/>
                     </div>
+                    <CardSwiper title="Переглянуті товари">
+                        {lookedOverGoods.map(good =>
+                            <CommodityCard key={good._id} good={good} cardSize="col-6 col-md-4 col-lg-3"
+                                           style={{minHeight: 420}}/>
+                        )}
+                    </CardSwiper>
                 </div>
             </section>
         )

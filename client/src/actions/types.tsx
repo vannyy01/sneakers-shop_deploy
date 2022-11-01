@@ -242,6 +242,8 @@ export interface CommodityInterface {
     description?: string,
     fullDescription?: string,
     availability?: boolean,
+    discount?: boolean,
+    discountPrice: number,
 }
 
 export interface ShoeInterface extends CommodityInterface {
